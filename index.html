@@ -3,226 +3,129 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>天气 · TIAQI — 实时天气 · 空气质量 · 二十四节气</title>
-  <meta name="description" content="TIAQI 天气：自动识别所在城市，显示实时天气、空气质量、生活指数、24小时温度趋势与二十四节气科普。极简冷调设计。" />
-  <link rel="stylesheet" href="styles.css?v=12" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='15' fill='none' stroke='%230071e3' stroke-width='4'/><path d='M24 12a12 12 0 0 1 0 24z' fill='%230071e3'/></svg>" />
+  <title>液态玻璃 · 天气 / 日历 / 百科 / 搜索</title>
+  <meta name="description" content="液态玻璃风格日常信息仪表盘：IP 天气、农历节气、历史上的今天百科与全站搜索。纯前端、免费开源 API、无需密钥。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230a84ff' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230a84ff'/></svg>" />
+  <link rel="stylesheet" href="style.css?v=13" />
 </head>
-<body data-time="day">
+<body data-ready="0">
 
-  <!-- ============ 氛围背景层（昼夜自适应柔和渐变） ============ -->
+  <!-- ============ 流动渐变背景（让玻璃折射可见） ============ -->
   <div class="bg" aria-hidden="true">
-    <svg class="bg-doodle" viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" stroke-width="2.5"/>
-      <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <path d="M50 18V10"/><path d="M50 90v-8"/><path d="M18 50h-8"/><path d="M90 50h-8"/>
-        <path d="M27 27l-6-6"/><path d="M79 79l-6-6"/><path d="M79 21l-6 6"/><path d="M27 73l-6 6"/>
-      </g>
-    </svg>
-    <div class="bg-tint"></div>
-    <div class="bg-stars" id="bg-stars"></div>
-    <div class="bg-grain"></div>
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <div class="grain"></div>
   </div>
 
-  <!-- ============ 欢迎页（Apple 激活风 · 柔光渐隐） ============ -->
+  <!-- ============ 欢迎页（首屏液态玻璃面板） ============ -->
   <div class="welcome" id="welcome">
-    <canvas id="welcome-canvas"></canvas>
-    <div class="welcome-inner">
-      <div class="welcome-mark" aria-hidden="true">
-        <svg viewBox="0 0 48 48" width="46" height="46"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
-      </div>
-      <p class="welcome-kicker">TIAN QI · 天气</p>
-      <h1 class="welcome-greeting">你好。</h1>
-      <p class="welcome-sub">正在为你准备所在地的天气与节气</p>
-      <div class="welcome-dots" id="welcome-dots"><span></span><span></span><span></span></div>
-      <button class="welcome-enter" id="welcome-enter">进入</button>
-      <p class="welcome-hint">轻点任意处开始</p>
+    <div class="welcome-panel liquid-glass" id="welcome-panel">
+      <p class="welcome-greet">你好，今天过得怎样</p>
+      <button class="enter-btn" id="enter">进入</button>
+      <p class="welcome-hint">轻点进入仪表盘</p>
     </div>
   </div>
 
-  <!-- ============ 顶部导航（极简磨砂） ============ -->
+  <!-- ============ 顶栏 + 搜索 ============ -->
   <header class="topbar">
-    <div class="topbar-left">
-      <button class="menu-btn" id="news-open" aria-label="搜索与热点新闻">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
-          <path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <span class="brand">天气 · TIAQI</span>
-    </div>
-    <button class="menu-btn" id="menu-open" aria-label="打开日历与黄历">
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <rect x="3.5" y="4.5" width="17" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M3.5 9h17M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <div class="brand">TIAQI · 天气日历</div>
+    <div class="search" id="search">
+      <svg class="search-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-    </button>
+      <input type="text" id="search-input" placeholder="搜索天气 / 节气 / 百科" aria-label="全站搜索" autocomplete="off" />
+      <div class="search-panel liquid-glass" id="search-panel" aria-live="polite">
+        <div class="search-results" id="search-results">
+          <p class="search-empty">输入关键词，实时检索天气、节气与百科</p>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <!-- ============ 首页 ============ -->
+  <!-- ============ 主页 ============ -->
   <main class="home">
-    <p class="eyebrow" id="eyebrow">今天</p>
-    <h1 class="date-hero" id="big-date">—</h1>
-    <p class="date-sub" id="date-sub">—</p>
-
-    <section class="weather" id="weather" aria-label="实时天气">
-      <div class="weather-search">
-        <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
-        <button class="btn-search" id="w-search">搜索</button>
-      </div>
-      <div class="weather-top">
-        <div class="weather-ico" id="w-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="56" height="56">
-            <circle cx="24" cy="24" r="9" fill="#ffd166" stroke="currentColor" stroke-width="3"/>
-            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
-              <path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/>
-              <path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/>
-            </g>
-          </svg>
+    <!-- IP + 天气主卡 -->
+    <section class="card liquid-glass weather" id="weather" aria-label="天气">
+      <div class="w-ip" id="w-ip">IP · 定位中…</div>
+      <div class="w-top">
+        <div class="w-ico" id="w-ico" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="54" height="54"><circle cx="24" cy="24" r="9" fill="#ffd166" stroke="currentColor" stroke-width="3"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/><path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/></g></svg>
         </div>
-        <div class="weather-main">
-          <div class="weather-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
-          <div class="weather-meta">
-            <span id="w-desc">定位中…</span>
-            <span class="sep">·</span>
-            <span class="loc" id="w-loc">
-              <svg class="loc-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-                <path d="M12 2a7 7 0 0 0 -7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0 -7-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                <circle cx="12" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="2"/>
-              </svg>
-              <span id="w-city">—</span>
-            </span>
-          </div>
+        <div class="w-main">
+          <div class="w-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
+          <div class="w-desc" id="w-desc">定位中…</div>
         </div>
       </div>
-      <div class="weather-detail" id="w-detail">
-        <span>体感 <em id="w-feel">--</em>°</span>
-        <span>湿度 <em id="w-hum">--</em>%</span>
-        <span>风 <em id="w-wind">--</em></span>
+      <div class="w-detail" id="w-detail">
+        <div class="w-m"><span class="k">体感</span><span class="v"><em id="w-feel">--</em>°</span></div>
+        <div class="w-m"><span class="k">风速</span><span class="v"><em id="w-wind">--</em></span></div>
+        <div class="w-m"><span class="k">城市</span><span class="v" id="w-city">—</span></div>
       </div>
-      <div class="weather-aqi" id="w-aqi">
-        <span class="aqi-dot" id="w-aqi-dot"></span>
-        <span class="aqi-text">空气 <em id="w-aqi-val">--</em> <i id="w-aqi-label">—</i></span>
-      </div>
-      <div class="weather-indices" id="w-indices"></div>
-      <div class="weather-trend">
-        <div class="trend-head"><span>未来 24 小时温度</span><span id="w-trend-temp">--°</span></div>
-        <svg id="w-trend" viewBox="0 0 320 72" preserveAspectRatio="none" aria-hidden="true"></svg>
-      </div>
+      <div class="w-err" id="w-err" hidden>天气暂不可用</div>
     </section>
 
-    <div class="city-bar" id="city-bar" aria-label="快捷切换城市"></div>
+    <!-- 小卡片：日历 + 百科 -->
+    <div class="small-grid">
+      <section class="card liquid-glass cal-card" id="cal-card" aria-label="日历" tabindex="0">
+        <div class="sc-head"><span class="sc-k">日历</span><span class="sc-go">展开 ›</span></div>
+        <div class="cal-date" id="cal-greg">—</div>
+        <div class="cal-sub" id="cal-lunar">农历 —</div>
+        <div class="cal-tags" id="cal-tags"></div>
+      </section>
 
-    <section class="card fact-card" aria-label="天气小百科">
-      <span class="fact-k">天气小百科</span>
-      <span id="wx-fact">—</span>
-    </section>
+      <section class="card liquid-glass wiki-card" id="wiki-card" aria-label="历史上的今天" tabindex="0">
+        <div class="sc-head"><span class="sc-k">历史上的今天</span><span class="sc-go">展开 ›</span></div>
+        <div class="wiki-title" id="wiki-title">加载中…</div>
+        <div class="wiki-text" id="wiki-text">—</div>
+      </section>
+    </div>
 
-    <section class="card mini-terms" aria-label="当前节气">
-      <div class="term-now">
-        <div class="term-name" id="h-term-name">—</div>
-        <div class="term-desc" id="h-term-desc">—</div>
-        <div class="term-next" id="h-term-next">—</div>
-      </div>
-      <button class="btn-detail" id="open-terms">查看全部二十四节气</button>
-    </section>
-
-    <section class="card brief" id="brief" aria-label="今日农历黄历简略">
-      <div class="brief-lunar" id="b-lunar">农历 —</div>
-      <div class="brief-ganzhi" id="b-ganzhi">—</div>
-      <div class="brief-yiji">
-        <span class="yi">宜 <em id="b-yi">—</em></span>
-        <span class="ji">忌 <em id="b-ji">—</em></span>
-      </div>
-      <button class="btn-detail" id="open-detail">查看完整日历与黄历</button>
-    </section>
-
-    <footer class="sale-footer">
-      <span class="sale-line">本域名 / 整站 出售中</span>
-      <a class="sale-mail" href="mailto:2324143400@qq.com">联系出让 · 2324143400@qq.com</a>
-    </footer>
+    <!-- 访问量 -->
+    <div class="visit" id="visit">访问量 —</div>
   </main>
 
-  <!-- ============ 遮罩（点空白关侧栏） ============ -->
+  <!-- ============ 遮罩 + 抽屉（bottom sheet） ============ -->
   <div class="backdrop" id="backdrop"></div>
 
-  <!-- ============ 搜索·热点 抽屉（左侧） ============ -->
-  <aside class="newsbar" id="newsbar" aria-label="搜索与热点新闻">
-    <div class="sheet-grab" aria-hidden="true"></div>
-    <div class="sidebar-head">
-      <span>搜索 · 热点</span>
-      <button class="close-btn" id="news-close" aria-label="关闭">
+  <section class="sheet liquid-glass" id="cal-sheet" aria-label="当月日历" hidden>
+    <div class="sheet-grab" id="cal-grab" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <span class="sheet-title">日历 · 农历 · 节气</span>
+      <button class="close-btn" id="cal-close" aria-label="关闭">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div class="web-search">
-      <input type="text" id="web-input" placeholder="搜索一下，回车或点搜索" aria-label="网页搜索" />
-      <button class="btn-search" id="web-go">搜索</button>
+    <div class="cal-bar">
+      <button class="cal-nav" id="cal-prev" aria-label="上个月">‹</button>
+      <div class="cal-title" id="cal-title">—</div>
+      <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
     </div>
-    <p class="news-cap">热点新闻</p>
-    <div class="news-list" id="news-list"><p class="news-loading">加载中…</p></div>
-  </aside>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-legend">
+      <span><i class="dot holiday"></i>节假日</span>
+      <span><i class="dot work"></i>调休上班</span>
+      <span><i class="dot term"></i>节气</span>
+    </div>
+  </section>
 
-  <!-- ============ 侧边栏 / 抽屉 / 底部 sheet ============ -->
-  <aside class="sidebar" id="sidebar" aria-label="日历与黄历详情">
-    <div class="sheet-grab" aria-hidden="true"></div>
-    <div class="sidebar-head">
-      <span>日历 · 农历 · 黄历</span>
-      <button class="close-btn" id="menu-close" aria-label="关闭">
+  <section class="sheet liquid-glass" id="wiki-sheet" aria-label="百科详情" hidden>
+    <div class="sheet-grab" id="wiki-grab" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <span class="sheet-title" id="wiki-sheet-title">历史上的今天</span>
+      <button class="close-btn" id="wiki-close" aria-label="关闭">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
+    <img class="wiki-img" id="wiki-img" alt="" hidden />
+    <div class="wiki-body" id="wiki-body">—</div>
+    <a class="wiki-link" id="wiki-link" href="#" target="_blank" rel="noopener">阅读原文 ›</a>
+  </section>
 
-    <!-- 1. 日历 -->
-    <section class="card calendar-card" id="calendar">
-      <div class="cal-bar">
-        <button class="cal-nav" id="cal-prev" aria-label="上个月">‹</button>
-        <div class="cal-title" id="cal-title">—</div>
-        <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
-      </div>
-      <div class="cal-grid cal-compact" id="cal-grid"></div>
-      <p class="cal-hint" id="cal-hint">点选某天查看其农历与黄历</p>
-    </section>
-
-    <!-- 2. 农历 -->
-    <section class="card lunar-card" id="lunar" aria-label="今日农历">
-      <div class="lunar-head">
-        <span class="lunar-k">农历</span>
-        <span class="lunar-zodiac" id="ln-zodiac">生肖 —</span>
-      </div>
-      <div class="lunar-date" id="ln-date">农历 —</div>
-      <div class="lunar-ganzhi" id="ln-ganzhi">—</div>
-      <div class="lunar-term" id="ln-term">—</div>
-    </section>
-
-    <!-- 3. 二十四节气 -->
-    <section class="card term-side" aria-label="二十四节气">
-      <div class="mini-terms-title">二十四节气</div>
-      <div class="term-big" id="term-big"></div>
-    </section>
-
-    <!-- 4. 黄历 -->
-    <section class="card almanac" id="almanac">
-      <div class="al-lunar" id="al-lunar">农历 —</div>
-      <div class="al-ganzhi" id="al-ganzhi">—</div>
-      <div class="al-tags">
-        <span class="al-tag" id="al-zodiac">生肖 —</span>
-        <span class="al-tag" id="al-jianchu">—</span>
-      </div>
-      <div class="al-yiji">
-        <div class="al-yi">
-          <div class="h">宜</div>
-          <div class="c" id="al-yi">—</div>
-        </div>
-        <div class="al-ji">
-          <div class="h">忌</div>
-          <div class="c" id="al-ji">—</div>
-        </div>
-      </div>
-      <div class="al-chong" id="al-chong">—</div>
-    </section>
-  </aside>
-
-  <script src="app.js?v=12"></script>
+  <!-- ============ 轻量依赖（CDN，固定主版本） ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/chinese-days@1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
