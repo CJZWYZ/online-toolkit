@@ -224,7 +224,6 @@ document.getElementById("cal-grid").addEventListener("click", (e) => {
   renderCalendar();
   const selDate = new Date(selY, selM, selD);
   renderAlmanac(selDate);
-  document.getElementById("cal-lunar").textContent = computeAlmanac(selDate).lunarText;
   const wd = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
   document.getElementById("cal-hint").textContent =
     `已选 ${selY}年${selM + 1}月${selD}日 · ${wd[selDate.getDay()]}`;
@@ -234,7 +233,6 @@ initCal();
 renderCalendar();
 renderAlmanac(new Date());
 renderBrief(new Date());
-document.getElementById("cal-lunar").textContent = computeAlmanac(new Date()).lunarText;
 
 /* ============================================================
    侧边栏开关
@@ -671,6 +669,7 @@ const FACTS = {
   snow: "雪花多为六角形，形状随温度与湿度千变万化。",
   thunder: "雷电是云内电荷的剧烈放电，雷声在空气中约每秒传播340米。"
 };
+let curTermInfo = null, nextTermInfo = null;
 function renderTerms() {
   const now = new Date();
   const y = now.getFullYear();
@@ -684,6 +683,7 @@ function renderTerms() {
     else { next = t; break; }
   }
   if (!cur) return;
+  curTermInfo = cur; nextTermInfo = next;
   const nameTxt = `${cur.n} · ${cur.m}月${cur.day}日`;
   const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   setT("term-name", nameTxt);
@@ -702,16 +702,40 @@ function renderTerms() {
   }
   const big = document.getElementById("term-big");
   if (big) {
-    big.innerHTML = TERMS.map((t) => {
+    const seasonKey = ["sp","sp","sp","su","su","su","au","au","au","wi","wi","wi"];
+    const seasonTxt = ["春","春","春","夏","夏","夏","秋","秋","秋","冬","冬","冬"];
+    big.innerHTML = TERMS.map((t, i) => {
       const dd = termDate(y, t);
       const isCur = cur.year === y && cur.n === t.n;
+      const sk = seasonKey[t.m - 1];
       return `<div class="term-bigcell${isCur ? " cur" : ""}">
-        <div class="n">${t.n}</div><div class="d">${t.m}月${dd}日</div>
-        <div class="desc">${t.d}</div></div>`;
+        <div class="term-idx">${String(i + 1).padStart(2, "0")}</div>
+        <div class="term-body">
+          <div class="term-line">
+            <span class="n">${t.n}</span><span class="d">${t.m}月${dd}日</span>
+            <span class="term-season ${sk}">${seasonTxt[t.m - 1]}</span>
+          </div>
+          <div class="desc">${t.d}</div>
+        </div>
+      </div>`;
     }).join("");
   }
 }
 renderTerms();
+renderLunar(new Date());
+
+/* 农历卡片（侧栏第二项）：今日农历 + 当前节气进度 */
+function renderLunar(date) {
+  const a = computeAlmanac(date);
+  const setL = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setL("ln-date", a.lunarText);
+  setL("ln-ganzhi", a.ganzhiText);
+  setL("ln-zodiac", a.zodiac);
+  if (curTermInfo && nextTermInfo) {
+    const diff = Math.ceil((new Date(nextTermInfo.year, nextTermInfo.m - 1, nextTermInfo.day) - date) / 86400000);
+    setL("ln-term", `当前 ${curTermInfo.n} · 距 ${nextTermInfo.n} 还有 ${diff} 天`);
+  }
+}
 
 /* ============================================================
    背景：夜间星点（柔和）
