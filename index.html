@@ -3,26 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在线小工具箱 · Toolkit</title>
-  <meta name="description" content="一个纯前端、零依赖的在线小工具集合：实时天气、密码生成器、单位换算、番茄钟、日历。" />
+  <title>工具箱 · Toolkit</title>
+  <meta name="description" content="一个纯前端、零依赖的小工具集合：实时天气、密码生成器、单位换算、番茄钟、日历。" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='6' y='16' width='36' height='24' rx='4' fill='%238e8e93' stroke='%231d1d1f' stroke-width='3'/><path d='M16 16 V10 H32 V16' fill='none' stroke='%231d1d1f' stroke-width='3' stroke-linecap='round'/><rect x='18' y='22' width='12' height='12' rx='2' fill='%23ffd60a' stroke='%231d1d1f' stroke-width='3'/></svg>" />
 </head>
 <body>
   <div class="page">
-    <header class="hero">
-      <div class="hero-badge" aria-hidden="true">
-        <svg viewBox="0 0 48 48" width="64" height="64">
-          <rect x="6" y="16" width="36" height="24" rx="5" fill="#a9adb7" stroke="#1d1d1f" stroke-width="3"/>
-          <path d="M16 16 V10 H32 V16" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="18" y="22" width="12" height="12" rx="2.5" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-          <circle cx="24" cy="28" r="2" fill="#1d1d1f"/>
-        </svg>
-      </div>
-      <h1>在线小工具箱</h1>
-      <p class="subtitle">纯前端 · 零依赖 · 在浏览器里本地运行，数据不外传</p>
-    </header>
-
     <!-- 实时天气（顶部常驻） -->
     <section class="weather" id="weather" aria-label="实时天气">
       <div class="weather-ico" id="w-ico" aria-hidden="true">
@@ -115,7 +102,8 @@
           </div>
         </div>
         <div class="output-row">
-          <input type="text" id="pw-output" readonly aria-label="生成的密码" />
+          <input type="text" id="pw-output" readonly placeholder="点击「生成密码」创建" aria-label="生成的密码" />
+          <button class="btn-copy" id="pw-toggle" title="显示或隐藏密码">显示</button>
           <button class="btn-copy" id="pw-copy" title="复制">复制</button>
         </div>
         <div class="strength"><span id="pw-strength" class="badge">强度：—</span></div>
