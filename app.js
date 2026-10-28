@@ -244,6 +244,7 @@ function closeSidebar() { document.body.classList.remove("sidebar-open"); }
 
 document.getElementById("menu-open").addEventListener("click", openSidebar);
 document.getElementById("open-detail").addEventListener("click", openSidebar);
+document.getElementById("open-terms").addEventListener("click", openSidebar);
 document.getElementById("menu-close").addEventListener("click", closeSidebar);
 document.getElementById("backdrop").addEventListener("click", () => { closeSidebar(); closeNews(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeSidebar(); closeNews(); } });
@@ -683,21 +684,21 @@ function renderTerms() {
     else { next = t; break; }
   }
   if (!cur) return;
-  document.getElementById("term-name").textContent = `${cur.n} · ${cur.m}月${cur.day}日`;
-  document.getElementById("term-desc").textContent = cur.d;
+  const nameTxt = `${cur.n} · ${cur.m}月${cur.day}日`;
+  const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setT("term-name", nameTxt);
+  setT("h-term-name", nameTxt);
+  setT("term-desc", cur.d);
+  setT("h-term-desc", cur.d);
   if (next) {
     const diff = Math.ceil((new Date(next.year, next.m - 1, next.day) - now) / 86400000);
-    document.getElementById("term-next").textContent =
-      `下一节气：${next.n}（${next.m}月${next.day}日 · 还有 ${diff} 天）`;
+    const nextTxt = `下一节气：${next.n}（${next.m}月${next.day}日 · 还有 ${diff} 天）`;
+    setT("term-next", nextTxt);
+    setT("h-term-next", nextTxt);
   }
   const grid = document.getElementById("term-grid");
   if (grid) {
-    grid.innerHTML = TERMS.map((t) => {
-      const dd = termDate(y, t);
-      const isCur = cur.year === y && cur.n === t.n;
-      return `<div class="term-cell${isCur ? " cur" : ""}">
-        <div class="n">${t.n}</div><div class="d">${t.m}/${dd}</div></div>`;
-    }).join("");
+    grid.innerHTML = "";
   }
   const big = document.getElementById("term-big");
   if (big) {
