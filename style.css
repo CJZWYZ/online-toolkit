@@ -500,7 +500,12 @@ body {
 /* ============================================================
    6 · 主页布局与卡片
    ============================================================ */
-.home { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 20px 16px 56px; }
+.home {
+  position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 20px 16px 56px;
+  --gap-stack: 16px;   /* 卡片堆叠间距：全站唯一来源 */
+}
+/* —— 纵向堆叠间距统一下发，杜绝各卡片各写魔法值 —— */
+.home > * + * { margin-top: var(--gap-stack); }
 .card { position: relative; overflow: hidden; padding: 20px; }
 
 /* —— 入场错峰弹簧：--i 0..4 —— */
@@ -545,7 +550,7 @@ body[data-ready="1"] .enter { opacity: 1; transform: none; }
 @media (prefers-color-scheme: dark) { .w-err { color: var(--warm); } }
 
 /* 小卡片网格 */
-.small-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 16px; }
+.small-grid { display: grid; grid-template-columns: 1fr; gap: var(--gap-stack); }
 .sc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .sc-k { font-weight: 600; font-size: var(--t-body); }
 .sc-go { font-size: var(--t-xs); color: var(--brand); }
@@ -867,7 +872,117 @@ body.sheet-open .backdrop { opacity: 1; pointer-events: auto; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ============================================================
-   10 · 响应式断点（移动端优先，最小 360px）
+   10 · 留言板 与 留言特效层
+   ============================================================ */
+/* —— 特效层：背景大字在内容之下(z:0)；弹幕在内容之上、抽屉之下(z:30) —— */
+.msgfx { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.msgfx-amb { z-index: 0; }
+.msgfx-dm  { z-index: 30; }
+
+/* —— 弹幕：右侧入场 → 向左匀速漂出；时长由 JS 按留言长度写入 --dur —— */
+.dm-item {
+  position: absolute; left: 100%; top: 0;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 13px; border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .30);
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  backdrop-filter: blur(6px) saturate(1.2);
+  box-shadow: 0 2px 10px rgba(16, 24, 28, .06);
+  white-space: nowrap; font-size: var(--t-sm);
+  color: var(--ink); opacity: .52;
+  animation: dm-fly var(--dur, 14s) linear forwards;
+  will-change: transform;
+}
+@keyframes dm-fly {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(-100vw - 100%), 0, 0); }
+}
+.dm-item .dm-u { font-weight: 700; }
+
+/* —— 背景大字氛围层：极低透明度的大号字，浮动在内容与天光之间 —— */
+.amb-item {
+  position: absolute; max-width: 60vw;
+  font-size: clamp(2.4rem, 10vw, 6.5rem); font-weight: 700; line-height: 1.06;
+  letter-spacing: -.03em; color: var(--ink); opacity: 0;
+  word-break: break-word;
+  transform: translate3d(0, 14px, 0) scale(.97);
+  transition: opacity 1.5s var(--e-soft), transform 1.5s var(--e-soft);
+}
+.amb-item.show { opacity: .085; transform: none; }
+@media (prefers-color-scheme: dark) { .amb-item.show { opacity: .11; } }
+
+/* 按昵称哈希取色，让不同人的留言有稳定色彩身份 */
+.dm-item.c1, .msg-item .mu.c1, .amb-item.c1 { color: var(--brand); }
+.dm-item.c2, .msg-item .mu.c2, .amb-item.c2 { color: var(--term); }
+.dm-item.c3, .msg-item .mu.c3, .amb-item.c3 { color: var(--warm-ink); }
+.dm-item.c4, .msg-item .mu.c4, .amb-item.c4 { color: var(--indigo); }
+.dm-item.c5, .msg-item .mu.c5, .amb-item.c5 { color: var(--holiday-ink); }
+@media (prefers-color-scheme: dark) {
+  .dm-item.c3, .msg-item .mu.c3, .amb-item.c3 { color: var(--warm); }
+  .dm-item.c5, .msg-item .mu.c5, .amb-item.c5 { color: var(--holiday); }
+}
+
+/* —— 留言板卡片 —— */
+.msg-card { display: flex; flex-direction: column; gap: 12px; }
+.msg-count { font-size: var(--t-xs); color: var(--ink-2); }
+.msg-form { display: flex; gap: 10px; align-items: stretch; }
+.msg-fields { flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.msg-in {
+  width: 100%; min-width: 0; font-family: inherit; font-size: var(--t-body); color: var(--ink);
+  background: rgba(127, 127, 127, .10); border: 1px solid var(--hairline);
+  border-radius: var(--r-sm); padding: 10px 12px; outline: none;
+  transition: border-color 160ms var(--e-out), background 160ms var(--e-out);
+}
+.msg-in::placeholder { color: var(--ink-3); }
+.msg-in:focus { border-color: var(--brand-ring); background: rgba(127, 127, 127, .14); }
+.msg-send {
+  flex: 0 0 auto; min-width: 68px;
+  font-family: inherit; font-size: var(--t-body); font-weight: 600; color: #fff;
+  background: linear-gradient(160deg, var(--brand-grad-a), var(--brand-grad-b));
+  border: none; border-radius: var(--r-sm); padding: 10px 16px; cursor: pointer;
+  transition: transform 90ms var(--e-press), filter 160ms var(--e-out);
+}
+.msg-send:active { transform: scale(var(--s-press)); }
+
+.msg-ctrl { display: flex; flex-wrap: wrap; gap: 8px; }
+.tg {
+  font-family: inherit; font-size: var(--t-xs); font-weight: 600; color: var(--ink-2);
+  background: rgba(127, 127, 127, .10); border: 1px solid var(--hairline);
+  border-radius: var(--r-pill); padding: 7px 14px; cursor: pointer;
+  transition: color 160ms var(--e-out), background 160ms var(--e-out),
+              border-color 160ms var(--e-out), transform 90ms var(--e-press);
+}
+.tg:active { transform: scale(var(--s-press)); }
+.tg[aria-pressed="true"] { color: var(--brand); background: var(--brand-tint); border-color: var(--brand-ring); }
+.tg-del { color: var(--holiday-ink); }
+@media (prefers-color-scheme: dark) { .tg-del { color: var(--holiday); } }
+
+.msg-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 172px; overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.msg-item {
+  display: flex; align-items: baseline; gap: 8px; font-size: var(--t-sm); line-height: 1.5;
+  padding: 8px 10px; border-radius: var(--r-sm); background: rgba(127, 127, 127, .06);
+  animation: msg-in 340ms var(--e-pop) both;
+}
+@keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg-item .mu { flex: 0 0 auto; font-weight: 700; max-width: 38%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-item .mt { flex: 1 1 auto; min-width: 0; color: var(--ink-2); word-break: break-word; }
+.msg-item .mtime { flex: 0 0 auto; font-size: var(--t-micro); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.msg-empty { font-size: var(--t-sm); color: var(--ink-3); padding: 6px 2px; }
+.msg-tip { margin: 0; font-size: var(--t-micro); color: var(--ink-3); }
+
+@media (min-width: 560px) {
+  .msg-form { align-items: center; }
+  .msg-fields { flex-direction: row; }
+  .msg-fields .msg-in:first-child { flex: 0 0 32%; }
+}
+
+/* ============================================================
+   11 · 响应式断点（移动端优先，最小 360px）
    ============================================================ */
 /* —— 360–559：单列（base 已满足）—— */
 @media (max-width: 559px) {
@@ -889,7 +1004,7 @@ body.sheet-open .backdrop { opacity: 1; pointer-events: auto; }
 
 /* —— ≥768：居中列 + 抽屉转居中模态 —— */
 @media (min-width: 768px) {
-  .home { max-width: 720px; padding: 32px 18px 64px; }
+  .home { max-width: 720px; padding: 32px 18px 64px; --gap-stack: 20px; }
   .topbar { max-width: 720px; margin: 16px auto 0; }
   .welcome-panel { max-width: 440px; }
   .visit-chart { height: 84px; --plot-h: 68px; }
@@ -928,7 +1043,7 @@ body.sheet-open .backdrop { opacity: 1; pointer-events: auto; }
 }
 
 /* ============================================================
-   11 · 降级
+   12 · 降级
    ============================================================ */
 /* 焦点可见性（原 .search input{outline:none} 导致键盘焦点不可见） */
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
@@ -949,7 +1064,8 @@ html[data-paused="1"] .aura,
 html[data-paused="1"] .glow,
 html[data-paused="1"] .card::after,
 html[data-paused="1"] .w-ico *,
-html[data-paused="1"] .sk::after { animation-play-state: paused !important; }
+html[data-paused="1"] .sk::after,
+html[data-paused="1"] .dm-item { animation-play-state: paused !important; }
 
 /* —— prefers-reduced-motion：补全 iteration-count / delay / 位移 —— */
 @media (prefers-reduced-motion: reduce) {
@@ -963,6 +1079,9 @@ html[data-paused="1"] .sk::after { animation-play-state: paused !important; }
   }
   .enter { transform: none !important; }
   .glow, .sky-glow, .card::after, .ripple { display: none !important; }
+  /* 留言特效：降低动效下完全不出现（JS 侧同样门控），留言列表照常可读 */
+  .dm-item, .amb-item { display: none !important; }
+  .msg-item { animation: none !important; }
   .w-ico .wi-float, .w-ico .wi-rays,
   .w-ico .wi-drop, .w-ico .wi-flake, .w-ico .wi-bolt { animation: none !important; }
   body.sheet-open .topbar, body.sheet-open .home { transform: none; }
