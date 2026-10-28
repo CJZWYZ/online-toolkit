@@ -825,6 +825,8 @@
       if (MQ.reduce.matches) return;
       const host = e.target.closest && e.target.closest(SCOPE);
       if (!host) return;
+      /* 表单控件与留言列表内不产生涟漪，避免打字时满卡水波纹 */
+      if (e.target.closest("input, textarea, select, .msg-list")) return;
       if (host.querySelectorAll(".ripple").length >= 3) return;
       const r = host.getBoundingClientRect();
       const size = Math.max(r.width, r.height) * 1.35;
@@ -872,12 +874,210 @@
   }
 
   /* ============================================================
-     10 · 欢迎页与初始化
+     10 · 留言板（localStorage 本机保存 + 预留远程接口）
+     ============================================================ */
+  const MSG_KEY = "tiaqi_msgs", NICK_KEY = "tiaqi_nick";
+  const MSG_MAX = 60, DM_MAX = 8, DM_GAP = 3600, AMB_GAP = 8200;
+  /* 想升级为「全网共享」：填入后端地址即可（GET 返回留言数组，POST 追加 {u,t,ts}）。
+     留空 = 仅保存在本机浏览器，无需任何密钥与注册。 */
+  const MSG_ENDPOINT = "";
+  const MSG_TINTS = ["c1", "c2", "c3", "c4", "c5"];
+  let msgs = [], dmOn = true, ambOn = true, dmTimer = 0, ambTimer = 0, dmIdx = 0, ambIdx = 0;
+
+  /* 昵称 → 稳定色彩身份（同一个人每次同色） */
+  function msgTint(u) {
+    let h = 0;
+    for (let i = 0; i < u.length; i++) h = (h * 31 + u.charCodeAt(i)) % 9973;
+    return MSG_TINTS[h % MSG_TINTS.length];
+  }
+  function msgTime(ts) {
+    const d = new Date(ts);
+    return `${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+  const readStore = () => {
+    try { return JSON.parse(localStorage.getItem(MSG_KEY) || "[]"); } catch (e) { return []; }
+  };
+  const writeStore = (arr) => {
+    try { localStorage.setItem(MSG_KEY, JSON.stringify(arr)); } catch (e) {}
+  };
+
+  /* —— 渲染留言列表：全程 textContent，用户输入不会被当作 HTML —— */
+  function renderMsgs() {
+    const list = $("msg-list"), cnt = $("msg-count");
+    if (cnt) cnt.textContent = msgs.length ? `共 ${msgs.length} 条` : "还没有留言";
+    if (!list) return;
+    list.textContent = "";
+    if (!msgs.length) {
+      const li = document.createElement("li");
+      li.className = "msg-empty";
+      li.textContent = "写第一条留言，它会化作弹幕飘过天光";
+      list.appendChild(li);
+      return;
+    }
+    msgs.slice(-24).reverse().forEach((m) => {
+      const li = document.createElement("li");
+      li.className = "msg-item";
+      const u = document.createElement("span");
+      u.className = "mu " + msgTint(m.u);
+      u.textContent = m.u;
+      const t = document.createElement("span");
+      t.className = "mt";
+      t.textContent = m.t;
+      const s = document.createElement("span");
+      s.className = "mtime";
+      s.textContent = msgTime(m.ts);
+      li.append(u, t, s);
+      list.appendChild(li);
+    });
+  }
+
+  /* —— 远程同步：MSG_ENDPOINT 留空时自动跳过，纯本机运行 —— */
+  async function pullRemote() {
+    if (!MSG_ENDPOINT) return;
+    try {
+      const arr = await fetchJSON(MSG_ENDPOINT, 5000);
+      if (!Array.isArray(arr)) return;
+      const seen = new Set(msgs.map((m) => m.u + "|" + m.t + "|" + m.ts));
+      const add = arr
+        .filter((m) => m && m.t && !seen.has(String(m.u || "") + "|" + m.t + "|" + m.ts))
+        .map((m) => ({ u: String(m.u || "").slice(0, 12) || "匿名旅人", t: String(m.t).slice(0, 60), ts: +m.ts || Date.now() }));
+      if (!add.length) return;
+      msgs = msgs.concat(add).sort((a, b) => a.ts - b.ts).slice(-MSG_MAX);
+      writeStore(msgs);
+      renderMsgs();
+    } catch (e) { /* 远程不可用 → 静默保持本机数据 */ }
+  }
+  function pushRemote(m) {
+    if (!MSG_ENDPOINT) return;
+    fetch(MSG_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(m)
+    }).catch(() => {});
+  }
+
+  function addMsg(rawU, rawT) {
+    const u = String(rawU || "").trim().slice(0, 12) || "匿名旅人";
+    const t = String(rawT || "").trim().slice(0, 60);
+    if (!t) { toast("留言内容不能为空"); return false; }
+    const m = { u, t, ts: Date.now() };
+    msgs.push(m);
+    if (msgs.length > MSG_MAX) msgs = msgs.slice(-MSG_MAX);
+    writeStore(msgs);
+    renderMsgs();
+    pushRemote(m);
+    spawnDanmaku(m);            /* 即时反馈：自己刚发的这条立刻飘出 */
+    spawnAmbient(m);            /* 同步浮现为背景大字，不必等到下一个轮询 */
+    return true;
+  }
+
+  /* —— 弹幕：单条生成；越长漂得越慢保证可读；同屏并发 ≤ DM_MAX —— */
+  function spawnDanmaku(m) {
+    const layer = $("msgfx-dm");
+    if (!layer || MQ.reduce.matches || document.hidden) return;
+    if (layer.querySelectorAll(".dm-item").length >= DM_MAX) return;
+    const el = document.createElement("span");
+    el.className = "dm-item " + msgTint(m.u);
+    const b = document.createElement("b");
+    b.className = "dm-u";
+    b.textContent = m.u;
+    el.append(b, document.createTextNode("：" + m.t));
+    el.style.setProperty("--dur", Math.max(9, Math.min(18, 9 + m.t.length * 0.16)).toFixed(1) + "s");
+    el.style.top = (12 + Math.random() * 62).toFixed(1) + "%";
+    el.addEventListener("animationend", () => el.remove());
+    layer.appendChild(el);
+  }
+  function tickDanmaku() {
+    if (!msgs.length) return;
+    spawnDanmaku(msgs[dmIdx++ % msgs.length]);
+  }
+
+  /* —— 背景大字：随机锚点浮现，6.4s 后淡出，同屏 ≤2 —— */
+  function spawnAmbient(m) {
+    const layer = $("msgfx-amb");
+    if (!layer || MQ.reduce.matches || document.hidden) return;
+    if (layer.querySelectorAll(".amb-item").length >= 2) return;
+    const el = document.createElement("span");
+    el.className = "amb-item " + msgTint(m.u);
+    el.textContent = m.t;
+    el.style.left = (3 + Math.random() * 26).toFixed(1) + "%";
+    el.style.top = (10 + Math.random() * 48).toFixed(1) + "%";
+    layer.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => {
+      el.classList.remove("show");
+      setTimeout(() => el.remove(), 1700);
+    }, 6400);
+  }
+  function tickAmbient() {
+    if (!msgs.length) return;
+    spawnAmbient(msgs[ambIdx++ % msgs.length]);
+  }
+
+  function startMsgFx() {
+    if (MQ.reduce.matches) return;
+    if (dmOn && !dmTimer) { tickDanmaku(); dmTimer = setInterval(tickDanmaku, DM_GAP); }
+    if (ambOn && !ambTimer) { tickAmbient(); ambTimer = setInterval(tickAmbient, AMB_GAP); }
+  }
+  function stopMsgFx() {
+    clearInterval(dmTimer); dmTimer = 0;
+    clearInterval(ambTimer); ambTimer = 0;
+  }
+  function setFx(which, on) {
+    const save = (k, v) => { try { localStorage.setItem(k, v ? "1" : "0"); } catch (e) {} };
+    if (which === "dm") {
+      dmOn = on; save("tiaqi_dm", on);
+      clearInterval(dmTimer); dmTimer = 0;
+      const l = $("msgfx-dm"); if (l) l.textContent = "";
+      if (on && !MQ.reduce.matches) { tickDanmaku(); dmTimer = setInterval(tickDanmaku, DM_GAP); }
+    } else {
+      ambOn = on; save("tiaqi_amb", on);
+      clearInterval(ambTimer); ambTimer = 0;
+      const l = $("msgfx-amb"); if (l) l.textContent = "";
+      if (on && !MQ.reduce.matches) { tickAmbient(); ambTimer = setInterval(tickAmbient, AMB_GAP); }
+    }
+    syncFxUI();
+  }
+  function syncFxUI() {
+    const a = $("tg-dm"), b = $("tg-amb");
+    if (a) { a.setAttribute("aria-pressed", dmOn ? "true" : "false"); a.textContent = "弹幕 · " + (dmOn ? "开" : "关"); }
+    if (b) { b.setAttribute("aria-pressed", ambOn ? "true" : "false"); b.textContent = "背景大字 · " + (ambOn ? "开" : "关"); }
+  }
+
+  function initMsg() {
+    msgs = readStore()
+      .filter((m) => m && m.t)
+      .map((m) => ({
+        u: String(m.u || "匿名旅人").slice(0, 12),
+        t: String(m.t).slice(0, 60),
+        ts: +m.ts || Date.now()
+      }))
+      .sort((a, b) => a.ts - b.ts).slice(-MSG_MAX);
+    try {
+      dmOn = localStorage.getItem("tiaqi_dm") !== "0";
+      ambOn = localStorage.getItem("tiaqi_amb") !== "0";
+      const nick = localStorage.getItem(NICK_KEY);
+      if (nick && $("msg-nick")) $("msg-nick").value = nick;
+    } catch (e) {}
+    syncFxUI();
+    renderMsgs();
+    pullRemote();
+    /* 后台标签页停表，回到前台再续 */
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopMsgFx();
+      else if (document.body.dataset.ready === "1") startMsgFx();
+    });
+    if ($("msg-tip")) $("msg-tip").textContent = MSG_ENDPOINT ? "留言已联网共享" : "留言保存在本机浏览器";
+  }
+
+  /* ============================================================
+     11 · 欢迎页与初始化
      ============================================================ */
   function enterHome() {
     if (document.body.dataset.ready === "1") return;
     document.body.dataset.ready = "1";
     flushChart();                                /* 曲线若已在视口内，此刻开始生长 */
+    startMsgFx();                                /* 留言弹幕与背景大字自此刻起流动 */
     const w = $("welcome");
     w.classList.add("leave");                    /* 与进入同曲线同长同路径：只 translateY */
     setTimeout(() => {
@@ -1006,6 +1206,29 @@
     $("cal-prev").addEventListener("click", () => { const d = parseTitle(); d.setMonth(d.getMonth() - 1); renderCalendarSheet(d); });
     $("cal-next").addEventListener("click", () => { const d = parseTitle(); d.setMonth(d.getMonth() + 1); renderCalendarSheet(d); });
 
+    /* —— 留言板：发送 / 开关 / 清空 —— */
+    const mform = $("msg-form");
+    if (mform) {
+      mform.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const uEl = $("msg-nick"), tEl = $("msg-text");
+        if (addMsg(uEl.value, tEl.value)) {
+          try { localStorage.setItem(NICK_KEY, String(uEl.value).trim().slice(0, 12)); } catch (er) {}
+          tEl.value = "";
+          announce("留言已发送");
+          if (!MQ.coarse.matches) tEl.focus({ preventScroll: true });
+        }
+      });
+    }
+    $("tg-dm").addEventListener("click", () => setFx("dm", !dmOn));
+    $("tg-amb").addEventListener("click", () => setFx("amb", !ambOn));
+    $("msg-clear").addEventListener("click", () => {
+      if (!msgs.length) { toast("还没有留言可清空"); return; }
+      if (!confirm(`确定清空全部 ${msgs.length} 条留言？此操作不可撤销。`)) return;
+      msgs = []; writeStore(msgs); renderMsgs(); stopMsgFx(); startMsgFx();
+      toast("留言已清空");
+    });
+
     bindDrag($("cal-sheet"));
     bindDrag($("wiki-sheet"));
     bindRipple();
@@ -1023,6 +1246,7 @@
     /* 骨架先占位（延迟 300ms 才出现），数据到达后撤下 */
     showSkeleton($("wiki-title"), 1);
     showSkeleton($("wiki-text"), 4);   /* 4 行 ≈ 真实 4 行文本高度 */
+    initMsg();
     updateVisit();
     loadWiki();
     loadNews();
