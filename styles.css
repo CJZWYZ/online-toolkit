@@ -103,14 +103,23 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
 
 /* ===== 顶部导航 ===== */
 .topbar {
-  position: sticky; top: 0; z-index: 30;
+  position: sticky; top: 8px; z-index: 30;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 20px;
-  padding-top: calc(12px + env(safe-area-inset-top));
-  background: transparent;
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border-bottom: 0.5px solid transparent;
+  margin: 8px 12px 0;
+  margin-top: calc(8px + env(safe-area-inset-top));
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: linear-gradient(140deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 48%, rgba(255,255,255,0.11) 100%);
+  border: 1px solid rgba(255,255,255,0.45);
+  box-shadow: 0 10px 30px rgba(31,74,110,0.12),
+    inset 0 1px 1px rgba(255,255,255,0.75),
+    inset 0 -10px 24px -14px rgba(255,255,255,0.45);
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
+}
+body[data-time="night"] .topbar {
+  background: linear-gradient(140deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.09) 100%);
+  border-color: rgba(255,255,255,0.16);
 }
 .brand { display: inline-flex; align-items: center; gap: 8px;
   font-size: 1.05rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text); }
@@ -307,7 +316,7 @@ body[data-time="night"] .card, body[data-time="night"] .weather {
 
 /* 搜索·热点 抽屉（左侧） */
 .newsbar {
-  position: fixed; top: 0; left: 0; height: 100dvh; width: 400px; max-width: 92vw;
+  position: fixed; top: 0; left: 0; height: 100dvh; width: 420px; max-width: 92vw;
   background: var(--card-solid);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
@@ -318,14 +327,15 @@ body[data-time="night"] .card, body[data-time="night"] .weather {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  display: flex; flex-direction: column; gap: 14px;
+  display: flex; flex-direction: column; gap: 18px;
   transform: translateX(-100%); transition: transform 0.38s var(--ease);
   z-index: 50;
 }
 body.news-open .newsbar { transform: translateX(0); }
 .web-search { display: flex; gap: 8px; position: sticky; top: 0; z-index: 5;
-  background: var(--card-solid); padding: 8px 2px;
-  box-shadow: 0 6px 14px -8px rgba(0,0,0,0.25); }
+  background: var(--card-solid); padding: 10px;
+  border: 1px solid rgba(255,255,255,0.45); border-radius: 16px;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.75), 0 8px 20px -12px rgba(0,0,0,0.3); }
 .web-search input {
   flex: 1; min-width: 0;
   background: rgba(127,127,127,0.12);
@@ -339,10 +349,11 @@ body.news-open .newsbar { transform: translateX(0); }
 .news-cap { margin: 4px 0 0; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.08em; }
 .news-list { display: flex; flex-direction: column; gap: 8px; }
 .news-item {
-  display: block; padding: 11px 14px; border-radius: var(--radius-sm);
-  background: rgba(127,127,127,0.08); text-decoration: none;
+  display: block; padding: 11px 14px; border-radius: 16px;
+  background: linear-gradient(140deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%);
+  text-decoration: none;
   color: var(--text); font-size: 0.9rem; line-height: 1.45;
-  border: 0.5px solid transparent;
+  border: 1px solid rgba(255,255,255,0.35);
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .news-item:hover { background: var(--accent-soft); border-color: var(--accent); }
