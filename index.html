@@ -3,217 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>工具箱 · Toolkit</title>
-  <meta name="description" content="一个纯前端、零依赖的小工具集合：实时天气、密码生成器、单位换算、番茄钟、日历。" />
+  <title>日历 · 今日天气</title>
+  <meta name="description" content="极简日历与黄历：自动获取当天日期与实时天气，侧边栏显示农历、干支、生肖、宜忌、冲煞，背景随天气与昼夜联动。" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='6' y='16' width='36' height='24' rx='4' fill='%238e8e93' stroke='%231d1d1f' stroke-width='3'/><path d='M16 16 V10 H32 V16' fill='none' stroke='%231d1d1f' stroke-width='3' stroke-linecap='round'/><rect x='18' y='22' width='12' height='12' rx='2' fill='%23ffd60a' stroke='%231d1d1f' stroke-width='3'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='8' y='12' width='32' height='30' rx='5' fill='%23fff' stroke='%231d1d1f' stroke-width='3'/><path d='M8 20 H40' stroke='%231d1d1f' stroke-width='3'/><path d='M16 8 V14 M32 8 V14' stroke='%231d1d1f' stroke-width='3' stroke-linecap='round'/><rect x='20' y='26' width='8' height='8' rx='2' fill='%230071e3'/></svg>" />
 </head>
 <body>
   <div class="page">
-    <!-- 实时天气（顶部常驻） -->
-    <section class="weather" id="weather" aria-label="实时天气">
-      <div class="weather-ico" id="w-ico" aria-hidden="true">
-        <svg viewBox="0 0 48 48" width="52" height="52">
-          <circle cx="24" cy="24" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-          <g stroke="#1d1d1f" stroke-width="3" stroke-linecap="round">
-            <path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/>
-            <path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/>
-          </g>
-        </svg>
-      </div>
-      <div class="weather-info">
-        <div class="weather-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
-        <div class="weather-desc" id="w-desc">加载中…</div>
-      </div>
-      <div class="weather-right">
-        <div class="weather-loc"><span id="w-city">—</span></div>
-        <div class="weather-extra" id="w-extra">湿度 — · 风 —</div>
-        <div class="weather-search">
-          <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
-          <button class="btn-copy small" id="w-search">搜索</button>
-        </div>
-      </div>
-    </section>
 
-    <nav class="tabs" role="tablist" aria-label="工具切换">
-      <button class="tab active" data-tab="password" role="tab" aria-selected="true">
-        <span class="tab-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="26" height="26">
-            <circle cx="17" cy="17" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-            <circle cx="17" cy="17" r="2.6" fill="#1d1d1f"/>
-            <path d="M23 23 L37 37" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
-            <path d="M31 31 l6 0 M33 37 l4 4" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
-          </svg>
-        </span>
-        密码生成器
-      </button>
-      <button class="tab" data-tab="convert" role="tab" aria-selected="false">
-        <span class="tab-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="26" height="26">
-            <rect x="8" y="19" width="32" height="10" rx="3" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
-            <path d="M15 22 L19 24 L15 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M33 22 L29 24 L33 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        单位换算
-      </button>
-      <button class="tab" data-tab="pomodoro" role="tab" aria-selected="false">
-        <span class="tab-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="26" height="26">
-            <circle cx="24" cy="28" r="14" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
-            <path d="M24 14 q-3 -7 -9 -5 q3 2 4 6" fill="#34c759" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round"/>
-            <circle cx="19" cy="27" r="2" fill="#1d1d1f"/>
-            <circle cx="29" cy="27" r="2" fill="#1d1d1f"/>
-            <path d="M19 33 q5 4 10 0" fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"/>
-          </svg>
-        </span>
-        番茄钟
-      </button>
-      <button class="tab" data-tab="calendar" role="tab" aria-selected="false">
-        <span class="tab-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="26" height="26">
-            <rect x="9" y="13" width="30" height="28" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="3"/>
-            <path d="M9 20 H39" stroke="#1d1d1f" stroke-width="3"/>
-            <path d="M16 9 V15 M32 9 V15" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="17" cy="28" r="2" fill="#ff3b30"/><circle cx="24" cy="28" r="2" fill="#1d1d1f"/><circle cx="31" cy="28" r="2" fill="#0a84ff"/>
-            <circle cx="17" cy="35" r="2" fill="#1d1d1f"/><circle cx="24" cy="35" r="2" fill="#1d1d1f"/><circle cx="31" cy="35" r="2" fill="#34c759"/>
-          </svg>
-        </span>
-        日历
-      </button>
+    <!-- 顶部极简导航 -->
+    <nav class="topbar">
+      <span class="brand">日历</span>
+      <span class="brand-sub">今日 · 天气 · 黄历</span>
     </nav>
 
-    <main class="container">
-
-      <!-- 密码生成器 -->
-      <section id="password" class="panel active" role="tabpanel">
-        <div class="panel-head">
-          <span class="panel-ico" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="40" height="40">
-              <circle cx="17" cy="17" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-              <circle cx="17" cy="17" r="2.6" fill="#1d1d1f"/>
-              <path d="M23 23 L37 37" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
-              <path d="M31 31 l6 0 M33 37 l4 4" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </span>
-          <div>
-            <h2>密码生成器</h2>
-            <p class="hint">调整长度和字符类型，一键生成高强度密码。</p>
+    <div class="layout">
+      <!-- 侧边栏：日历 + 农历 + 黄历 -->
+      <aside class="sidebar">
+        <section class="card calendar-card" id="calendar" aria-label="日历">
+          <div class="cal-bar">
+            <button class="cal-nav" id="cal-prev" aria-label="上个月">‹</button>
+            <div class="cal-title" id="cal-title">—</div>
+            <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
           </div>
-        </div>
-        <div class="output-row">
-          <input type="text" id="pw-output" readonly placeholder="点击「生成密码」创建" aria-label="生成的密码" />
-          <button class="btn-copy" id="pw-toggle" title="显示或隐藏密码">显示</button>
-          <button class="btn-copy" id="pw-copy" title="复制">复制</button>
-        </div>
-        <div class="strength"><span id="pw-strength" class="badge">强度：—</span></div>
+          <div class="cal-grid cal-compact" id="cal-grid"></div>
+          <p class="cal-hint" id="cal-hint">点击某天查看其农历与黄历</p>
+        </section>
 
-        <label class="field">
-          长度：<span id="pw-len-val">16</span>
-          <input type="range" id="pw-len" min="4" max="40" value="16" />
-        </label>
+        <section class="card almanac" id="almanac" aria-label="农历黄历">
+          <div class="al-lunar" id="al-lunar">农历 —</div>
+          <div class="al-ganzhi" id="al-ganzhi">—</div>
 
-        <div class="checks">
-          <label><input type="checkbox" id="opt-lower" checked /> 小写 a-z</label>
-          <label><input type="checkbox" id="opt-upper" checked /> 大写 A-Z</label>
-          <label><input type="checkbox" id="opt-num" checked /> 数字 0-9</label>
-          <label><input type="checkbox" id="opt-sym" checked /> 符号 !@#$</label>
-        </div>
-
-        <button class="btn-primary" id="pw-gen">生成密码</button>
-      </section>
-
-      <!-- 单位换算 -->
-      <section id="convert" class="panel" role="tabpanel" hidden>
-        <div class="panel-head">
-          <span class="panel-ico" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="40" height="40">
-              <rect x="8" y="19" width="32" height="10" rx="3" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
-              <path d="M15 22 L19 24 L15 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M33 22 L29 24 L33 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <div>
-            <h2>单位换算</h2>
-            <p class="hint">支持长度、重量、温度的实时换算。</p>
+          <div class="al-tags">
+            <span class="al-tag" id="al-zodiac">生肖 —</span>
+            <span class="al-tag" id="al-jianchu">—</span>
           </div>
-        </div>
-        <label class="field">
-          类型
-          <select id="conv-type">
-            <option value="length">长度</option>
-            <option value="weight">重量</option>
-            <option value="temp">温度</option>
-          </select>
-        </label>
-        <div class="convert-grid">
-          <div>
-            <input type="number" id="conv-from" value="1" />
-            <select id="conv-from-unit"></select>
-          </div>
-          <div class="arrow">→</div>
-          <div>
-            <input type="text" id="conv-to" readonly />
-            <select id="conv-to-unit"></select>
-          </div>
-        </div>
-      </section>
 
-      <!-- 番茄钟 -->
-      <section id="pomodoro" class="panel" role="tabpanel" hidden>
-        <div class="panel-head">
-          <span class="panel-ico" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="40" height="40">
-              <circle cx="24" cy="28" r="14" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
-              <path d="M24 14 q-3 -7 -9 -5 q3 2 4 6" fill="#34c759" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round"/>
-              <circle cx="19" cy="27" r="2" fill="#1d1d1f"/>
-              <circle cx="29" cy="27" r="2" fill="#1d1d1f"/>
-              <path d="M19 33 q5 4 10 0" fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"/>
-            </svg>
-          </span>
-          <div>
-            <h2>番茄钟</h2>
-            <p class="hint">专注 25 分钟，休息 5 分钟，提升效率。</p>
+          <div class="al-yiji">
+            <div class="al-yi">
+              <div class="h">宜</div>
+              <div class="c" id="al-yi">—</div>
+            </div>
+            <div class="al-ji">
+              <div class="h">忌</div>
+              <div class="c" id="al-ji">—</div>
+            </div>
           </div>
-        </div>
-        <div class="clock" id="clock">25:00</div>
-        <div class="pomo-controls">
-          <button class="btn-primary" id="pomo-toggle">开始</button>
-          <button class="btn-secondary" id="pomo-reset">重置</button>
-        </div>
-        <p class="pomo-state" id="pomo-state">准备就绪</p>
-      </section>
 
-      <!-- 日历（替换原颜色工具） -->
-      <section id="calendar" class="panel" role="tabpanel" hidden>
-        <div class="panel-head">
-          <span class="panel-ico" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="40" height="40">
-              <rect x="9" y="13" width="30" height="28" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="3"/>
-              <path d="M9 20 H39" stroke="#1d1d1f" stroke-width="3"/>
-              <path d="M16 9 V15 M32 9 V15" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="17" cy="28" r="2" fill="#ff3b30"/><circle cx="24" cy="28" r="2" fill="#1d1d1f"/><circle cx="31" cy="28" r="2" fill="#0a84ff"/>
-              <circle cx="17" cy="35" r="2" fill="#1d1d1f"/><circle cx="24" cy="35" r="2" fill="#1d1d1f"/><circle cx="31" cy="35" r="2" fill="#34c759"/>
-            </svg>
-          </span>
-          <div>
-            <h2>日历</h2>
-            <p class="hint">查看日期，自动标记今天，可前后翻月。</p>
-          </div>
-        </div>
-        <div class="cal-bar">
-          <button class="cal-nav" id="cal-prev" aria-label="上个月">‹</button>
-          <div class="cal-title" id="cal-title">—</div>
-          <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
-        </div>
-        <div class="cal-grid" id="cal-grid"></div>
-      </section>
+          <div class="al-chong" id="al-chong">—</div>
+        </section>
+      </aside>
 
-    </main>
+      <!-- 主区：日期 + 天气 -->
+      <main class="content">
+        <header class="hero">
+          <p class="eyebrow" id="eyebrow">今天</p>
+          <h1 class="date-hero" id="big-date">—</h1>
+          <p class="date-sub" id="date-sub">—</p>
 
-    <footer class="footer">
-      <p>用纯 JavaScript 打造 · 天气数据来自 Open-Meteo · 可自由修改与部署</p>
-    </footer>
+          <section class="weather" id="weather" aria-label="实时天气">
+            <div class="weather-ico" id="w-ico" aria-hidden="true">
+              <svg viewBox="0 0 48 48" width="52" height="52">
+                <circle cx="24" cy="24" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+                <g stroke="#1d1d1f" stroke-width="3" stroke-linecap="round">
+                  <path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/>
+                  <path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/>
+                </g>
+              </svg>
+            </div>
+            <div class="weather-main">
+              <div class="weather-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
+              <div class="weather-meta">
+                <span id="w-desc">加载中…</span>
+                <span class="sep">·</span>
+                <span id="w-city">—</span>
+              </div>
+            </div>
+            <div class="weather-search">
+              <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
+              <button class="btn-search" id="w-search">搜索</button>
+            </div>
+          </section>
+          <p class="weather-extra-line" id="w-extra">湿度 — · 风 —</p>
+        </header>
+
+        <footer class="footer">
+          <p>天气来自 Open-Meteo · 农历黄历为算法推算，仅供参考 · 背景随天气与昼夜联动</p>
+        </footer>
+      </main>
+    </div>
   </div>
 
   <script src="app.js"></script>
