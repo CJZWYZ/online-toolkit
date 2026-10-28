@@ -251,6 +251,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSideb
    ============================================================ */
 const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
 const FC_API = "https://api.open-meteo.com/v1/forecast";
+const AIR_API = "https://air-quality-api.open-meteo.com/v1/air-quality";
 
 const WMO = {
   0: { desc: "晴", icon: "sun" },
@@ -318,7 +319,7 @@ function degToDir(deg) {
 
 async function renderWeather(lat, lon, label) {
   try {
-    const w = await fetch(`${FC_API}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,is_day&timezone=auto`);
+    const w = await fetch(`${FC_API}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,is_day,uv_index&hourly=temperature_2m&forecast_days=1&timezone=auto`);
     if (!w.ok) throw new Error("net");
     const wj = await w.json();
     const c = wj.current;
@@ -334,6 +335,10 @@ async function renderWeather(lat, lon, label) {
     applyTheme(info.icon, c.is_day);
     currentLat = lat; currentLon = lon; currentLabel = label;
     currentCity = label.split(" · ")[0];
+    renderIndices(c);
+    renderTrend(wj);
+    updateCityActive();
+    fetchAQI(lat, lon).then(renderAQI).catch(() => {});
   } catch (e) {
     setWeatherError("天气获取失败，请稍后重试");
   }
@@ -351,6 +356,129 @@ async function loadWeather(city) {
   } catch (e) {
     setWeatherError("天气获取失败，请稍后重试");
   }
+}
+
+/* ============================================================
+   空气质量（Open-Meteo 免费，支持浏览器跨域）
+   ============================================================ */
+async function fetchAQI(lat, lon) {
+  const r = await fetch(`${AIR_API}?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10&timezone=auto`);
+  if (!r.ok) throw new Error("aqi");
+  return await r.json();
+}
+function aqiLevel(v) {
+  if (v == null) return { t: "—", c: "var(--muted)" };
+  if (v <= 50) return { t: "优", c: "#34c759" };
+  if (v <= 100) return { t: "良", c: "#ffd60a" };
+  if (v <= 150) return { t: "轻度污染", c: "#ff9f0a" };
+  if (v <= 200) return { t: "中度污染", c: "#ff453a" };
+  if (v <= 300) return { t: "重度污染", c: "#a21caf" };
+  return { t: "严重污染", c: "#7a1fa2" };
+}
+function renderAQI(j) {
+  const valEl = document.getElementById("w-aqi-val");
+  const labEl = document.getElementById("w-aqi-label");
+  const dotEl = document.getElementById("w-aqi-dot");
+  if (!j || !j.current || j.current.us_aqi == null) {
+    valEl.textContent = "--"; labEl.textContent = "—"; return;
+  }
+  const v = Math.round(j.current.us_aqi);
+  const lv = aqiLevel(v);
+  const pm = j.current.pm2_5 != null ? ` · PM2.5 ${Math.round(j.current.pm2_5)}` : "";
+  valEl.textContent = v;
+  labEl.textContent = lv.t + pm;
+  dotEl.style.color = lv.c;
+}
+
+/* ============================================================
+   生活指数（由实时数据推算）
+   ============================================================ */
+function renderIndices(c) {
+  const ap = c.apparent_temperature;
+  let dress;
+  if (ap < 5) dress = "羽绒棉服";
+  else if (ap < 11) dress = "厚外套";
+  else if (ap < 17) dress = "夹克长袖";
+  else if (ap < 23) dress = "薄长袖";
+  else if (ap < 28) dress = "短袖单衣";
+  else dress = "清凉夏装";
+  const uv = c.uv_index != null ? c.uv_index : 0;
+  let uvT;
+  if (uv < 3) uvT = "弱";
+  else if (uv < 6) uvT = "中等";
+  else if (uv < 8) uvT = "强";
+  else if (uv < 11) uvT = "很强";
+  else uvT = "极强";
+  const code = c.weather_code;
+  let out;
+  if (code >= 95) out = "不宜外出";
+  else if (code >= 71 || (code >= 61 && code <= 67)) out = "带伞出行";
+  else if (code >= 45) out = "注意防雾";
+  else if (code <= 2) out = "适宜出行";
+  else out = "正常出行";
+  const arr = [
+    { k: "穿衣", v: dress },
+    { k: "紫外线", v: uvT },
+    { k: "出行", v: out },
+  ];
+  document.getElementById("w-indices").innerHTML =
+    arr.map((x) => `<span class="idx-chip"><b>${x.k}</b><span>${x.v}</span></span>`).join("");
+}
+
+/* ============================================================
+   未来 24 小时温度趋势
+   ============================================================ */
+function renderTrend(wj) {
+  const svg = document.getElementById("w-trend");
+  const tempEl = document.getElementById("w-trend-temp");
+  if (!svg || !wj || !wj.hourly) return;
+  const times = wj.hourly.time, temps = wj.hourly.temperature_2m;
+  if (!times || !temps) return;
+  const nowH = new Date().getHours();
+  const pad = String(nowH).padStart(2, "0");
+  let idx = times.findIndex((t) => t.slice(11, 13) === pad);
+  if (idx < 0) idx = 0;
+  const slice = temps.slice(idx, idx + 24);
+  if (slice.length < 2) return;
+  const w = 320, h = 72, padX = 6, padY = 12;
+  const min = Math.min(...slice), max = Math.max(...slice);
+  const span = max - min || 1;
+  const pts = slice.map((t, i) => {
+    const x = padX + (i / (slice.length - 1)) * (w - padX * 2);
+    const y = h - padY - ((t - min) / span) * (h - padY * 2);
+    return [x, y];
+  });
+  const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const area = `${line} L ${pts[pts.length - 1][0].toFixed(1)} ${h} L ${pts[0][0].toFixed(1)} ${h} Z`;
+  tempEl.textContent = `${Math.round(min)}° ~ ${Math.round(max)}°`;
+  svg.innerHTML =
+    `<defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
+       <stop offset="0%" stop-color="rgba(0,113,227,0.35)"/>
+       <stop offset="100%" stop-color="rgba(0,113,227,0)"/>
+     </linearGradient></defs>
+     <path d="${area}" fill="url(#tg)"/>
+     <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+}
+
+/* ============================================================
+   多城市快捷切换
+   ============================================================ */
+const CITIES = ["北京", "上海", "广州", "深圳", "成都", "杭州", "西安", "武汉"];
+function renderCityBar() {
+  const bar = document.getElementById("city-bar");
+  if (!bar) return;
+  bar.innerHTML = CITIES.map((c) => `<button class="city-chip" data-city="${c}">${c}</button>`).join("");
+  bar.querySelectorAll(".city-chip").forEach((btn) => {
+    btn.addEventListener("click", () => loadWeather(btn.dataset.city));
+  });
+  updateCityActive();
+}
+function updateCityActive() {
+  const bar = document.getElementById("city-bar");
+  if (!bar) return;
+  bar.querySelectorAll(".city-chip").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.city === currentCity);
+  });
 }
 
 /* ============================================================
@@ -430,6 +558,7 @@ async function initLocation() {
   }
 }
 initLocation();
+renderCityBar();
 
 document.getElementById("w-search").addEventListener("click", () => {
   const v = document.getElementById("w-input").value.trim();
