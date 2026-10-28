@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>液态玻璃 · 天气 / 日历 / 百科 / 搜索</title>
-  <meta name="description" content="液态玻璃风格日常信息仪表盘：IP 天气、农历节气、历史上的今天百科与全站搜索。纯前端、免费开源 API、无需密钥。" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230a84ff' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230a84ff'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=18" />
+  <title>天光 · Skylight —— 天气 / 日历 / 百科 / 搜索</title>
+  <meta name="description" content="天光 Skylight：薄釉质感的日常信息仪表盘，含 IP 天气、农历节气、历史上的今天与全站搜索。纯前端、免费开源 API、无需密钥。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230B6E7C' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230B6E7C'/></svg>" />
+  <link rel="stylesheet" href="style.css?v=19" />
 </head>
 <body data-ready="0">
 
-  <!-- ============ 流动渐变背景（让玻璃折射可见） ============ -->
+  <!-- ============ 背景：L1 光晕呼吸 + L3 噪点（L0 在 body，L2 指针天光见下） ============ -->
   <div class="bg" aria-hidden="true">
-    <span class="blob b1"></span>
-    <span class="blob b2"></span>
-    <span class="blob b3"></span>
+    <span class="aura aura-a"></span>
+    <span class="aura aura-b"></span>
     <div class="grain"></div>
   </div>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="sky-glow" aria-hidden="true"></div>
 
-  <!-- ============ 欢迎页（首屏液态玻璃面板） ============ -->
-  <div class="welcome" id="welcome">
+  <!-- ============ 欢迎页 ============ -->
+  <div class="welcome" id="welcome" data-phase="in" aria-label="欢迎页，轻点或按回车进入">
     <div class="welcome-panel liquid-glass" id="welcome-panel">
       <p class="welcome-greet">你好，今天过得怎样</p>
       <button class="enter-btn" id="enter">进入</button>
@@ -28,16 +29,18 @@
   </div>
 
   <!-- ============ 顶栏 + 搜索 ============ -->
-  <header class="topbar">
+  <header class="topbar enter" style="--i:0">
     <div class="brand">TIAQI · 天气日历</div>
     <div class="search" id="search">
       <svg class="search-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
         <path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-      <input type="text" id="search-input" placeholder="搜索天气 / 节气 / 百科" aria-label="全站搜索" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" />
-      <div class="search-panel liquid-glass" id="search-panel" aria-live="polite">
-        <div class="search-results" id="search-results">
+      <input type="text" id="search-input" placeholder="搜索天气 / 节气 / 百科" aria-label="全站搜索"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true"
+             role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" />
+      <div class="search-panel liquid-glass" id="search-panel">
+        <div class="search-results" id="search-results" role="listbox" aria-label="搜索结果">
           <p class="search-empty">输入关键词，实时检索天气、节气与百科</p>
         </div>
         <div class="search-engine" id="search-engine" hidden>
@@ -54,13 +57,13 @@
   </header>
 
   <!-- ============ 主页 ============ -->
-  <main class="home">
+  <main class="home" id="home" tabindex="-1">
     <!-- IP + 天气主卡 -->
-    <section class="card liquid-glass weather" id="weather" aria-label="天气">
+    <section class="card liquid-glass weather enter" id="weather" aria-label="天气" style="--i:1">
       <div class="w-ip" id="w-ip">IP · 定位中…</div>
       <div class="w-top">
         <div class="w-ico" id="w-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="54" height="54"><circle cx="24" cy="24" r="9" fill="#ffd166" stroke="currentColor" stroke-width="3"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/><path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/></g></svg>
+          <svg viewBox="0 0 48 48" width="54" height="54"><g class="wi-float"><circle class="wi-sun" cx="24" cy="24" r="9" stroke="currentColor" stroke-width="3"/><g class="wi-rays" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/><path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/></g></g></svg>
         </div>
         <div class="w-main">
           <div class="w-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
@@ -77,14 +80,16 @@
 
     <!-- 小卡片：日历 + 百科 -->
     <div class="small-grid">
-      <section class="card liquid-glass cal-card" id="cal-card" aria-label="日历" tabindex="0">
+      <section class="card liquid-glass cal-card enter" id="cal-card" aria-label="日历，展开月历"
+               style="--i:2" tabindex="0" role="button" aria-haspopup="dialog" aria-expanded="false">
         <div class="sc-head"><span class="sc-k">日历</span><span class="sc-go">展开 ›</span></div>
         <div class="cal-date" id="cal-greg">—</div>
         <div class="cal-sub" id="cal-lunar">农历 —</div>
         <div class="cal-tags" id="cal-tags"></div>
       </section>
 
-      <section class="card liquid-glass wiki-card" id="wiki-card" aria-label="历史上的今天" tabindex="0">
+      <section class="card liquid-glass wiki-card enter" id="wiki-card" aria-label="历史上的今天，展开详情"
+               style="--i:3" tabindex="0" role="button" aria-haspopup="dialog" aria-expanded="false">
         <div class="sc-head"><span class="sc-k">历史上的今天</span><span class="sc-go">展开 ›</span></div>
         <div class="wiki-title" id="wiki-title">加载中…</div>
         <div class="wiki-text" id="wiki-text">—</div>
@@ -92,7 +97,7 @@
     </div>
 
     <!-- 访问统计（含访问记录曲线） -->
-    <section class="card liquid-glass visit-card" aria-label="访问统计">
+    <section class="card liquid-glass visit-card enter" aria-label="访问统计" style="--i:4">
       <div class="visit-row">
         <div class="visit-col">
           <div class="visit-k">全站访问量</div>
@@ -104,17 +109,18 @@
         </div>
       </div>
       <div class="visit-sub" id="visit-sub">最近访问 —</div>
-      <div class="visit-chart" id="visit-chart" aria-label="访问记录曲线（近 7 天）"></div>
+      <div class="visit-chart" id="visit-chart" role="img" aria-label="最近 7 天访问记录，暂无数据"></div>
     </section>
   </main>
 
-  <!-- ============ 遮罩 + 抽屉（bottom sheet） ============ -->
-  <div class="backdrop" id="backdrop"></div>
+  <!-- ============ 遮罩 + 抽屉 ============ -->
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
 
-  <section class="sheet liquid-glass" id="cal-sheet" aria-label="当月日历" hidden>
+  <section class="sheet liquid-glass" id="cal-sheet" aria-label="当月日历" role="dialog" aria-modal="true"
+           aria-labelledby="cal-sheet-title" tabindex="-1" hidden>
     <div class="sheet-grab" id="cal-grab" aria-hidden="true"></div>
     <div class="sheet-head">
-      <span class="sheet-title">日历 · 农历 · 节气</span>
+      <span class="sheet-title" id="cal-sheet-title">日历 · 农历 · 节气</span>
       <button class="close-btn" id="cal-close" aria-label="关闭">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
@@ -132,7 +138,8 @@
     </div>
   </section>
 
-  <section class="sheet liquid-glass" id="wiki-sheet" aria-label="百科详情" hidden>
+  <section class="sheet liquid-glass" id="wiki-sheet" aria-label="百科详情" role="dialog" aria-modal="true"
+           aria-labelledby="wiki-sheet-title" tabindex="-1" hidden>
     <div class="sheet-grab" id="wiki-grab" aria-hidden="true"></div>
     <div class="sheet-head">
       <span class="sheet-title" id="wiki-sheet-title">历史上的今天</span>
@@ -149,9 +156,12 @@
     </div>
   </section>
 
+  <!-- 独立的 live region：只播报「找到 N 条结果」等，避免整块结果被重读 -->
+  <div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
+
   <!-- ============ 轻量依赖（CDN，固定主版本） ============ -->
   <script src="https://cdn.jsdelivr.net/npm/chinese-days@1"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
