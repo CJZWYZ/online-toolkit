@@ -56,21 +56,73 @@
   const CITIES = ["北京","上海","广州","深圳","成都","杭州","西安","武汉","南京","重庆","天津","苏州","长沙","青岛","厦门","香港","台北","哈尔滨","昆明","大连"];
 
   /* ============================================================
-     IP 定位（geo.kamero.ai → ipapi.co 兜底 → 浏览器时区）
+     IP 定位（ipwho.is → ipapi.co → 搜狐/太平洋 script 注入 → 城市转坐标）
+     国内网络下 ipapi.co / geo.kamero.ai 常不可达，
+     搜狐 pv.sohu.com 与 whois.pconline.com.cn 为国内稳定源（script 注入免 CORS）。
      ============================================================ */
-  async function getGeo() {
+  function loadScript(src, ms = 5000) {
+    return new Promise((res, rej) => {
+      const s = document.createElement("script");
+      const t = setTimeout(() => { s.remove(); rej(new Error("timeout")); }, ms);
+      s.onload = () => { clearTimeout(t); res(); };
+      s.onerror = () => { clearTimeout(t); s.remove(); rej(new Error("fail")); };
+      s.src = src;
+      document.head.appendChild(s);
+    });
+  }
+  /* 城市名 → 坐标（Open-Meteo 免费地理编码） */
+  async function geocodeCity(name) {
     try {
-      const d = await fetchJSON("https://geo.kamero.ai/api/geo", 5000);
-      if (d && d.latitude != null && d.longitude != null) {
-        return { lat: +d.latitude, lon: +d.longitude, city: d.city || "未知位置",
-                 country: d.country || "", ip: d.ip || "", tz: d.timezone || tz() };
+      const j = await fetchJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&language=zh&count=1&format=json`, 5000);
+      const r = j && j.results && j.results[0];
+      if (r && r.latitude != null) return { lat: r.latitude, lon: r.longitude, tz: r.timezone || tz() };
+    } catch (e) {}
+    return null;
+  }
+  async function getGeo() {
+    /* 1) ipwho.is（CORS 开放，含经纬度） */
+    try {
+      const d = await fetchJSON("https://ipwho.is/", 5000);
+      if (d && d.success !== false && d.latitude != null) {
+        const city = [d.city, d.country].filter(Boolean).join(" · ") || "未知位置";
+        return { lat: +d.latitude, lon: +d.longitude, city, ip: d.ip || "",
+                 tz: (d.timezone && d.timezone.id) || tz() };
       }
     } catch (e) {}
+    /* 2) ipapi.co（规格指定兜底） */
     try {
       const d = await fetchJSON("https://ipapi.co/json/", 5000);
-      if (d && d.latitude != null && d.longitude != null) {
+      if (d && d.latitude != null) {
         const city = [d.city, d.country_name].filter(Boolean).join(" · ") || "未知位置";
         return { lat: +d.latitude, lon: +d.longitude, city, ip: d.ip || "", tz: d.timezone || tz() };
+      }
+    } catch (e) {}
+    /* 3) 搜狐 cityjson（script 注入，返回 returnCitySN = {cip, cname}） */
+    try {
+      await loadScript("https://pv.sohu.com/cityjson?ie=utf-8", 5000);
+      const sn = window.returnCitySN;
+      if (sn && sn.cname && sn.cname !== "未知") {
+        const cn = String(sn.cname).replace(/省|市/g, "");
+        const g = await geocodeCity(cn);
+        return { lat: g ? g.lat : null, lon: g ? g.lon : null,
+                 city: String(sn.cname), ip: sn.cip || "", tz: g ? g.tz : tz() };
+      }
+    } catch (e) {}
+    /* 4) 太平洋电脑网 JSONP（返回 {ip, pro, city}） */
+    try {
+      const cb = "_tiaqiGeo" + Date.now();
+      const got = new Promise((res, rej) => {
+        window[cb] = (d) => res(d);
+        setTimeout(() => rej(new Error("timeout")), 5000);
+      });
+      await loadScript(`https://whois.pconline.com.cn/ipJson.jsp?callback=${cb}`, 5000);
+      const d = await got;
+      if (d && (d.city || d.pro)) {
+        const cn = String(d.city || d.pro).replace(/省|市/g, "");
+        const g = await geocodeCity(cn);
+        const label = [d.pro, d.city].filter((v, i, a) => v && a.indexOf(v) === i).join(" ");
+        return { lat: g ? g.lat : null, lon: g ? g.lon : null,
+                 city: label || "未知位置", ip: d.ip || "", tz: g ? g.tz : tz() };
       }
     } catch (e) {}
     return { lat: null, lon: null, city: "未知位置", ip: "", tz: tz() };
@@ -94,6 +146,7 @@
       $("w-err").hidden = true;
     } catch (e) {
       $("w-desc").textContent = "天气暂不可用";
+      $("w-ico").style.opacity = ".3";
       $("w-err").hidden = false;
     }
   }
@@ -158,9 +211,30 @@
   }
 
   /* ============================================================
-     百科（Wikipedia onthisday，免密钥，&origin=*）
+     百科 · 历史上的今天（国内源优先，Wikipedia 兜底，免密钥）
      ============================================================ */
   let wikiCurrent = null, wikiAvailable = true;
+  /* 容错解析：在任意 JSON 中找到事件数组，统一为 {year, text, pages} */
+  function extractEvents(j) {
+    let arr = null;
+    const find = (v) => {
+      if (arr || !v || typeof v !== "object") return;
+      if (Array.isArray(v)) {
+        if (v.length && v[0] && typeof v[0] === "object" && !Array.isArray(v[0])) arr = v;
+        return;
+      }
+      Object.values(v).forEach(find);
+    };
+    find(j);
+    if (!arr) return [];
+    const pick = (o, keys) => { for (const k of keys) if (o[k]) return String(o[k]); return ""; };
+    return arr.map((o) => {
+      const year = pick(o, ["year", "time", "date"]);
+      const text = pick(o, ["title", "content", "text", "event", "desc", "detail", "info"]);
+      const title = pick(o, ["title", "name"]);
+      return { year: /^\d{3,4}$/.test(year) ? year : "", text, pages: title ? [{ title }] : [] };
+    }).filter((e) => e.text);
+  }
   async function loadWiki() {
     const now = new Date();
     const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -171,7 +245,10 @@
       return (j && j.events) || [];
     };
     let evs = [];
-    try { evs = await tryLoad("zh"); } catch (e) {}
+    /* 国内可达源优先 */
+    try { evs = extractEvents(await fetchJSON("https://api.vvhan.com/api/history", 5000)); } catch (e) {}
+    if (!evs.length) { try { evs = extractEvents(await fetchJSON("https://api.oioweb.cn/api/common/HistoryToday", 5000)); } catch (e) {} }
+    if (!evs.length) { try { evs = await tryLoad("zh"); } catch (e) {} }
     if (!evs.length) { try { evs = await tryLoad("en"); } catch (e) {} }
     if (!evs.length) { wikiFail(); return; }
     const pool = evs.slice(0, 24);
@@ -400,7 +477,7 @@
     $("w-ip").textContent = geo.ip ? `IP ${geo.ip} · ${geo.city}` : `IP · ${geo.city}`;
     $("w-city").textContent = geo.city;
     if (geo.lat != null && geo.lon != null) fetchWeather(geo.lat, geo.lon);
-    else { $("w-desc").textContent = "位置未知"; $("w-err").hidden = false; }
+    else { $("w-desc").textContent = "位置未知"; $("w-ico").style.opacity = ".3"; $("w-err").hidden = false; }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
