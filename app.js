@@ -1,19 +1,25 @@
 /* ============================================================
-   赛博气象终端 - 逻辑
-   首页：自动显示当天日期 + 实时天气（按 IP 定位）+ 农历黄历简略
-   侧边栏（第二页）：点按钮滑出，显示完整日历 + 详细农历黄历
-   欢迎页：粒子场，点击后向外消散
-   背景：JS 生成赛博城市天际线
+   晴历 - 逻辑
+   首页：自动日期 + 实时天气（按 IP 定位）+ 农历黄历简略
+   侧栏：日历 + 详细农历黄历
+   欢迎页：Apple 风柔光 + 轻缓粒子渐隐
+   背景：昼夜自适应 + 夜间星点
    ============================================================ */
 
 /* ---------- 自动显示当天日期 ---------- */
 function renderDate() {
   const now = new Date();
-  const wd = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  const wd = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
   document.getElementById("big-date").textContent = `${now.getMonth() + 1}月${now.getDate()}日`;
   document.getElementById("date-sub").textContent = `${now.getFullYear()}年 · ${wd[now.getDay()]}`;
 }
 renderDate();
+
+// 进入天气加载前，先用本地时间设定昼夜基调
+(function initTheme() {
+  const h = new Date().getHours();
+  document.body.dataset.time = (h >= 19 || h < 6) ? "night" : "day";
+})();
 
 /* ============================================================
    农历 / 黄历换算（纯算法，免依赖）
@@ -242,7 +248,6 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSideb
 
 /* ============================================================
    实时天气（Open-Meteo，免费免密钥，支持浏览器跨域）
-   默认按访问者 IP 定位显示当地天气；可手动搜索城市
    ============================================================ */
 const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
 const FC_API = "https://api.open-meteo.com/v1/forecast";
@@ -264,9 +269,9 @@ const WMO = {
 };
 
 function weatherSVG(type) {
-  const cloud = `<path d="M13 28 a8 8 0 0 1 1 -16 a11 11 0 0 1 21 2 a7 7 0 0 1 1 14 Z" fill="rgba(0,240,255,0.10)" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>`;
+  const cloud = `<path d="M13 28 a8 8 0 0 1 1 -16 a11 11 0 0 1 21 2 a7 7 0 0 1 1 14 Z" fill="rgba(255,255,255,0.12)" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>`;
   const sun = `<circle cx="16" cy="16" r="6" fill="#ffd166" stroke="currentColor" stroke-width="3"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M16 4 V8"/><path d="M5 16 H9"/><path d="M8 8 L11 11"/><path d="M24 8 L21 11"/></g>`;
-  const open = `<svg viewBox="0 0 48 48" width="52" height="52">`;
+  const open = `<svg viewBox="0 0 48 48" width="56" height="56">`;
   const close = `</svg>`;
   switch (type) {
     case "sun":
@@ -278,9 +283,9 @@ function weatherSVG(type) {
     case "fog":
       return `${open}${cloud}<g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 38 H34"/><path d="M16 43 H30"/></g>${close}`;
     case "rain":
-      return `${open}${cloud}<g stroke="#00f0ff" stroke-width="3" stroke-linecap="round"><path d="M17 32 L15 39"/><path d="M25 32 L23 39"/><path d="M33 32 L31 39"/></g>${close}`;
+      return `${open}${cloud}<g stroke="#0a84ff" stroke-width="3" stroke-linecap="round"><path d="M17 32 L15 39"/><path d="M25 32 L23 39"/><path d="M33 32 L31 39"/></g>${close}`;
     case "snow":
-      return `${open}${cloud}<g fill="#00f0ff"><circle cx="17" cy="36" r="1.8"/><circle cx="25" cy="39" r="1.8"/><circle cx="33" cy="36" r="1.8"/></g>${close}`;
+      return `${open}${cloud}<g fill="#0a84ff"><circle cx="17" cy="36" r="1.8"/><circle cx="25" cy="39" r="1.8"/><circle cx="33" cy="36" r="1.8"/></g>${close}`;
     case "thunder":
       return `${open}${cloud}<path d="M25 30 L20 40 L25 40 L22 47" fill="#ffd166" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${close}`;
     default:
@@ -292,6 +297,8 @@ const WX_CLASS = { sun: "sun", suncloud: "suncloud", cloud: "cloud", fog: "fog",
 function applyTheme(icon, isDay) {
   document.body.dataset.weather = WX_CLASS[icon] || "cloud";
   document.body.dataset.time = isDay === 1 ? "day" : "night";
+  // 夜间天气图标改为冷蓝调
+  document.getElementById("w-ico").style.color = isDay === 1 ? "#ffb02e" : "#9cc2ff";
 }
 
 let currentCity = "北京";
@@ -346,35 +353,79 @@ async function loadWeather(city) {
   }
 }
 
-/* 按访问者 IP 定位 */
+/* ============================================================
+   IP 地理定位（多层兜底，重点解决国内识别失败）
+   顺序：ipapi.co(坐标) → ipinfo.io(坐标) → 太平洋电脑网 JSONP(城市名)
+        → 兜底北京
+   ============================================================ */
+function fetchJSON(url, ms = 6000) {
+  return new Promise((resolve, reject) => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    fetch(url, { signal: ctrl.signal, cache: "no-store" })
+      .then((r) => { if (!r.ok) throw new Error("http"); return r.json(); })
+      .then((j) => { clearTimeout(t); resolve(j); })
+      .catch((err) => { clearTimeout(t); reject(err); });
+  });
+}
+
+// 太平洋电脑网：国内最稳，返回城市名（JSONP，可绕过 fetch 跨域限制）
+function pconlineGeo() {
+  return new Promise((resolve) => {
+    const cb = "pc_geo_" + Date.now();
+    const s = document.createElement("script");
+    const to = setTimeout(() => { cleanup(); resolve(null); }, 7000);
+    function cleanup() {
+      clearTimeout(to);
+      try { delete window[cb]; } catch (e) {}
+      if (s.parentNode) s.parentNode.removeChild(s);
+    }
+    window[cb] = (d) => { cleanup(); resolve(d || null); };
+    s.onerror = () => { cleanup(); resolve(null); };
+    s.src = "https://whois.pconline.com.cn/ipJson.jsp?callback=" + cb;
+    document.head.appendChild(s);
+  });
+}
+
 async function detectLocation() {
+  // 1) ipapi.co：含经纬度
   try {
-    const r = await fetch("https://ipapi.co/json/", { cache: "no-store" });
-    if (r.ok) {
-      const d = await r.json();
-      if (d && d.latitude && d.longitude) {
-        return { lat: d.latitude, lon: d.longitude, city: d.city || "", country: d.country_name || "" };
+    const d = await fetchJSON("https://ipapi.co/json/", 6000);
+    if (d && d.latitude && d.longitude) {
+      const label = [d.city, d.country_name].filter(Boolean).join(" · ");
+      return { lat: +d.latitude, lon: +d.longitude, label: label || "当前位置" };
+    }
+  } catch (e) {}
+  // 2) ipinfo.io：含经纬度
+  try {
+    const d = await fetchJSON("https://ipinfo.io/json", 6000);
+    if (d && d.loc) {
+      const [lat, lon] = d.loc.split(",").map(Number);
+      if (lat && lon) {
+        const label = [d.city, d.country].filter(Boolean).join(" · ");
+        return { lat, lon, label: label || "当前位置" };
       }
     }
-  } catch (e) { /* 忽略，尝试兜底 */ }
+  } catch (e) {}
+  // 3) 太平洋电脑网（仅城市名，国内可达）
   try {
-    const r = await fetch("https://ipinfo.io/json", { cache: "no-store" });
-    if (r.ok) {
-      const d = await r.json();
-      const [lat, lon] = (d.loc || "").split(",").map(Number);
-      if (lat && lon) return { lat, lon, city: d.city || "", country: d.country || "" };
+    const d = await pconlineGeo();
+    if (d && d.city) {
+      const label = d.city;
+      return { city: d.city, label };
     }
-  } catch (e) { /* 忽略 */ }
+  } catch (e) {}
   return null;
 }
 
 async function initLocation() {
   const loc = await detectLocation();
   if (loc && loc.lat && loc.lon) {
-    const label = [loc.city, loc.country].filter(Boolean).join(" · ");
-    await renderWeather(loc.lat, loc.lon, label || "当前位置");
+    await renderWeather(loc.lat, loc.lon, loc.label || "当前位置");
+  } else if (loc && loc.city) {
+    // 只有城市名：用 Open-Meteo 地理编码取坐标
+    loadWeather(loc.city);
   } else {
-    // 兜底：固定城市
     loadWeather("北京");
   }
 }
@@ -398,52 +449,34 @@ setInterval(() => {
 }, 10 * 60 * 1000);
 
 /* ============================================================
-   赛博城市天际线（JS 生成霓虹楼宇 SVG）
+   背景：夜间星点（柔和）
    ============================================================ */
-(function buildCity() {
-  const svg = document.getElementById("cyber-city");
-  if (!svg) return;
-  const W = 1440, H = 360;
-  const neon = ["#00f0ff", "#ff2bd6", "#9d4edd", "#ffd166"];
-  let html = "";
-  let x = 0;
-  while (x < W) {
-    const bw = 26 + Math.random() * 46;
-    const bh = 70 + Math.random() * 250;
-    const y = H - bh;
-    const color = neon[Math.floor(Math.random() * neon.length)];
-    html += `<rect class="bld" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" stroke="${color}" stroke-width="1.2" style="filter:drop-shadow(0 0 4px ${color})"/>`;
-    // 窗户
-    const cols = Math.max(1, Math.floor(bw / 12));
-    const rows = Math.max(1, Math.floor(bh / 18));
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (Math.random() < 0.45) {
-          const wx = x + 5 + c * 12;
-          const wy = y + 8 + r * 18;
-          if (wx + 4 < x + bw && wy + 4 < H) {
-            html += `<rect class="win" x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="4" height="4" fill="${color}" color="${color}" opacity="${(0.5 + Math.random() * 0.5).toFixed(2)}"/>`;
-          }
-        }
-      }
-    }
-    x += bw + 4 + Math.random() * 16;
+(function stars() {
+  const box = document.getElementById("bg-stars");
+  if (!box) return;
+  const n = 70;
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement("i");
+    s.style.left = (Math.random() * 100).toFixed(2) + "%";
+    s.style.top = (Math.random() * 70).toFixed(2) + "%";
+    s.style.opacity = (0.3 + Math.random() * 0.6).toFixed(2);
+    s.style.transform = "scale(" + (0.5 + Math.random() * 1.3).toFixed(2) + ")";
+    frag.appendChild(s);
   }
-  // 地面霓虹线
-  html += `<line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="#00f0ff" stroke-width="2" style="filter:drop-shadow(0 0 6px #00f0ff)"/>`;
-  svg.innerHTML = html;
+  box.appendChild(frag);
 })();
 
 /* ============================================================
-   欢迎页：粒子场 + 点击消散
+   欢迎页：Apple 激活风 + 轻缓粒子渐隐
    ============================================================ */
 (function welcome() {
   const overlay = document.getElementById("welcome");
   const canvas = document.getElementById("welcome-canvas");
   if (!overlay || !canvas) return;
 
-  // 已在本会话进入过则直接隐藏
-  if (sessionStorage.getItem("cyber_welcomed")) {
+  // 本会话已进入过则直接隐藏
+  if (sessionStorage.getItem("ql_welcomed")) {
     overlay.style.display = "none";
     return;
   }
@@ -460,111 +493,48 @@ setInterval(() => {
   }
   function seed() {
     particles = [];
-    const n = Math.min(170, Math.floor((innerWidth * innerHeight) / 8500));
+    const n = Math.min(90, Math.floor((innerWidth * innerHeight) / 16000));
     for (let i = 0; i < n; i++) {
-      const x = Math.random() * W, y = Math.random() * H;
       particles.push({
-        x, y,
-        vx: (Math.random() - 0.5) * 0.35 * dpr,
-        vy: (Math.random() - 0.5) * 0.35 * dpr,
-        r: (Math.random() * 1.6 + 0.6) * dpr,
-        color: Math.random() < 0.5 ? "0,240,255" : "255,43,214",
-        a: Math.random() * 0.5 + 0.3
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vy: -(0.15 + Math.random() * 0.3) * dpr,   // 缓慢上浮
+        r: (Math.random() * 1.4 + 0.8) * dpr,
+        a: Math.random() * 0.4 + 0.2
       });
     }
   }
-  size();
-  seed();
+  size(); seed();
 
-  function draw() {
+  function frame() {
     ctx.clearRect(0, 0, W, H);
-    const linkDist = 92 * dpr;
-    // 连线
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      for (let j = i + 1; j < particles.length; j++) {
-        const q = particles[j];
-        const dx = p.x - q.x, dy = p.y - q.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < linkDist) {
-          ctx.strokeStyle = `rgba(0,240,255,${(0.14 * (1 - dist / linkDist) * p.a).toFixed(3)})`;
-          ctx.lineWidth = dpr;
-          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-        }
-      }
-    }
-    // 粒子
     for (const p of particles) {
+      p.y += p.vy;
+      if (!dissipating && p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      if (dissipating) p.a *= 0.95;
       ctx.beginPath();
-      ctx.fillStyle = `rgba(${p.color},${p.a.toFixed(3)})`;
-      ctx.shadowColor = `rgba(${p.color},${p.a.toFixed(3)})`;
-      ctx.shadowBlur = 8 * dpr;
+      ctx.fillStyle = `rgba(0,113,227,${(dissipating ? p.a : p.a * 0.7).toFixed(3)})`;
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.shadowBlur = 0;
-    raf = requestAnimationFrame(step);
-  }
-  function step() {
-    ctx.clearRect(0, 0, W, H);
-    const linkDist = 92 * dpr;
-    for (const p of particles) {
-      if (!dissipating) {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
-      } else {
-        p.x += p.vx * 9; p.y += p.vy * 9; p.a *= 0.95;
-      }
-    }
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      if (dissipating) continue;
-      for (let j = i + 1; j < particles.length; j++) {
-        const q = particles[j];
-        const dx = p.x - q.x, dy = p.y - q.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < linkDist) {
-          ctx.strokeStyle = `rgba(0,240,255,${(0.14 * (1 - dist / linkDist) * p.a).toFixed(3)})`;
-          ctx.lineWidth = dpr;
-          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-        }
-      }
-    }
-    for (const p of particles) {
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(${p.color},${p.a.toFixed(3)})`;
-      ctx.shadowColor = `rgba(${p.color},${p.a.toFixed(3)})`;
-      ctx.shadowBlur = 8 * dpr;
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.shadowBlur = 0;
-    if (dissipating && particles.every((p) => p.a < 0.04)) { end(); return; }
-    raf = requestAnimationFrame(step);
+    if (dissipating && particles.every((p) => p.a < 0.03)) { end(); return; }
+    raf = requestAnimationFrame(frame);
   }
 
   function start() {
     if (dissipating) return;
     dissipating = true;
-    const cx = W / 2, cy = H / 2;
-    for (const p of particles) {
-      const dx = p.x - cx, dy = p.y - cy;
-      const d = Math.hypot(dx, dy) || 1;
-      const sp = 4 + Math.random() * 5;
-      p.vx = (dx / d) * sp; p.vy = (dy / d) * sp;
-    }
-    overlay.classList.add("dissolve");
+    overlay.classList.add("leave");
   }
   function end() {
     cancelAnimationFrame(raf);
     overlay.style.display = "none";
-    sessionStorage.setItem("cyber_welcomed", "1");
+    sessionStorage.setItem("ql_welcomed", "1");
   }
 
   overlay.addEventListener("click", start);
   document.getElementById("welcome-enter").addEventListener("click", (e) => { e.stopPropagation(); start(); });
   window.addEventListener("resize", () => { if (!dissipating) { size(); seed(); } });
 
-  draw();
+  frame();
 })();
