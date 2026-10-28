@@ -107,9 +107,9 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 20px;
   padding-top: calc(12px + env(safe-area-inset-top));
-  background: var(--topbar-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: transparent;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 0.5px solid transparent;
 }
 .brand { display: inline-flex; align-items: center; gap: 8px;
@@ -222,38 +222,56 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
 .city-chip:active { transform: scale(0.96); }
 .city-chip.active { background: var(--accent); color: #fff; border-color: transparent; }
 
-/* 通用磨砂卡片（液态玻璃质感） */
+/* 通用卡片（液态玻璃） */
 .card {
   position: relative; overflow: hidden;
-  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.22) 100%);
-  border: 0.5px solid rgba(255,255,255,0.8);
+  background: linear-gradient(140deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.20) 100%);
+  border: 1px solid rgba(255,255,255,0.55);
   border-radius: var(--radius);
-  box-shadow: 0 10px 40px rgba(31,74,110,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.65),
-    inset 0 -1px 1px rgba(255,255,255,0.2);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 14px 38px rgba(31,74,110,0.16),
+    inset 0 1px 1px rgba(255,255,255,0.9),
+    inset 0 -10px 24px -14px rgba(255,255,255,0.65);
+  backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
+  -webkit-backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
   padding: 22px; transition: background 0.6s ease, transform 0.2s ease;
 }
 .card::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(120deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 30%,
-    rgba(255,255,255,0) 66%, rgba(255,255,255,0.4) 100%);
+  background:
+    radial-gradient(120% 70% at 8% 0%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(125deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 35%,
+      rgba(255,255,255,0) 62%, rgba(255,255,255,0.35) 100%);
 }
-/* 天气卡同步液态玻璃质感 */
+/* 天气卡同款液态玻璃 */
 .weather {
-  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.22) 100%);
-  border-color: rgba(255,255,255,0.65);
-  box-shadow: 0 10px 40px rgba(31,74,110,0.12), inset 0 1px 0 rgba(255,255,255,0.65),
-    inset 0 -1px 1px rgba(255,255,255,0.2);
+  background: linear-gradient(140deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.20) 100%);
+  border-color: rgba(255,255,255,0.55);
+  box-shadow: 0 14px 38px rgba(31,74,110,0.16), inset 0 1px 1px rgba(255,255,255,0.9),
+    inset 0 -10px 24px -14px rgba(255,255,255,0.65);
+  backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
+  -webkit-backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
 }
-/* 按钮液态玻璃质感 */
-.btn-search, .btn-detail, .city-chip, .menu-btn, .close-btn, .cal-nav {
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 14px rgba(31,74,110,0.10);
+/* 按钮液态玻璃 */
+.city-chip, .menu-btn, .close-btn, .cal-nav {
+  background: linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 100%);
+  border: 1px solid rgba(255,255,255,0.6);
+  backdrop-filter: blur(18px) saturate(190%);
+  -webkit-backdrop-filter: blur(18px) saturate(190%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 16px rgba(31,74,110,0.14);
 }
-body[data-time="night"] .card { border-color: rgba(255,255,255,0.14); }
+.btn-search, .btn-detail {
+  background: linear-gradient(180deg, #23cbc5 0%, #0abab5 100%);
+  border: 1px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 18px rgba(10,186,181,0.38);
+}
+.btn-detail { background: linear-gradient(160deg, rgba(255,255,255,0.55), rgba(255,255,255,0.18));
+  color: var(--accent); }
+body[data-time="night"] .card, body[data-time="night"] .weather {
+  border-color: rgba(255,255,255,0.16);
+  background: linear-gradient(140deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.09) 100%);
+}
 
 /* 首页农历黄历简略 */
 .brief { max-width: 440px; margin: 26px auto 0; text-align: center; }
@@ -406,23 +424,26 @@ body.sidebar-open .sidebar { transform: translateX(0); }
 .mini-terms { max-width: 440px; margin: 22px auto 0; }
 .mini-terms-title { font-weight: 600; font-size: 1.02rem; color: var(--text);
   margin-bottom: 12px; text-align: left; }
-.term-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.term-cell { text-align: center; padding: 8px 2px; border-radius: 12px;
-  background: rgba(127,127,127,0.08); }
-.term-cell .n { font-size: 0.8rem; font-weight: 500; color: var(--text); }
-.term-cell .d { font-size: 0.66rem; color: var(--muted); margin-top: 2px; }
+.term-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.term-cell { text-align: center; padding: 6px 1px; border-radius: 10px;
+  background: rgba(255,255,255,0.22); }
+.term-cell .n { font-size: 0.72rem; font-weight: 500; color: var(--text); }
+.term-cell .d { font-size: 0.6rem; color: var(--muted); margin-top: 1px; }
 .term-cell.cur { background: var(--accent); }
 .term-cell.cur .n { color: #fff; font-weight: 600; }
 .term-cell.cur .d { color: rgba(255,255,255,0.85); }
 .term-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-.term-bigcell { padding: 14px; border-radius: 16px; background: rgba(127,127,127,0.08);
-  border: 0.5px solid transparent; }
+.term-bigcell { padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.35); }
 .term-bigcell .n { font-weight: 600; font-size: 1.05rem; color: var(--text); }
 .term-bigcell .d { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
 .term-bigcell .desc { font-size: 0.8rem; color: var(--muted); margin-top: 6px; line-height: 1.55; }
 .term-bigcell.cur { background: var(--accent-soft);
   box-shadow: inset 0 0 0 1.5px var(--accent); }
 @media (max-width: 420px) { .term-grid { grid-template-columns: repeat(3, 1fr); } }
+
+/* 抽屉内卡片不允许被 flex 压缩（修复侧栏无法滚动 / 大卡片被截断） */
+.sidebar > *, .newsbar > * { flex: 0 0 auto; }
 
 /* 黄历 */
 .almanac { padding: 22px; }
