@@ -1,5 +1,5 @@
 /* ============================================================
-   在线小工具箱 - 纯前端交互逻辑
+   工具箱 - 纯前端交互逻辑
    ============================================================ */
 
 /* ---------- Tab 切换 ---------- */
@@ -41,7 +41,7 @@ document.querySelectorAll(".btn-copy[data-copy]").forEach((btn) => {
 });
 
 /* ============================================================
-   1. 密码生成器
+   1. 密码生成器（默认掩码，可显示/隐藏，不自动生成）
    ============================================================ */
 const LOWER = "abcdefghijklmnopqrstuvwxyz";
 const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -52,30 +52,19 @@ const pwOutput = document.getElementById("pw-output");
 const pwLen = document.getElementById("pw-len");
 const pwLenVal = document.getElementById("pw-len-val");
 const pwStrength = document.getElementById("pw-strength");
+const pwToggle = document.getElementById("pw-toggle");
+
+let currentPwd = "";
+let revealed = false;
 
 pwLen.addEventListener("input", () => (pwLenVal.textContent = pwLen.value));
 
-function generatePassword() {
-  const len = +pwLen.value;
-  let pool = "";
-  if (document.getElementById("opt-lower").checked) pool += LOWER;
-  if (document.getElementById("opt-upper").checked) pool += UPPER;
-  if (document.getElementById("opt-num").checked) pool += NUM;
-  if (document.getElementById("opt-sym").checked) pool += SYM;
-  if (!pool) {
-    pwOutput.value = "";
-    pwStrength.textContent = "强度：请至少选择一种字符";
-    pwStrength.style.color = "var(--danger)";
-    return;
-  }
-  let pwd = "";
-  const arr = new Uint32Array(len);
-  crypto.getRandomValues(arr);
-  for (let i = 0; i < len; i++) pwd += pool[arr[i] % pool.length];
-  pwOutput.value = pwd;
-  rateStrength(pwd, pool);
+function maskStr(s) {
+  return "•".repeat(Math.max(8, Math.min(s.length, 48)));
 }
-
+function renderPw() {
+  pwOutput.value = currentPwd ? (revealed ? currentPwd : maskStr(currentPwd)) : "";
+}
 function rateStrength(pwd, pool) {
   let score = pwd.length >= 12 ? 1 : 0;
   if (pwd.length >= 16) score++;
@@ -92,11 +81,39 @@ function rateStrength(pwd, pool) {
   pwStrength.style.color = color;
 }
 
+function generatePassword() {
+  const len = +pwLen.value;
+  let pool = "";
+  if (document.getElementById("opt-lower").checked) pool += LOWER;
+  if (document.getElementById("opt-upper").checked) pool += UPPER;
+  if (document.getElementById("opt-num").checked) pool += NUM;
+  if (document.getElementById("opt-sym").checked) pool += SYM;
+  if (!pool) {
+    currentPwd = "";
+    renderPw();
+    pwStrength.textContent = "强度：请至少选择一种字符";
+    pwStrength.style.color = "var(--danger)";
+    return;
+  }
+  let pwd = "";
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  for (let i = 0; i < len; i++) pwd += pool[arr[i] % pool.length];
+  currentPwd = pwd;
+  renderPw();
+  rateStrength(pwd, pool);
+}
+
 document.getElementById("pw-gen").addEventListener("click", generatePassword);
 document.getElementById("pw-copy").addEventListener("click", (e) =>
-  copyText(pwOutput.value, e.currentTarget)
+  copyText(currentPwd, e.currentTarget)
 );
-generatePassword();
+pwToggle.addEventListener("click", () => {
+  if (!currentPwd) return;
+  revealed = !revealed;
+  pwToggle.textContent = revealed ? "隐藏" : "显示";
+  renderPw();
+});
 
 /* ============================================================
    2. 单位换算
@@ -234,7 +251,7 @@ document.getElementById("pomo-reset").addEventListener("click", () => {
 renderClock();
 
 /* ============================================================
-   4. 日历（替换原颜色工具）
+   4. 日历
    ============================================================ */
 let calY, calM;
 function renderCalendar() {
@@ -316,6 +333,13 @@ function weatherSVG(type) {
   }
 }
 
+/* 天气 / 昼夜 → 背景联动 */
+const WX_CLASS = { sun: "sun", suncloud: "suncloud", cloud: "cloud", fog: "fog", rain: "rain", snow: "snow", thunder: "thunder" };
+function applyTheme(icon, isDay) {
+  document.body.dataset.weather = WX_CLASS[icon] || "cloud";
+  document.body.dataset.time = isDay === 1 ? "day" : "night";
+}
+
 let currentCity = "北京";
 
 function setWeatherError(msg) {
@@ -333,7 +357,7 @@ async function loadWeather(city) {
       return;
     }
     const loc = gj.results[0];
-    const w = await fetch(`${FC_API}?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`);
+    const w = await fetch(`${FC_API}?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=auto`);
     const wj = await w.json();
     const c = wj.current;
     const info = WMO[c.weather_code] || { desc: "未知", icon: "cloud" };
@@ -345,6 +369,7 @@ async function loadWeather(city) {
     document.getElementById("w-extra").textContent = `湿度 ${c.relative_humidity_2m}% · 风 ${Math.round(c.wind_speed_10m)} km/h`;
     document.getElementById("weather").classList.remove("error");
     currentCity = loc.name;
+    applyTheme(info.icon, c.is_day);
   } catch (e) {
     setWeatherError("天气获取失败，请稍后重试");
   }
