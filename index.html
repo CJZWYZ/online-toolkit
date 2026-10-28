@@ -6,7 +6,7 @@
   <title>天光 · Skylight —— 天气 / 日历 / 百科 / 搜索</title>
   <meta name="description" content="天光 Skylight：薄釉质感的日常信息仪表盘，含 IP 天气、农历节气、历史上的今天与全站搜索。纯前端、免费开源 API、无需密钥。" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230B6E7C' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230B6E7C'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=20" />
+  <link rel="stylesheet" href="style.css?v=21" />
 </head>
 <body data-ready="0">
 
@@ -139,6 +139,28 @@
       <ul class="msg-list" id="msg-list"></ul>
       <p class="msg-tip" id="msg-tip">留言保存在本机浏览器</p>
     </section>
+
+    <!-- 排班板：时间 + 事项，可标记完成/删除；事项与留言共用背景氛围层 -->
+    <section class="card liquid-glass plan-card enter" aria-label="今日排班" style="--i:6">
+      <div class="sc-head">
+        <span class="sc-k">今日排班</span>
+        <span class="plan-count" id="plan-count">还没有安排</span>
+      </div>
+      <form class="plan-form" id="plan-form" autocomplete="off">
+        <div class="plan-fields">
+          <input class="plan-in plan-when" id="plan-when" type="time" aria-label="时间" />
+          <input class="plan-in plan-text" id="plan-text" type="text" maxlength="40"
+                 placeholder="安排点什么…最多 40 字" aria-label="排班事项"
+                 autocomplete="off" enterkeyhint="send" />
+        </div>
+        <button class="msg-send plan-add" id="plan-add" type="submit">添加</button>
+      </form>
+      <div class="msg-ctrl">
+        <button type="button" class="tg tg-del" id="plan-clear">清空</button>
+      </div>
+      <ul class="plan-list" id="plan-list"></ul>
+      <p class="msg-tip" id="plan-tip">排班保存在本机浏览器，也会浮现在背景里（由「背景大字」开关统一控制）</p>
+    </section>
   </main>
 
   <!-- ============ 遮罩 + 抽屉 ============ -->
@@ -190,6 +212,6 @@
   <!-- ============ 轻量依赖（CDN，固定主版本） ============ -->
   <script src="https://cdn.jsdelivr.net/npm/chinese-days@1"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
-  <script src="app.js?v=20"></script>
+  <script src="app.js?v=21"></script>
 </body>
 </html>
