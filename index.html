@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>天气 · TIAQI — 实时天气 · 空气质量 · 二十四节气</title>
   <meta name="description" content="TIAQI 天气：自动识别所在城市，显示实时天气、空气质量、生活指数、24小时温度趋势与二十四节气科普。极简冷调设计。" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=7" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='15' fill='none' stroke='%230071e3' stroke-width='4'/><path d='M24 12a12 12 0 0 1 0 24z' fill='%230071e3'/></svg>" />
 </head>
 <body data-time="day">
@@ -66,6 +66,10 @@
     <p class="date-sub" id="date-sub">—</p>
 
     <section class="weather" id="weather" aria-label="实时天气">
+      <div class="weather-search">
+        <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
+        <button class="btn-search" id="w-search">搜索</button>
+      </div>
       <div class="weather-top">
         <div class="weather-ico" id="w-ico" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="56" height="56">
@@ -104,10 +108,6 @@
       <div class="weather-trend">
         <div class="trend-head"><span>未来 24 小时温度</span><span id="w-trend-temp">--°</span></div>
         <svg id="w-trend" viewBox="0 0 320 72" preserveAspectRatio="none" aria-hidden="true"></svg>
-      </div>
-      <div class="weather-search">
-        <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
-        <button class="btn-search" id="w-search">搜索</button>
       </div>
     </section>
 
@@ -208,6 +208,6 @@
     </section>
   </aside>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
