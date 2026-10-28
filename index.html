@@ -3,45 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>NEON 气象终端 · 天气 · 黄历</title>
-  <meta name="description" content="赛博朋克风格天气黄历：自动识别你所在地区显示实时天气，附农历黄历、日历与城市霓虹背景。" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+  <title>晴历 · 天气 · 黄历 · 日历</title>
+  <meta name="description" content="晴历：自动识别你所在地区显示实时天气，附农历黄历与日历。Apple 风格的安静科技体验。" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='16' fill='none' stroke='%2300f0ff' stroke-width='4'/><circle cx='24' cy='24' r='6' fill='%23ff2bd6'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='15' fill='none' stroke='%230071e3' stroke-width='4'/><path d='M24 12a12 12 0 0 1 0 24z' fill='%230071e3'/></svg>" />
 </head>
-<body>
-  <!-- ============ 赛博朋克背景层 ============ -->
-  <div class="cyber-bg" aria-hidden="true">
-    <div class="cyber-sun"></div>
-    <div class="cyber-grid"></div>
-    <svg class="cyber-city" id="cyber-city" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
-    <div class="cyber-scanlines"></div>
-    <div class="cyber-vignette"></div>
-    <div class="cyber-noise"></div>
+<body data-time="day">
+
+  <!-- ============ 氛围背景层（昼夜自适应柔和渐变） ============ -->
+  <div class="bg" aria-hidden="true">
+    <div class="bg-orb"></div>
+    <div class="bg-stars" id="bg-stars"></div>
+    <div class="bg-grain"></div>
   </div>
 
-  <!-- ============ 欢迎页（粒子消散） ============ -->
+  <!-- ============ 欢迎页（Apple 激活风 · 柔光渐隐） ============ -->
   <div class="welcome" id="welcome">
     <canvas id="welcome-canvas"></canvas>
-    <div class="welcome-content">
-      <div class="welcome-kicker">// SYSTEM ONLINE</div>
-      <h1 class="welcome-title glitch" data-text="赛博气象终端">赛博气象终端</h1>
-      <p class="welcome-sub">NEON WEATHER · 农历黄历 · 实时定位</p>
-      <button class="welcome-enter" id="welcome-enter">进入 / ENTER</button>
-      <div class="welcome-hint">点击任意位置亦可进入</div>
+    <div class="welcome-inner">
+      <div class="welcome-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="46" height="46"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
+      </div>
+      <p class="welcome-kicker">QÍNG LÌ · 晴历</p>
+      <h1 class="welcome-greeting">你好。</h1>
+      <p class="welcome-sub">正在为你准备所在地的天气与今日黄历</p>
+      <div class="welcome-dots" id="welcome-dots"><span></span><span></span><span></span></div>
+      <button class="welcome-enter" id="welcome-enter">进入</button>
+      <p class="welcome-hint">轻点任意处开始</p>
     </div>
   </div>
 
-  <!-- ============ 顶部栏 ============ -->
+  <!-- ============ 顶部导航（极简磨砂） ============ -->
   <header class="topbar">
+    <span class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
+      晴历
+    </span>
     <button class="menu-btn" id="menu-open" aria-label="打开日历与黄历">
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <rect x="3.5" y="4.5" width="17" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M3.5 9h17M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
     </button>
-    <span class="brand">◈ 赛博气象终端</span>
   </header>
 
   <!-- ============ 首页 ============ -->
@@ -53,7 +56,7 @@
     <section class="weather" id="weather" aria-label="实时天气">
       <div class="weather-top">
         <div class="weather-ico" id="w-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="52" height="52">
+          <svg viewBox="0 0 48 48" width="56" height="56">
             <circle cx="24" cy="24" r="9" fill="#ffd166" stroke="currentColor" stroke-width="3"/>
             <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
               <path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/>
@@ -94,12 +97,11 @@
         <span class="yi">宜 <em id="b-yi">—</em></span>
         <span class="ji">忌 <em id="b-ji">—</em></span>
       </div>
-      <button class="btn-detail" id="open-detail">查看完整日历与黄历 ›</button>
+      <button class="btn-detail" id="open-detail">查看完整日历与黄历</button>
     </section>
 
-    <!-- ============ 网址出售信息 ============ -->
     <footer class="sale-footer">
-      <div class="sale-line">◆ 本域名 / 整站 出售中 ◆</div>
+      <span class="sale-line">本域名 / 整站 出售中</span>
       <a class="sale-mail" href="mailto:2324143400@qq.com">联系出让 · 2324143400@qq.com</a>
     </footer>
   </main>
@@ -107,11 +109,14 @@
   <!-- ============ 遮罩（点空白关侧栏） ============ -->
   <div class="backdrop" id="backdrop"></div>
 
-  <!-- ============ 侧边栏 / 第二页 ============ -->
+  <!-- ============ 侧边栏 / 抽屉 / 底部 sheet ============ -->
   <aside class="sidebar" id="sidebar" aria-label="日历与黄历详情">
+    <div class="sheet-grab" aria-hidden="true"></div>
     <div class="sidebar-head">
       <span>日历 · 黄历</span>
-      <button class="close-btn" id="menu-close" aria-label="关闭">×</button>
+      <button class="close-btn" id="menu-close" aria-label="关闭">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
 
     <section class="card calendar-card" id="calendar">
@@ -121,7 +126,7 @@
         <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
       </div>
       <div class="cal-grid cal-compact" id="cal-grid"></div>
-      <p class="cal-hint" id="cal-hint">点击某天查看其农历与黄历</p>
+      <p class="cal-hint" id="cal-hint">点选某天查看其农历与黄历</p>
     </section>
 
     <section class="card almanac" id="almanac">
