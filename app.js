@@ -335,6 +335,9 @@ async function renderWeather(lat, lon, label) {
     applyTheme(info.icon, c.is_day);
     currentLat = lat; currentLon = lon; currentLabel = label;
     currentCity = label.split(" · ")[0];
+    try { localStorage.setItem("tiaqi_last_city", JSON.stringify({ lat, lon, label })); } catch (e) {}
+    const factEl = document.getElementById("wx-fact");
+    if (factEl) factEl.textContent = FACTS[info.icon] || FACTS.cloud;
     renderIndices(c);
     renderTrend(wj);
     updateCityActive();
@@ -547,6 +550,14 @@ async function detectLocation() {
 }
 
 async function initLocation() {
+  // 0) 优先恢复上次查看的城市（修复刷新后搜索结果不保留）
+  try {
+    const saved = JSON.parse(localStorage.getItem("tiaqi_last_city") || "null");
+    if (saved && saved.lat != null && saved.lon != null) {
+      await renderWeather(saved.lat, saved.lon, saved.label || "上次城市");
+      return;
+    }
+  } catch (e) {}
   const loc = await detectLocation();
   if (loc && loc.lat && loc.lon) {
     await renderWeather(loc.lat, loc.lon, loc.label || "当前位置");
@@ -570,12 +581,93 @@ document.getElementById("w-input").addEventListener("keydown", (e) => {
     if (v) loadWeather(v);
   }
 });
+// 网页搜：接入搜索引擎（Bing 搜索，免密钥）
+document.getElementById("w-web").addEventListener("click", () => {
+  const q = (currentLabel || currentCity || "北京") + " 天气";
+  window.open("https://www.bing.com/search?q=" + encodeURIComponent(q), "_blank", "noopener");
+});
 
 // 定时刷新（用已知坐标或城市）
 setInterval(() => {
   if (currentLat != null && currentLon != null) renderWeather(currentLat, currentLon, currentLabel);
   else loadWeather(currentCity);
 }, 10 * 60 * 1000);
+
+/* ============================================================
+   二十四节气（21 世纪寿星公式）+ 天气小百科
+   ============================================================ */
+const TERMS = [
+  { n: "小寒", m: 1,  c: 5.4055, d: "天渐寒，尚未大冷，隆冬将至。" },
+  { n: "大寒", m: 1,  c: 20.12,  d: "一年中最冷的时节，注意防寒保暖。" },
+  { n: "立春", m: 2,  c: 3.87,   d: "春季开始，万物复苏，大地回暖。" },
+  { n: "雨水", m: 2,  c: 18.73,  d: "降水渐增，冰雪融化，润物无声。" },
+  { n: "惊蛰", m: 3,  c: 5.63,   d: "春雷始鸣，惊醒蛰伏的昆虫。" },
+  { n: "春分", m: 3,  c: 20.646, d: "昼夜平分，莺飞草长，春意正浓。" },
+  { n: "清明", m: 4,  c: 4.81,   d: "气清景明，踏青祭祖，慎终追远。" },
+  { n: "谷雨", m: 4,  c: 20.1,   d: "雨生百谷，播种移苗的最佳时节。" },
+  { n: "立夏", m: 5,  c: 5.52,   d: "夏季开始，万物繁茂，绿意渐浓。" },
+  { n: "小满", m: 5,  c: 21.04,  d: "麦类等夏熟作物籽粒开始饱满。" },
+  { n: "芒种", m: 6,  c: 5.678,  d: "有芒之谷可种，农忙时节到来。" },
+  { n: "夏至", m: 6,  c: 21.37,  d: "白昼最长，盛夏将临，注意防暑。" },
+  { n: "小暑", m: 7,  c: 7.108,  d: "暑气上升，尚未最热，茉莉飘香。" },
+  { n: "大暑", m: 7,  c: 22.83,  d: "一年中最热，防暑降温是关键。" },
+  { n: "立秋", m: 8,  c: 7.5,    d: "秋季开始，暑去凉来，一叶知秋。" },
+  { n: "处暑", m: 8,  c: 23.13,  d: "暑气至此而止，秋意渐显。" },
+  { n: "白露", m: 9,  c: 7.646,  d: "天气转凉，清晨草木凝露。" },
+  { n: "秋分", m: 9,  c: 23.042, d: "昼夜再次平分，秋高气爽。" },
+  { n: "寒露", m: 10, c: 8.318,  d: "露气寒冷，深秋将至，添衣保暖。" },
+  { n: "霜降", m: 10, c: 23.438, d: "初霜出现，昼夜温差加大。" },
+  { n: "立冬", m: 11, c: 7.438,  d: "冬季开始，万物收藏。" },
+  { n: "小雪", m: 11, c: 22.36,  d: "初雪将至，北方渐寒。" },
+  { n: "大雪", m: 12, c: 7.18,   d: "降雪增多，瑞雪兆丰年。" },
+  { n: "冬至", m: 12, c: 21.94,  d: "白昼最短，数九寒天从此开始。" }
+];
+// 21 世纪通用：D = [Y×0.2422 + C] − L，L = (Y−1)/4
+function termDate(year, t) {
+  const y = year % 100;
+  return Math.floor(y * 0.2422 + t.c) - Math.floor((y - 1) / 4);
+}
+const FACTS = {
+  sun: "晴天地面散热快，昼夜温差往往更大，适合晾晒与户外活动。",
+  suncloud: "云朵是天空的调温器：白天遮阳降温，夜间保温防冻。",
+  cloud: "云由无数小水滴或冰晶组成，云越厚，颜色越显灰白。",
+  fog: "雾其实是贴近地面的云——湿度接近饱和时水汽凝结而成。",
+  rain: "雨滴由云中水汽凝结增长而成，夏天的雷阵雨多在午后出现。",
+  snow: "雪花多为六角形，形状随温度与湿度千变万化。",
+  thunder: "雷电是云内电荷的剧烈放电，雷声在空气中约每秒传播340米。"
+};
+function renderTerms() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const list = [];
+  for (const yy of [y - 1, y, y + 1])
+    for (const t of TERMS) list.push({ ...t, year: yy, day: termDate(yy, t) });
+  let cur = null, next = null;
+  for (const t of list) {
+    const d = new Date(t.year, t.m - 1, t.day);
+    if (d <= now) cur = t;
+    else { next = t; break; }
+  }
+  if (!cur) return;
+  document.getElementById("term-name").textContent = `${cur.n} · ${cur.m}月${cur.day}日`;
+  document.getElementById("term-desc").textContent = cur.d;
+  if (next) {
+    const diff = Math.ceil((new Date(next.year, next.m - 1, next.day) - now) / 86400000);
+    document.getElementById("term-next").textContent =
+      `下一节气：${next.n}（${next.m}月${next.day}日 · 还有 ${diff} 天）`;
+  }
+  const grid = document.getElementById("term-grid");
+  if (grid) {
+    grid.innerHTML = TERMS.map((t) => {
+      const dd = termDate(y, t);
+      const isCur = cur.year === y && cur.n === t.n;
+      const isNext = next && next.year === y && next.n === t.n;
+      return `<div class="term-cell${isCur ? " cur" : ""}${isNext ? " nxt" : ""}">
+        <div class="n">${t.n}</div><div class="d">${t.m}/${dd}</div></div>`;
+    }).join("");
+  }
+}
+renderTerms();
 
 /* ============================================================
    背景：夜间星点（柔和）
