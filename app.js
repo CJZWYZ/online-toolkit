@@ -1,6 +1,7 @@
 /* ============================================================
-   日历 · 今日天气 · 黄历 - 纯前端逻辑
-   自动获取当天日期与实时天气；侧边栏日历可点击，联动农历与黄历
+   今日 · 天气 · 黄历 - 纯前端逻辑
+   首页：自动显示当天日期 + 实时天气 + 农历黄历简略信息
+   侧边栏（第二页）：点按钮滑出，显示完整日历 + 详细农历黄历
    ============================================================ */
 
 /* ---------- 自动显示当天日期 ---------- */
@@ -120,35 +121,54 @@ function shaFang(zhiIdx) {
   return "";
 }
 
-function renderAlmanac(date) {
+/* 根据日期计算黄历全部字段（供简略卡 / 详细卡共用） */
+function computeAlmanac(date) {
   const l = solar2lunar(date.getFullYear(), date.getMonth() + 1, date.getDate());
   const yIdx = (l.year - 4) % 10;
   const zIdx = (l.year - 4) % 12;
   const yearGZ = GAN[yIdx] + ZHI[zIdx];
-
   const monthStr = (l.isLeap ? "闰" : "") + LM[l.month - 1] + "月";
   const dayStr = LD[l.day - 1];
   const gd = ganzhiDay(date);
   const dayGZ = GAN[gd.gan] + ZHI[gd.zhi];
-
-  // 月干支：正月天干由年干五虎遁推出
   const firstMonthGan = (yIdx * 2 + 2) % 10;
   const monthGan = (firstMonthGan + (l.month - 1)) % 10;
   const monthZhi = (l.month + 1) % 12;
   const monthGZ = GAN[monthGan] + ZHI[monthZhi];
-
   const jc = JIANCHU[(l.day - 1) % 12];
   const yiji = YI_JI[jc];
   const chongZhi = (gd.zhi + 6) % 12;
   const chongAnimal = ZODIAC[chongZhi];
+  return {
+    lunarText: `农历 ${yearGZ}年 ${monthStr}${dayStr}`,
+    ganzhiText: `${yearGZ}年 ${monthGZ}月 ${dayGZ}日`,
+    zodiac: `生肖 ${ZODIAC[zIdx]}`,
+    jianchu: `${jc}日`,
+    yi: yiji.yi,
+    ji: yiji.ji,
+    chong: `冲${chongAnimal}(${ZHI[chongZhi]}) · 煞${shaFang(gd.zhi)}`
+  };
+}
 
-  document.getElementById("al-lunar").textContent = `农历 ${yearGZ}年 ${monthStr}${dayStr}`;
-  document.getElementById("al-ganzhi").textContent = `${yearGZ}年 ${monthGZ}月 ${dayGZ}日`;
-  document.getElementById("al-zodiac").textContent = `生肖 ${ZODIAC[zIdx]}`;
-  document.getElementById("al-jianchu").textContent = `${jc}日`;
-  document.getElementById("al-yi").textContent = yiji.yi;
-  document.getElementById("al-ji").textContent = yiji.ji;
-  document.getElementById("al-chong").textContent = `冲${chongAnimal}(${ZHI[chongZhi]}) · 煞${shaFang(gd.zhi)}`;
+/* 首页：农历黄历简略信息 */
+function renderBrief(date) {
+  const a = computeAlmanac(date);
+  document.getElementById("b-lunar").textContent = a.lunarText;
+  document.getElementById("b-ganzhi").textContent = a.ganzhiText;
+  document.getElementById("b-yi").textContent = a.yi;
+  document.getElementById("b-ji").textContent = a.ji;
+}
+
+/* 侧边栏：详细农历黄历 */
+function renderAlmanac(date) {
+  const a = computeAlmanac(date);
+  document.getElementById("al-lunar").textContent = a.lunarText;
+  document.getElementById("al-ganzhi").textContent = a.ganzhiText;
+  document.getElementById("al-zodiac").textContent = a.zodiac;
+  document.getElementById("al-jianchu").textContent = a.jianchu;
+  document.getElementById("al-yi").textContent = a.yi;
+  document.getElementById("al-ji").textContent = a.ji;
+  document.getElementById("al-chong").textContent = a.chong;
 }
 
 /* ============================================================
@@ -210,6 +230,19 @@ document.getElementById("cal-grid").addEventListener("click", (e) => {
 initCal();
 renderCalendar();
 renderAlmanac(new Date());
+renderBrief(new Date());
+
+/* ============================================================
+   侧边栏开关（默认收起，点按钮打开 / 第二页）
+   ============================================================ */
+function openSidebar() { document.body.classList.add("sidebar-open"); }
+function closeSidebar() { document.body.classList.remove("sidebar-open"); }
+
+document.getElementById("menu-open").addEventListener("click", openSidebar);
+document.getElementById("open-detail").addEventListener("click", openSidebar);
+document.getElementById("menu-close").addEventListener("click", closeSidebar);
+document.getElementById("backdrop").addEventListener("click", closeSidebar);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSidebar(); });
 
 /* ============================================================
    实时天气（Open-Meteo，免费免密钥，支持浏览器跨域）
@@ -267,6 +300,38 @@ function applyTheme(icon, isDay) {
 
 let currentCity = "北京";
 
+/* 地区风景背景：根据当前城市获取代表性实景图（维基百科，免费、支持跨域） */
+const bgPhoto = document.getElementById("bg-photo");
+const bgCaption = document.getElementById("bg-caption");
+let bgCityLoaded = "";
+
+async function loadCityImage(city) {
+  if (!city || city === bgCityLoaded) return;
+  const urls = [
+    `https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`,
+    `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`
+  ];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { headers: { accept: "application/json" } });
+      if (!r.ok) continue;
+      const d = await r.json();
+      const src = (d.thumbnail ? d.thumbnail.source : "") || (d.originalimage ? d.originalimage.source : "");
+      if (!src) continue;
+      const big = src.replace(/\/[\d]+px-/, "/1280px-");
+      bgPhoto.style.backgroundImage = `url("${big}")`;
+      bgPhoto.classList.add("show");
+      bgCaption.textContent = `${city} · 城市实景`;
+      bgCaption.classList.add("show");
+      bgCityLoaded = city;
+      return;
+    } catch (e) { /* 忽略，尝试下一个来源 */ }
+  }
+  // 未取到图片则保持天气渐变背景（优雅降级）
+  bgPhoto.classList.remove("show");
+  bgCaption.classList.remove("show");
+}
+
 function setWeatherError(msg) {
   document.getElementById("w-desc").textContent = msg;
   document.getElementById("w-temp").textContent = "--";
@@ -292,6 +357,7 @@ async function loadWeather(city) {
     document.getElementById("weather").classList.remove("error");
     currentCity = loc.name;
     applyTheme(info.icon, c.is_day);
+    loadCityImage(currentCity);
   } catch (e) {
     setWeatherError("天气获取失败，请稍后重试");
   }
