@@ -899,6 +899,9 @@ body.sheet-open .backdrop { opacity: 1; pointer-events: auto; }
 }
 .dm-item .dm-u { font-weight: 700; }
 
+/* 排班事项在背景氛围层用「节气绿」区分于留言，形成统一内容源下的两种来源 */
+.amb-item.plan { color: var(--term); }
+
 /* —— 背景大字氛围层：极低透明度的大号字，浮动在内容与天光之间 —— */
 .amb-item {
   position: absolute; max-width: 60vw;
@@ -979,6 +982,59 @@ body.sheet-open .backdrop { opacity: 1; pointer-events: auto; }
   .msg-form { align-items: center; }
   .msg-fields { flex-direction: row; }
   .msg-fields .msg-in:first-child { flex: 0 0 32%; }
+}
+
+/* —— 排班板卡片：复用留言板输入/按钮视觉语言，保持整体统一 —— */
+.plan-card { display: flex; flex-direction: column; gap: 12px; }
+.plan-form { display: flex; gap: 10px; align-items: stretch; }
+.plan-fields { flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.plan-in {
+  width: 100%; min-width: 0; font-family: inherit; font-size: var(--t-body); color: var(--ink);
+  background: rgba(127, 127, 127, .10); border: 1px solid var(--hairline);
+  border-radius: var(--r-sm); padding: 10px 12px; outline: none;
+  transition: border-color 160ms var(--e-out), background 160ms var(--e-out);
+}
+.plan-in::placeholder { color: var(--ink-3); }
+.plan-in:focus { border-color: var(--brand-ring); background: rgba(127, 127, 127, .14); }
+.plan-when { color: var(--term); font-variant-numeric: tabular-nums; }
+.plan-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 200px; overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.plan-item {
+  display: flex; align-items: center; gap: 10px; font-size: var(--t-sm); line-height: 1.4;
+  padding: 8px 10px; border-radius: var(--r-sm); background: rgba(127, 127, 127, .06);
+  animation: msg-in 340ms var(--e-pop) both;
+}
+.plan-toggle {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  font-family: inherit; font-size: var(--t-sm); line-height: 1; color: var(--term);
+  background: transparent; border: 1.5px solid var(--hairline);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 160ms var(--e-out), color 160ms var(--e-out);
+}
+.plan-toggle:active { transform: scale(var(--s-press)); }
+.plan-item.done .plan-toggle { background: var(--term); color: #fff; border-color: var(--term); }
+.plan-tx { flex: 1 1 auto; min-width: 0; display: flex; gap: 8px; align-items: baseline; }
+.plan-when { flex: 0 0 auto; font-variant-numeric: tabular-nums; color: var(--term); font-weight: 600; }
+.plan-t { flex: 1 1 auto; min-width: 0; color: var(--ink-2); word-break: break-word; }
+.plan-item.done .plan-t { color: var(--ink-3); text-decoration: line-through; }
+.plan-del {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  font-family: inherit; font-size: 15px; line-height: 1; color: var(--holiday-ink);
+  background: transparent; border: none;
+  transition: background 160ms var(--e-out), color 160ms var(--e-out);
+}
+.plan-del:active { transform: scale(var(--s-press)); }
+.plan-del:hover { background: rgba(127, 127, 127, .12); }
+.plan-empty { font-size: var(--t-sm); color: var(--ink-3); padding: 6px 2px; }
+
+@media (min-width: 560px) {
+  .plan-form { align-items: center; }
+  .plan-fields { flex-direction: row; }
+  .plan-when { flex: 0 0 116px; }
 }
 
 /* ============================================================
