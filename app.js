@@ -171,7 +171,6 @@
     }
     const terms = cd.getSolarTermsInRange(now, now);
     if (terms.length) tags.push(["term", terms[0].name]);
-    tags.push(["zodiac", L.zodiac + "年"]);
     $("cal-tags").innerHTML = tags.map(([c, t]) => `<span class="cal-tag ${c}">${t}</span>`).join("");
   }
 
@@ -245,8 +244,21 @@
       return (j && j.events) || [];
     };
     let evs = [];
-    /* 国内可达源优先 */
-    try { evs = extractEvents(await fetchJSON("https://api.vvhan.com/api/history", 5000)); } catch (e) {}
+    /* 国内可达源优先：60s API（实测稳定）→ 韩小韩 → oioweb → Wikipedia */
+    try {
+      const j = await fetchJSON("https://60s.viki.moe/v2/today_in_history", 5000);
+      const items = j && j.data && j.data.items;
+      if (Array.isArray(items) && items.length) {
+        evs = items.map((it) => ({
+          year: /^\d{3,4}$/.test(String(it.year)) ? String(it.year) : "",
+          text: String(it.description || it.title || "").replace(/\[\d+\]/g, ""),
+          title: String(it.title || ""),
+          link: it.link || "",
+          pages: it.title ? [{ title: String(it.title) }] : []
+        }));
+      }
+    } catch (e) {}
+    if (!evs.length) { try { evs = extractEvents(await fetchJSON("https://api.vvhan.com/api/history", 5000)); } catch (e) {} }
     if (!evs.length) { try { evs = extractEvents(await fetchJSON("https://api.oioweb.cn/api/common/HistoryToday", 5000)); } catch (e) {} }
     if (!evs.length) { try { evs = await tryLoad("zh"); } catch (e) {} }
     if (!evs.length) { try { evs = await tryLoad("en"); } catch (e) {} }
@@ -273,7 +285,7 @@
     if (page && page.thumbnail && page.thumbnail.source) { img.src = page.thumbnail.source; img.hidden = false; }
     else img.hidden = true;
     const link = $("wiki-link");
-    const href = page && page.content_urls && page.content_urls.desktop && page.content_urls.desktop.page;
+    const href = (page && page.content_urls && page.content_urls.desktop && page.content_urls.desktop.page) || ev.link || "";
     if (href) { link.href = href; link.hidden = false; } else link.hidden = true;
     openSheet("wiki");
   }
@@ -325,9 +337,6 @@
         ${it.snippet ? `<span class="si-snippet">${esc(it.snippet)}</span>` : ""}
       </div>`;
     }).join("");
-    box.querySelectorAll(".search-item").forEach((el) => {
-      el.addEventListener("click", () => onSearchSelect(lastResults[+el.dataset.i]));
-    });
   }
   function onSearchSelect(it) {
     if (!it) return;
@@ -447,7 +456,12 @@
     const input = $("search-input");
     input.addEventListener("focus", () => document.getElementById("search").classList.add("open"));
     input.addEventListener("input", () => renderSearchResults(input.value.trim()));
-    input.addEventListener("blur", () => setTimeout(closeSearch, 160));
+    /* pointerdown 在 blur 之前触发，避免 iOS 上点击结果被 blur→closeSearch 吞掉 */
+    input.addEventListener("blur", () => setTimeout(closeSearch, 300));
+    $("search-results").addEventListener("pointerdown", (e) => {
+      const el = e.target.closest(".search-item");
+      if (el) { e.preventDefault(); onSearchSelect(lastResults[+el.dataset.i]); }
+    });
 
     $("cal-card").addEventListener("click", () => { highlightIso = null; renderCalendarSheet(new Date()); openSheet("cal"); });
     $("wiki-card").addEventListener("click", () => { if (wikiCurrent) openWikiDrawer(wikiCurrent); });
