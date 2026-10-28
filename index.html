@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>天气 · TIAQI — 实时天气 · 空气质量 · 二十四节气</title>
   <meta name="description" content="TIAQI 天气：自动识别所在城市，显示实时天气、空气质量、生活指数、24小时温度趋势与二十四节气科普。极简冷调设计。" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='15' fill='none' stroke='%230071e3' stroke-width='4'/><path d='M24 12a12 12 0 0 1 0 24z' fill='%230071e3'/></svg>" />
 </head>
 <body data-time="day">
@@ -118,9 +118,13 @@
       <span id="wx-fact">—</span>
     </section>
 
-    <section class="card mini-terms" aria-label="二十四节气">
-      <div class="mini-terms-title">二十四节气</div>
-      <div class="term-grid" id="term-grid"></div>
+    <section class="card mini-terms" aria-label="当前节气">
+      <div class="term-now">
+        <div class="term-name" id="h-term-name">—</div>
+        <div class="term-desc" id="h-term-desc">—</div>
+        <div class="term-next" id="h-term-next">—</div>
+      </div>
+      <button class="btn-detail" id="open-terms">查看全部二十四节气</button>
     </section>
 
     <section class="card brief" id="brief" aria-label="今日农历黄历简略">
@@ -169,10 +173,8 @@
       </button>
     </div>
 
-    <section class="card term-side" aria-label="当前节气">
-      <div class="term-name" id="term-name">—</div>
-      <div class="term-desc" id="term-desc">—</div>
-      <div class="term-next" id="term-next">—</div>
+    <section class="card term-side" aria-label="二十四节气">
+      <div class="mini-terms-title">二十四节气</div>
       <div class="term-big" id="term-big"></div>
     </section>
 
@@ -208,6 +210,6 @@
     </section>
   </aside>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
