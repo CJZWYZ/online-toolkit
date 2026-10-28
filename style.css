@@ -6,6 +6,7 @@
    ============================================================ */
 
 /* ===== 设计令牌 ===== */
+*, *::before, *::after { box-sizing: border-box; }  /* 宽度含 padding/边框，防止 fixed 元素溢出屏幕 */
 :root {
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);      /* 抽屉/面板/对话框进入 */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);    /* 悬停/微交互/分段切换 */
@@ -297,6 +298,40 @@ body.sheet-open .backdrop { opacity: 1; pointer-events: auto; }
 @media (max-width: 380px) {
   .home { padding: 22px 12px 56px; }
   .card { padding: 18px; }
+}
+
+/* ===== 桌面端适配：抽屉改为居中模态，限制宽度，与主内容列协调 ===== */
+@media (min-width: 768px) {
+  .home { max-width: 720px; padding-top: 52px; }
+  .topbar { max-width: 720px; margin: 16px auto 0; }
+  .welcome-panel { max-width: 440px; }
+
+  /* 抽屉：从底部 sheet 改为居中模态弹窗（解决全宽贴底、尺寸错位、关闭按钮出屏） */
+  .sheet {
+    left: 50%; right: auto; top: 50%; bottom: auto;
+    width: min(660px, 92vw);
+    max-height: 86vh;
+    padding: 10px 22px calc(26px + env(safe-area-inset-bottom));
+    border-radius: 26px;
+    transform: translate(-50%, -46%) scale(0.96);
+    opacity: 0;
+    box-shadow: 0 24px 70px rgba(15, 25, 55, 0.32);
+    transition: transform .4s var(--ease-spring), opacity .3s ease;
+  }
+  .sheet.open { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  .sheet-grab { display: none; }                 /* 桌面端无需拖拽手柄 */
+  .sheet-head {
+    position: sticky; top: -10px; z-index: 5;   /* 关闭按钮固定可见，长内容滚动也不丢失 */
+    margin: -10px -22px 14px; padding: 16px 22px 12px;
+    background: rgba(250, 250, 252, 0.94);
+    -webkit-backdrop-filter: blur(10px) saturate(1.8);
+    backdrop-filter: blur(10px) saturate(1.8);
+    border-radius: 26px 26px 0 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    .sheet-head { background: rgba(28, 30, 38, 0.95); }
+  }
+  .close-btn { flex: 0 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
