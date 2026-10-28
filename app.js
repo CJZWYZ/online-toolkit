@@ -992,14 +992,16 @@
     spawnDanmaku(msgs[dmIdx++ % msgs.length]);
   }
 
-  /* —— 背景大字：随机锚点浮现，6.4s 后淡出，同屏 ≤2 —— */
-  function spawnAmbient(m) {
+  /* —— 背景大字：留言与排班共用同一氛围层。随机锚点浮现，6.4s 后淡出，同屏 ≤2 —— */
+  function spawnAmbient(m) { spawnAmbientText(m.t, msgTint(m.u)); }
+  function spawnAmbientText(str, tint) {
     const layer = $("msgfx-amb");
     if (!layer || MQ.reduce.matches || document.hidden) return;
     if (layer.querySelectorAll(".amb-item").length >= 2) return;
+    if (!str) return;
     const el = document.createElement("span");
-    el.className = "amb-item " + msgTint(m.u);
-    el.textContent = m.t;
+    el.className = "amb-item " + (tint || "c1");
+    el.textContent = str;
     el.style.left = (3 + Math.random() * 26).toFixed(1) + "%";
     el.style.top = (10 + Math.random() * 48).toFixed(1) + "%";
     layer.appendChild(el);
@@ -1009,9 +1011,18 @@
       setTimeout(() => el.remove(), 1700);
     }, 6400);
   }
+  /* 统一内容池：最近留言 + 未完成的排班，二者轮流浮现于背景 */
+  function ambientPool() {
+    const pool = [];
+    msgs.slice(-20).forEach((m) => pool.push({ str: m.t, tint: msgTint(m.u) }));
+    plans.filter((p) => !p.done && p.t).forEach((p) => pool.push({ str: planDisplay(p), tint: "plan" }));
+    return pool;
+  }
   function tickAmbient() {
-    if (!msgs.length) return;
-    spawnAmbient(msgs[ambIdx++ % msgs.length]);
+    const pool = ambientPool();
+    if (!pool.length) return;
+    const it = pool[ambIdx++ % pool.length];
+    spawnAmbientText(it.str, it.tint);
   }
 
   function startMsgFx() {
@@ -1068,6 +1079,95 @@
       else if (document.body.dataset.ready === "1") startMsgFx();
     });
     if ($("msg-tip")) $("msg-tip").textContent = MSG_ENDPOINT ? "留言已联网共享" : "留言保存在本机浏览器";
+  }
+
+  /* ============================================================
+     10.5 · 排班板（localStorage 本机保存，事项共用背景氛围层）
+     ============================================================ */
+  const PLAN_KEY = "tiaqi_plans", PLAN_MAX = 60;
+  let plans = [];
+
+  const readPlans = () => { try { return JSON.parse(localStorage.getItem(PLAN_KEY) || "[]"); } catch (e) { return []; } };
+  const writePlans = (arr) => { try { localStorage.setItem(PLAN_KEY, JSON.stringify(arr)); } catch (e) {} };
+
+  /* 背景大字里展示的内容：有时间就带时间前缀 */
+  function planDisplay(p) {
+    return (p.when ? p.when + " " : "") + p.t;
+  }
+  function renderPlans() {
+    const list = $("plan-list"), cnt = $("plan-count");
+    if (cnt) cnt.textContent = plans.length ? `共 ${plans.length} 项` : "还没有安排";
+    if (!list) return;
+    list.textContent = "";
+    if (!plans.length) {
+      const li = document.createElement("li");
+      li.className = "plan-empty";
+      li.textContent = "添加第一项安排，它会浮现在天光背景里";
+      list.appendChild(li);
+      return;
+    }
+    /* 按时间排序：有时间的在前，无时间的置后 */
+    const sorted = plans.slice().sort((a, b) => (a.when || "99:99").localeCompare(b.when || "99:99"));
+    sorted.forEach((p) => {
+      const li = document.createElement("li");
+      li.className = "plan-item" + (p.done ? " done" : "");
+      const tm = document.createElement("button");       /* 点击标记完成/恢复 */
+      tm.type = "button"; tm.className = "plan-toggle"; tm.setAttribute("aria-label", p.done ? "标记为未完成" : "标记为完成");
+      tm.textContent = p.done ? "✓" : "";
+      const tx = document.createElement("span");
+      tx.className = "plan-tx";
+      const w = document.createElement("span"); w.className = "plan-when"; w.textContent = p.when || "";
+      const t = document.createElement("span"); t.className = "plan-t"; t.textContent = p.t;
+      tx.append(w, t);
+      const del = document.createElement("button");
+      del.type = "button"; del.className = "plan-del"; del.setAttribute("aria-label", "删除"); del.textContent = "×";
+      li.append(tm, tx, del);
+      tm.addEventListener("click", () => togglePlan(p.ts));
+      del.addEventListener("click", () => delPlan(p.ts));
+      list.appendChild(li);
+    });
+  }
+  function addPlan(rawWhen, rawT) {
+    const t = String(rawT || "").trim().slice(0, 40);
+    if (!t) { toast("排班事项不能为空"); return false; }
+    const p = { when: String(rawWhen || "").trim(), t, ts: Date.now(), done: false };
+    plans.push(p);
+    if (plans.length > PLAN_MAX) plans = plans.slice(-PLAN_MAX);
+    writePlans(plans);
+    renderPlans();
+    if (!p.done) spawnAmbientText(planDisplay(p), "plan");   /* 即时浮现背景，与留言同一氛围层 */
+    return true;
+  }
+  function togglePlan(ts) {
+    const p = plans.find((x) => x.ts === ts);
+    if (!p) return;
+    p.done = !p.done;
+    writePlans(plans); renderPlans();
+  }
+  function delPlan(ts) {
+    plans = plans.filter((x) => x.ts !== ts);
+    writePlans(plans); renderPlans();
+  }
+  function clearPlans() {
+    if (!plans.length) { toast("还没有安排可清空"); return; }
+    if (!confirm(`确定清空全部 ${plans.length} 项排班？此操作不可撤销。`)) return;
+    plans = []; writePlans(plans); renderPlans(); toast("排班已清空");
+  }
+  function initPlan() {
+    plans = readPlans()
+      .filter((p) => p && p.t)
+      .map((p) => ({ when: String(p.when || ""), t: String(p.t).slice(0, 40), ts: +p.ts || Date.now(), done: !!p.done }))
+      .sort((a, b) => (a.when || "99:99").localeCompare(b.when || "99:99"));
+    renderPlans();
+    const form = $("plan-form");
+    if (form) form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const when = ($("plan-when") || {}).value || "";
+      const text = ($("plan-text") || {}).value || "";
+      if (addPlan(when, text)) { if ($("plan-text")) $("plan-text").value = ""; announce("已添加排班"); }
+    });
+    const clr = $("plan-clear");
+    if (clr) clr.addEventListener("click", clearPlans);
   }
 
   /* ============================================================
@@ -1247,6 +1347,7 @@
     showSkeleton($("wiki-title"), 1);
     showSkeleton($("wiki-text"), 4);   /* 4 行 ≈ 真实 4 行文本高度 */
     initMsg();
+    initPlan();
     updateVisit();
     loadWiki();
     loadNews();
