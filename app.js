@@ -1,279 +1,189 @@
 /* ============================================================
-   工具箱 - 纯前端交互逻辑
+   日历 · 今日天气 · 黄历 - 纯前端逻辑
+   自动获取当天日期与实时天气；侧边栏日历可点击，联动农历与黄历
    ============================================================ */
 
-/* ---------- Tab 切换 ---------- */
-document.querySelectorAll(".tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
-    document.querySelectorAll(".tab").forEach((t) => {
-      const active = t === tab;
-      t.classList.toggle("active", active);
-      t.setAttribute("aria-selected", active);
-    });
-    document.querySelectorAll(".panel").forEach((p) => {
-      const show = p.id === target;
-      p.classList.toggle("active", show);
-      p.hidden = !show;
-    });
-  });
-});
-
-/* ---------- 复制工具 ---------- */
-function copyText(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    if (btn) {
-      const old = btn.textContent;
-      btn.textContent = "已复制";
-      btn.classList.add("copied");
-      setTimeout(() => {
-        btn.textContent = old;
-        btn.classList.remove("copied");
-      }, 1200);
-    }
-  });
+/* ---------- 自动显示当天日期 ---------- */
+function renderDate() {
+  const now = new Date();
+  const wd = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  document.getElementById("big-date").textContent = `${now.getMonth() + 1}月${now.getDate()}日`;
+  document.getElementById("date-sub").textContent = `${now.getFullYear()}年 · ${wd[now.getDay()]}`;
 }
-document.querySelectorAll(".btn-copy[data-copy]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const el = document.getElementById(btn.dataset.copy);
-    copyText(el.textContent, btn);
-  });
-});
+renderDate();
 
 /* ============================================================
-   1. 密码生成器（默认掩码，可显示/隐藏，不自动生成）
+   农历 / 黄历换算（纯算法，免依赖）
    ============================================================ */
-const LOWER = "abcdefghijklmnopqrstuvwxyz";
-const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const NUM = "0123456789";
-const SYM = "!@#$%^&*()-_=+[]{};:,.<>?";
+const LUNAR_INFO = [
+  0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+  0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+  0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+  0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+  0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+  0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+  0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+  0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+  0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+  0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,
+  0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+  0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+  0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+  0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+  0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,
+  0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06b20,0x1a6c4,0x0aae0,
+  0x0a2e0,0x0d2d4,0x0d4d0,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,0x095a0,0x049b0,
+  0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,0x04af5,0x04970,
+  0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,0x0c960,0x0d954,
+  0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,0x0a950,0x0b4a0,
+  0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,0x07954,0x06aa0
+];
 
-const pwOutput = document.getElementById("pw-output");
-const pwLen = document.getElementById("pw-len");
-const pwLenVal = document.getElementById("pw-len-val");
-const pwStrength = document.getElementById("pw-strength");
-const pwToggle = document.getElementById("pw-toggle");
+const GAN = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const ZHI = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const ZODIAC = ["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
+const LM = ["正","二","三","四","五","六","七","八","九","十","冬","腊"];
+const LD = ["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十",
+  "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
+  "廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
+const JIANCHU = ["建","除","满","平","定","执","破","危","成","收","开","闭"];
 
-let currentPwd = "";
-let revealed = false;
-
-pwLen.addEventListener("input", () => (pwLenVal.textContent = pwLen.value));
-
-function maskStr(s) {
-  return "•".repeat(Math.max(8, Math.min(s.length, 48)));
-}
-function renderPw() {
-  pwOutput.value = currentPwd ? (revealed ? currentPwd : maskStr(currentPwd)) : "";
-}
-function rateStrength(pwd, pool) {
-  let score = pwd.length >= 12 ? 1 : 0;
-  if (pwd.length >= 16) score++;
-  if (pool.length >= 26 + 10) score++;
-  if (pool.length >= 26 + 10 + 10) score++;
-  const map = [
-    ["弱", "var(--danger)"],
-    ["中", "var(--warn)"],
-    ["强", "var(--ok)"],
-    ["极强", "var(--ok)"],
-  ];
-  const [label, color] = map[Math.min(score, 3)];
-  pwStrength.textContent = `强度：${label}`;
-  pwStrength.style.color = color;
-}
-
-function generatePassword() {
-  const len = +pwLen.value;
-  let pool = "";
-  if (document.getElementById("opt-lower").checked) pool += LOWER;
-  if (document.getElementById("opt-upper").checked) pool += UPPER;
-  if (document.getElementById("opt-num").checked) pool += NUM;
-  if (document.getElementById("opt-sym").checked) pool += SYM;
-  if (!pool) {
-    currentPwd = "";
-    renderPw();
-    pwStrength.textContent = "强度：请至少选择一种字符";
-    pwStrength.style.color = "var(--danger)";
-    return;
-  }
-  let pwd = "";
-  const arr = new Uint32Array(len);
-  crypto.getRandomValues(arr);
-  for (let i = 0; i < len; i++) pwd += pool[arr[i] % pool.length];
-  currentPwd = pwd;
-  renderPw();
-  rateStrength(pwd, pool);
-}
-
-document.getElementById("pw-gen").addEventListener("click", generatePassword);
-document.getElementById("pw-copy").addEventListener("click", (e) =>
-  copyText(currentPwd, e.currentTarget)
-);
-pwToggle.addEventListener("click", () => {
-  if (!currentPwd) return;
-  revealed = !revealed;
-  pwToggle.textContent = revealed ? "隐藏" : "显示";
-  renderPw();
-});
-
-/* ============================================================
-   2. 单位换算
-   ============================================================ */
-const UNITS = {
-  length: {
-    name: "长度",
-    base: "m",
-    factors: { mm: 0.001, cm: 0.01, m: 1, km: 1000, in: 0.0254, ft: 0.3048, mi: 1609.34 },
-  },
-  weight: {
-    name: "重量",
-    base: "kg",
-    factors: { mg: 0.000001, g: 0.001, kg: 1, t: 1000, lb: 0.453592, oz: 0.0283495 },
-  },
-  temp: { name: "温度", special: true },
+/* 宜 / 忌（按建除十二神） */
+const YI_JI = {
+  "建": { yi: "出行、祈福、订盟、纳采、动土", ji: "开仓、掘井" },
+  "除": { yi: "解除、沐浴、疗病、扫舍", ji: "求官、出行、移徙" },
+  "满": { yi: "祭祀、祈福、开市、纳财", ji: "动土、安葬、破土" },
+  "平": { yi: "修造、嫁娶、移徙、安床", ji: "栽种、词讼" },
+  "定": { yi: "嫁娶、纳采、出行、会友", ji: "词讼、出行、医疗" },
+  "执": { yi: "捕捉、修造、纳财、祭祀", ji: "开市、移徙、入宅" },
+  "破": { yi: "破屋、坏垣、求医", ji: "诸事不宜、嫁娶、出行" },
+  "危": { yi: "安床、祭祀、祈福", ji: "出行、登高、动工" },
+  "成": { yi: "结婚、开市、入学、交易", ji: "词讼、诉讼" },
+  "收": { yi: "嫁娶、纳财、入仓、捕捉", ji: "放债、出行、安葬" },
+  "开": { yi: "开业、求财、祭祀、动土", ji: "安葬、出行" },
+  "闭": { yi: "筑堤、埋穴、补垣、纳畜", ji: "开市、出行、疗病" }
 };
 
-const convType = document.getElementById("conv-type");
-const convFrom = document.getElementById("conv-from");
-const convFromUnit = document.getElementById("conv-from-unit");
-const convTo = document.getElementById("conv-to");
-const convToUnit = document.getElementById("conv-to-unit");
+function lYearDays(y) {
+  let sum = 348;
+  for (let i = 0x8000; i > 0x8; i >>= 1) sum += (LUNAR_INFO[y - 1900] & i) ? 1 : 0;
+  return sum + leapDays(y);
+}
+function leapDays(y) {
+  if (leapMonth(y)) return ((LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29);
+  return 0;
+}
+function leapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
+function monthDays(y, m) { return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
 
-function fillUnits() {
-  const t = convType.value;
-  if (t === "temp") {
-    const arr = ["°C", "°F", "K"];
-    [convFromUnit, convToUnit].forEach((sel) => {
-      sel.innerHTML = arr.map((u) => `<option>${u}</option>`).join("");
-    });
-    convToUnit.selectedIndex = 1;
-  } else {
-    const keys = Object.keys(UNITS[t].factors);
-    [convFromUnit, convToUnit].forEach((sel, i) => {
-      sel.innerHTML = keys.map((k) => `<option value="${k}">${k}</option>`).join("");
-      sel.selectedIndex = i === 1 ? 1 : 0;
-    });
+function solar2lunar(y, m, d) {
+  const baseDate = new Date(1900, 0, 31);
+  const objDate = new Date(y, m - 1, d);
+  let offset = Math.round((objDate - baseDate) / 86400000);
+  let temp = 0, lunarYear = 1900;
+  for (lunarYear = 1900; lunarYear < 2101 && offset > 0; lunarYear++) {
+    temp = lYearDays(lunarYear);
+    offset -= temp;
   }
-  convert();
+  if (offset < 0) { offset += temp; lunarYear--; }
+  const leap = leapMonth(lunarYear);
+  let isLeap = false, lunarMonth;
+  for (lunarMonth = 1; lunarMonth < 13 && offset > 0; lunarMonth++) {
+    if (leap > 0 && lunarMonth === (leap + 1) && !isLeap) {
+      --lunarMonth; isLeap = true; temp = leapDays(lunarYear);
+    } else {
+      temp = monthDays(lunarYear, lunarMonth);
+    }
+    if (isLeap && lunarMonth === (leap + 1)) isLeap = false;
+    offset -= temp;
+  }
+  if (offset === 0 && leap > 0 && lunarMonth === leap + 1) {
+    if (isLeap) isLeap = false; else { isLeap = true; --lunarMonth; }
+  }
+  if (offset < 0) { offset += temp; --lunarMonth; }
+  return { year: lunarYear, month: lunarMonth, day: offset + 1, isLeap };
 }
 
-function convert() {
-  const t = convType.value;
-  const v = parseFloat(convFrom.value);
-  if (isNaN(v)) {
-    convTo.value = "";
-    return;
-  }
-  let result;
-  if (t === "temp") {
-    result = convertTemp(v, convFromUnit.value, convToUnit.value);
-  } else {
-    const f = UNITS[t].factors;
-    const inBase = v * f[convFromUnit.value];
-    result = inBase / f[convToUnit.value];
-  }
-  convTo.value = Number(result.toFixed(6)).toString();
+/* 干支纪日：以 2000-01-01 = 戊午日(序号54) 为基准 */
+const BASE_2000 = new Date(2000, 0, 1);
+function ganzhiDay(date) {
+  const days = Math.round((date - BASE_2000) / 86400000);
+  const idx = (((54 + days) % 60) + 60) % 60;
+  return { idx, gan: idx % 10, zhi: idx % 12 };
 }
 
-function convertTemp(v, from, to) {
-  let c;
-  if (from === "°C") c = v;
-  else if (from === "°F") c = ((v - 32) * 5) / 9;
-  else c = v - 273.15;
-  if (to === "°C") return c;
-  if (to === "°F") return (c * 9) / 5 + 32;
-  return c + 273.15;
+/* 三合煞方 */
+function shaFang(zhiIdx) {
+  const groups = [[0, 4, 8], [2, 6, 10], [3, 7, 11], [1, 5, 9]];
+  const dirs = ["南", "北", "西", "东"];
+  for (let i = 0; i < groups.length; i++) if (groups[i].includes(zhiIdx)) return dirs[i];
+  return "";
 }
 
-convType.addEventListener("change", fillUnits);
-[convFrom, convFromUnit, convToUnit].forEach((el) =>
-  el.addEventListener("input", convert)
-);
-fillUnits();
+function renderAlmanac(date) {
+  const l = solar2lunar(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  const yIdx = (l.year - 4) % 10;
+  const zIdx = (l.year - 4) % 12;
+  const yearGZ = GAN[yIdx] + ZHI[zIdx];
+
+  const monthStr = (l.isLeap ? "闰" : "") + LM[l.month - 1] + "月";
+  const dayStr = LD[l.day - 1];
+  const gd = ganzhiDay(date);
+  const dayGZ = GAN[gd.gan] + ZHI[gd.zhi];
+
+  // 月干支：正月天干由年干五虎遁推出
+  const firstMonthGan = (yIdx * 2 + 2) % 10;
+  const monthGan = (firstMonthGan + (l.month - 1)) % 10;
+  const monthZhi = (l.month + 1) % 12;
+  const monthGZ = GAN[monthGan] + ZHI[monthZhi];
+
+  const jc = JIANCHU[(l.day - 1) % 12];
+  const yiji = YI_JI[jc];
+  const chongZhi = (gd.zhi + 6) % 12;
+  const chongAnimal = ZODIAC[chongZhi];
+
+  document.getElementById("al-lunar").textContent = `农历 ${yearGZ}年 ${monthStr}${dayStr}`;
+  document.getElementById("al-ganzhi").textContent = `${yearGZ}年 ${monthGZ}月 ${dayGZ}日`;
+  document.getElementById("al-zodiac").textContent = `生肖 ${ZODIAC[zIdx]}`;
+  document.getElementById("al-jianchu").textContent = `${jc}日`;
+  document.getElementById("al-yi").textContent = yiji.yi;
+  document.getElementById("al-ji").textContent = yiji.ji;
+  document.getElementById("al-chong").textContent = `冲${chongAnimal}(${ZHI[chongZhi]}) · 煞${shaFang(gd.zhi)}`;
+}
 
 /* ============================================================
-   3. 番茄钟
+   侧边栏日历（可点击，联动黄历）
    ============================================================ */
-const WORK = 25 * 60;
-const BREAK = 5 * 60;
-let remaining = WORK;
-let timer = null;
-let mode = "work";
+let calY, calM, selY, selM, selD;
+const WK = ["日", "一", "二", "三", "四", "五", "六"];
 
-const clock = document.getElementById("clock");
-const pomoState = document.getElementById("pomo-state");
-const pomoToggle = document.getElementById("pomo-toggle");
-
-function fmt(s) {
-  const m = String(Math.floor(s / 60)).padStart(2, "0");
-  const sec = String(s % 60).padStart(2, "0");
-  return `${m}:${sec}`;
-}
-function renderClock() {
-  clock.textContent = fmt(remaining);
-  document.title = `${fmt(remaining)} · ${mode === "work" ? "专注" : "休息"}`;
+function initCal() {
+  const t = new Date();
+  calY = selY = t.getFullYear();
+  calM = selM = t.getMonth();
+  selD = t.getDate();
 }
 
-function tick() {
-  remaining--;
-  if (remaining < 0) {
-    clearInterval(timer);
-    timer = null;
-    mode = mode === "work" ? "break" : "work";
-    remaining = mode === "work" ? WORK : BREAK;
-    pomoState.textContent = mode === "work" ? "专注时间到，开始休息 🌿" : "休息结束，开始专注 💪";
-    renderClock();
-    return;
-  }
-  renderClock();
-}
-
-pomoToggle.addEventListener("click", () => {
-  if (timer) {
-    clearInterval(timer);
-    timer = null;
-    pomoToggle.textContent = "继续";
-    pomoState.textContent = "已暂停";
-  } else {
-    timer = setInterval(tick, 1000);
-    pomoToggle.textContent = "暂停";
-    pomoState.textContent = mode === "work" ? "专注中…" : "休息中…";
-  }
-});
-document.getElementById("pomo-reset").addEventListener("click", () => {
-  clearInterval(timer);
-  timer = null;
-  mode = "work";
-  remaining = WORK;
-  pomoToggle.textContent = "开始";
-  pomoState.textContent = "准备就绪";
-  renderClock();
-});
-renderClock();
-
-/* ============================================================
-   4. 日历
-   ============================================================ */
-let calY, calM;
 function renderCalendar() {
   const now = new Date();
-  if (calY === undefined) {
-    calY = now.getFullYear();
-    calM = now.getMonth();
-  }
   const first = new Date(calY, calM, 1);
   const startDay = first.getDay();
   const days = new Date(calY, calM + 1, 0).getDate();
-  const isCur = calY === now.getFullYear() && calM === now.getMonth();
+  const isCurMonth = calY === now.getFullYear() && calM === now.getMonth();
+  const isSelMonth = calY === selY && calM === selM;
+
   document.getElementById("cal-title").textContent = `${calY}年${calM + 1}月`;
-  const wk = ["日", "一", "二", "三", "四", "五", "六"];
-  let html = wk.map((w) => `<div class="cal-wk">${w}</div>`).join("");
+  let html = WK.map((w) => `<div class="cal-wk">${w}</div>`).join("");
   for (let i = 0; i < startDay; i++) html += `<div class="cal-cell empty"></div>`;
   for (let d = 1; d <= days; d++) {
-    const cls = isCur && d === now.getDate() ? "cal-cell today" : "cal-cell";
-    html += `<div class="${cls}">${d}</div>`;
+    let cls = "cal-cell";
+    if (isCurMonth && d === now.getDate()) cls += " today";
+    if (isSelMonth && d === selD) cls += " selected";
+    html += `<div class="${cls}" data-day="${d}">${d}</div>`;
   }
   document.getElementById("cal-grid").innerHTML = html;
 }
+
 document.getElementById("cal-prev").addEventListener("click", () => {
   calM--;
   if (calM < 0) { calM = 11; calY--; }
@@ -284,10 +194,26 @@ document.getElementById("cal-next").addEventListener("click", () => {
   if (calM > 11) { calM = 0; calY++; }
   renderCalendar();
 });
+document.getElementById("cal-grid").addEventListener("click", (e) => {
+  const cell = e.target.closest(".cal-cell");
+  if (!cell || cell.classList.contains("empty")) return;
+  const d = parseInt(cell.dataset.day, 10);
+  selY = calY; selM = calM; selD = d;
+  renderCalendar();
+  const selDate = new Date(selY, selM, selD);
+  renderAlmanac(selDate);
+  const wd = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+  document.getElementById("cal-hint").textContent =
+    `已选 ${selY}年${selM + 1}月${selD}日 · ${wd[selDate.getDay()]}`;
+});
+
+initCal();
 renderCalendar();
+renderAlmanac(new Date());
 
 /* ============================================================
-   5. 实时天气（Open-Meteo，免费免密钥，支持浏览器跨域）
+   实时天气（Open-Meteo，免费免密钥，支持浏览器跨域）
+   显示在日期下方；背景随天气 / 昼夜联动
    ============================================================ */
 const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
 const FC_API = "https://api.open-meteo.com/v1/forecast";
@@ -333,7 +259,6 @@ function weatherSVG(type) {
   }
 }
 
-/* 天气 / 昼夜 → 背景联动 */
 const WX_CLASS = { sun: "sun", suncloud: "suncloud", cloud: "cloud", fog: "fog", rain: "rain", snow: "snow", thunder: "thunder" };
 function applyTheme(icon, isDay) {
   document.body.dataset.weather = WX_CLASS[icon] || "cloud";
@@ -352,10 +277,7 @@ async function loadWeather(city) {
   try {
     const g = await fetch(`${GEO_API}?name=${encodeURIComponent(city)}&language=zh&count=1&format=json`);
     const gj = await g.json();
-    if (!gj.results || !gj.results.length) {
-      setWeatherError(`未找到城市：${city}`);
-      return;
-    }
+    if (!gj.results || !gj.results.length) { setWeatherError(`未找到城市：${city}`); return; }
     const loc = gj.results[0];
     const w = await fetch(`${FC_API}?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=auto`);
     const wj = await w.json();
@@ -386,6 +308,5 @@ document.getElementById("w-input").addEventListener("keydown", (e) => {
   }
 });
 
-// 启动时加载默认城市，并每 10 分钟自动刷新
 loadWeather("北京");
 setInterval(() => loadWeather(currentCity), 10 * 60 * 1000);
