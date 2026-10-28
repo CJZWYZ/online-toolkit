@@ -6,107 +6,201 @@
   <title>在线小工具箱 · Toolkit</title>
   <meta name="description" content="一个纯前端、零依赖的在线小工具集合：密码生成器、单位换算、番茄钟、颜色工具。" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='6' y='16' width='36' height='24' rx='4' fill='%238e8e93' stroke='%231d1d1f' stroke-width='3'/><path d='M16 16 V10 H32 V16' fill='none' stroke='%231d1d1f' stroke-width='3' stroke-linecap='round'/><rect x='18' y='22' width='12' height='12' rx='2' fill='%23ffd60a' stroke='%231d1d1f' stroke-width='3'/></svg>" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <h1>🧰 在线小工具箱</h1>
-      <p class="subtitle">纯前端 · 零依赖 · 在你的浏览器里本地运行，数据不外传</p>
-    </div>
-  </header>
-
-  <nav class="tabs" role="tablist" aria-label="工具切换">
-    <button class="tab active" data-tab="password" role="tab" aria-selected="true">🔑 密码生成器</button>
-    <button class="tab" data-tab="convert" role="tab" aria-selected="false">📐 单位换算</button>
-    <button class="tab" data-tab="pomodoro" role="tab" aria-selected="false">⏱️ 番茄钟</button>
-    <button class="tab" data-tab="color" role="tab" aria-selected="false">🎨 颜色工具</button>
-  </nav>
-
-  <main class="container">
-
-    <!-- 密码生成器 -->
-    <section id="password" class="panel active" role="tabpanel">
-      <h2>密码生成器</h2>
-      <p class="hint">调整长度和字符类型，一键生成高强度密码。</p>
-      <div class="output-row">
-        <input type="text" id="pw-output" readonly aria-label="生成的密码" />
-        <button class="btn-copy" id="pw-copy" title="复制">复制</button>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-badge" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="64" height="64">
+          <rect x="6" y="16" width="36" height="24" rx="5" fill="#a9adb7" stroke="#1d1d1f" stroke-width="3"/>
+          <path d="M16 16 V10 H32 V16" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="18" y="22" width="12" height="12" rx="2.5" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+          <circle cx="24" cy="28" r="2" fill="#1d1d1f"/>
+        </svg>
       </div>
-      <div class="strength"><span id="pw-strength" class="badge">强度：—</span></div>
+      <h1>在线小工具箱</h1>
+      <p class="subtitle">纯前端 · 零依赖 · 在浏览器里本地运行，数据不外传</p>
+    </header>
 
-      <label class="field">
-        长度：<span id="pw-len-val">16</span>
-        <input type="range" id="pw-len" min="4" max="40" value="16" />
-      </label>
+    <nav class="tabs" role="tablist" aria-label="工具切换">
+      <button class="tab active" data-tab="password" role="tab" aria-selected="true">
+        <span class="tab-ico" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="26" height="26">
+            <circle cx="17" cy="17" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+            <circle cx="17" cy="17" r="2.6" fill="#1d1d1f"/>
+            <path d="M23 23 L37 37" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
+            <path d="M31 31 l6 0 M33 37 l4 4" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        密码生成器
+      </button>
+      <button class="tab" data-tab="convert" role="tab" aria-selected="false">
+        <span class="tab-ico" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="26" height="26">
+            <rect x="8" y="19" width="32" height="10" rx="3" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
+            <path d="M15 22 L19 24 L15 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M33 22 L29 24 L33 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        单位换算
+      </button>
+      <button class="tab" data-tab="pomodoro" role="tab" aria-selected="false">
+        <span class="tab-ico" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="26" height="26">
+            <circle cx="24" cy="28" r="14" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
+            <path d="M24 14 q-3 -7 -9 -5 q3 2 4 6" fill="#34c759" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round"/>
+            <circle cx="19" cy="27" r="2" fill="#1d1d1f"/>
+            <circle cx="29" cy="27" r="2" fill="#1d1d1f"/>
+            <path d="M19 33 q5 4 10 0" fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        番茄钟
+      </button>
+      <button class="tab" data-tab="color" role="tab" aria-selected="false">
+        <span class="tab-ico" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="26" height="26">
+            <circle cx="18" cy="20" r="9" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
+            <circle cx="30" cy="20" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+            <circle cx="24" cy="32" r="9" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
+          </svg>
+        </span>
+        颜色工具
+      </button>
+    </nav>
 
-      <div class="checks">
-        <label><input type="checkbox" id="opt-lower" checked /> 小写 a-z</label>
-        <label><input type="checkbox" id="opt-upper" checked /> 大写 A-Z</label>
-        <label><input type="checkbox" id="opt-num" checked /> 数字 0-9</label>
-        <label><input type="checkbox" id="opt-sym" checked /> 符号 !@#$</label>
-      </div>
+    <main class="container">
 
-      <button class="btn-primary" id="pw-gen">生成密码</button>
-    </section>
-
-    <!-- 单位换算 -->
-    <section id="convert" class="panel" role="tabpanel" hidden>
-      <h2>单位换算</h2>
-      <p class="hint">支持长度、重量、温度的实时换算。</p>
-      <label class="field">
-        类型
-        <select id="conv-type">
-          <option value="length">长度</option>
-          <option value="weight">重量</option>
-          <option value="temp">温度</option>
-        </select>
-      </label>
-      <div class="convert-grid">
-        <div>
-          <input type="number" id="conv-from" value="1" />
-          <select id="conv-from-unit"></select>
+      <!-- 密码生成器 -->
+      <section id="password" class="panel active" role="tabpanel">
+        <div class="panel-head">
+          <span class="panel-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="40" height="40">
+              <circle cx="17" cy="17" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+              <circle cx="17" cy="17" r="2.6" fill="#1d1d1f"/>
+              <path d="M23 23 L37 37" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
+              <path d="M31 31 l6 0 M33 37 l4 4" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div>
+            <h2>密码生成器</h2>
+            <p class="hint">调整长度和字符类型，一键生成高强度密码。</p>
+          </div>
         </div>
-        <div class="arrow">→</div>
-        <div>
-          <input type="text" id="conv-to" readonly />
-          <select id="conv-to-unit"></select>
+        <div class="output-row">
+          <input type="text" id="pw-output" readonly aria-label="生成的密码" />
+          <button class="btn-copy" id="pw-copy" title="复制">复制</button>
         </div>
-      </div>
-    </section>
+        <div class="strength"><span id="pw-strength" class="badge">强度：—</span></div>
 
-    <!-- 番茄钟 -->
-    <section id="pomodoro" class="panel" role="tabpanel" hidden>
-      <h2>番茄钟</h2>
-      <p class="hint">专注 25 分钟，休息 5 分钟，提升效率。</p>
-      <div class="clock" id="clock">25:00</div>
-      <div class="pomo-controls">
-        <button class="btn-primary" id="pomo-toggle">开始</button>
-        <button class="btn-secondary" id="pomo-reset">重置</button>
-      </div>
-      <p class="pomo-state" id="pomo-state">准备就绪</p>
-    </section>
+        <label class="field">
+          长度：<span id="pw-len-val">16</span>
+          <input type="range" id="pw-len" min="4" max="40" value="16" />
+        </label>
 
-    <!-- 颜色工具 -->
-    <section id="color" class="panel" role="tabpanel" hidden>
-      <h2>颜色工具</h2>
-      <p class="hint">选择颜色，自动给出 HEX / RGB / HSL 值。</p>
-      <div class="color-row">
-        <input type="color" id="color-picker" value="#4f7cff" />
-        <div class="swatch" id="color-swatch"></div>
-      </div>
-      <ul class="color-values">
-        <li>HEX：<code id="c-hex">#4f7cff</code> <button class="btn-copy small" data-copy="c-hex">复制</button></li>
-        <li>RGB：<code id="c-rgb">rgb(79,124,255)</code> <button class="btn-copy small" data-copy="c-rgb">复制</button></li>
-        <li>HSL：<code id="c-hsl">hsl(223,100%,65%)</code> <button class="btn-copy small" data-copy="c-hsl">复制</button></li>
-      </ul>
-    </section>
+        <div class="checks">
+          <label><input type="checkbox" id="opt-lower" checked /> 小写 a-z</label>
+          <label><input type="checkbox" id="opt-upper" checked /> 大写 A-Z</label>
+          <label><input type="checkbox" id="opt-num" checked /> 数字 0-9</label>
+          <label><input type="checkbox" id="opt-sym" checked /> 符号 !@#$</label>
+        </div>
 
-  </main>
+        <button class="btn-primary" id="pw-gen">生成密码</button>
+      </section>
 
-  <footer class="footer">
-    <p>用 ❤️ 与纯 JavaScript 打造 · 可自由修改与部署</p>
-  </footer>
+      <!-- 单位换算 -->
+      <section id="convert" class="panel" role="tabpanel" hidden>
+        <div class="panel-head">
+          <span class="panel-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="40" height="40">
+              <rect x="8" y="19" width="32" height="10" rx="3" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
+              <path d="M15 22 L19 24 L15 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M33 22 L29 24 L33 26" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <div>
+            <h2>单位换算</h2>
+            <p class="hint">支持长度、重量、温度的实时换算。</p>
+          </div>
+        </div>
+        <label class="field">
+          类型
+          <select id="conv-type">
+            <option value="length">长度</option>
+            <option value="weight">重量</option>
+            <option value="temp">温度</option>
+          </select>
+        </label>
+        <div class="convert-grid">
+          <div>
+            <input type="number" id="conv-from" value="1" />
+            <select id="conv-from-unit"></select>
+          </div>
+          <div class="arrow">→</div>
+          <div>
+            <input type="text" id="conv-to" readonly />
+            <select id="conv-to-unit"></select>
+          </div>
+        </div>
+      </section>
+
+      <!-- 番茄钟 -->
+      <section id="pomodoro" class="panel" role="tabpanel" hidden>
+        <div class="panel-head">
+          <span class="panel-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="40" height="40">
+              <circle cx="24" cy="28" r="14" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
+              <path d="M24 14 q-3 -7 -9 -5 q3 2 4 6" fill="#34c759" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round"/>
+              <circle cx="19" cy="27" r="2" fill="#1d1d1f"/>
+              <circle cx="29" cy="27" r="2" fill="#1d1d1f"/>
+              <path d="M19 33 q5 4 10 0" fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div>
+            <h2>番茄钟</h2>
+            <p class="hint">专注 25 分钟，休息 5 分钟，提升效率。</p>
+          </div>
+        </div>
+        <div class="clock" id="clock">25:00</div>
+        <div class="pomo-controls">
+          <button class="btn-primary" id="pomo-toggle">开始</button>
+          <button class="btn-secondary" id="pomo-reset">重置</button>
+        </div>
+        <p class="pomo-state" id="pomo-state">准备就绪</p>
+      </section>
+
+      <!-- 颜色工具 -->
+      <section id="color" class="panel" role="tabpanel" hidden>
+        <div class="panel-head">
+          <span class="panel-ico" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="40" height="40">
+              <circle cx="18" cy="20" r="9" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
+              <circle cx="30" cy="20" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+              <circle cx="24" cy="32" r="9" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
+            </svg>
+          </span>
+          <div>
+            <h2>颜色工具</h2>
+            <p class="hint">选择颜色，自动给出 HEX / RGB / HSL 值。</p>
+          </div>
+        </div>
+        <div class="color-row">
+          <input type="color" id="color-picker" value="#4f7cff" />
+          <div class="swatch" id="color-swatch"></div>
+        </div>
+        <ul class="color-values">
+          <li>HEX：<code id="c-hex">#4f7cff</code> <button class="btn-copy small" data-copy="c-hex">复制</button></li>
+          <li>RGB：<code id="c-rgb">rgb(79,124,255)</code> <button class="btn-copy small" data-copy="c-rgb">复制</button></li>
+          <li>HSL：<code id="c-hsl">hsl(223,100%,65%)</code> <button class="btn-copy small" data-copy="c-hsl">复制</button></li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <p>用纯 JavaScript 打造 · 可自由修改与部署</p>
+    </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>
