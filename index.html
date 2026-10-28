@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>晴历 · 天气 · 黄历 · 日历</title>
-  <meta name="description" content="晴历：自动识别你所在地区显示实时天气，附农历黄历与日历。Apple 风格的安静科技体验。" />
+  <title>天气 · TIAQI — 实时天气 · 空气质量 · 二十四节气</title>
+  <meta name="description" content="TIAQI 天气：自动识别所在城市，显示实时天气、空气质量、生活指数、24小时温度趋势与二十四节气科普。极简冷调设计。" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='15' fill='none' stroke='%230071e3' stroke-width='4'/><path d='M24 12a12 12 0 0 1 0 24z' fill='%230071e3'/></svg>" />
 </head>
@@ -13,6 +13,7 @@
   <!-- ============ 氛围背景层（昼夜自适应柔和渐变） ============ -->
   <div class="bg" aria-hidden="true">
     <div class="bg-orb"></div>
+    <div class="bg-tint"></div>
     <div class="bg-stars" id="bg-stars"></div>
     <div class="bg-grain"></div>
   </div>
@@ -24,9 +25,9 @@
       <div class="welcome-mark" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="46" height="46"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
       </div>
-      <p class="welcome-kicker">QÍNG LÌ · 晴历</p>
+      <p class="welcome-kicker">TIAN QI · 天气</p>
       <h1 class="welcome-greeting">你好。</h1>
-      <p class="welcome-sub">正在为你准备所在地的天气与今日黄历</p>
+      <p class="welcome-sub">正在为你准备所在地的天气与节气</p>
       <div class="welcome-dots" id="welcome-dots"><span></span><span></span><span></span></div>
       <button class="welcome-enter" id="welcome-enter">进入</button>
       <p class="welcome-hint">轻点任意处开始</p>
@@ -37,7 +38,7 @@
   <header class="topbar">
     <span class="brand">
       <svg class="brand-mark" viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
-      晴历
+      天气 · TIAQI
     </span>
     <button class="menu-btn" id="menu-open" aria-label="打开日历与黄历">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -96,6 +97,7 @@
       <div class="weather-search">
         <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
         <button class="btn-search" id="w-search">搜索</button>
+        <button class="btn-web" id="w-web" title="用搜索引擎查询该城市天气">网页搜</button>
       </div>
     </section>
 
@@ -109,6 +111,16 @@
         <span class="ji">忌 <em id="b-ji">—</em></span>
       </div>
       <button class="btn-detail" id="open-detail">查看完整日历与黄历</button>
+    </section>
+
+    <section class="card science" id="science" aria-label="天气与二十四节气科普">
+      <div class="sci-head"><span>天气小百科</span><span id="wx-fact">—</span></div>
+      <div class="term-now">
+        <div class="term-name" id="term-name">—</div>
+        <div class="term-desc" id="term-desc">—</div>
+        <div class="term-next" id="term-next">—</div>
+      </div>
+      <div class="term-grid" id="term-grid"></div>
     </section>
 
     <footer class="sale-footer">
