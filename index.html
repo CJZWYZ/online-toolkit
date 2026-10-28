@@ -6,7 +6,7 @@
   <title>天光 · Skylight —— 天气 / 日历 / 百科 / 搜索</title>
   <meta name="description" content="天光 Skylight：薄釉质感的日常信息仪表盘，含 IP 天气、农历节气、历史上的今天与全站搜索。纯前端、免费开源 API、无需密钥。" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230B6E7C' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230B6E7C'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=19" />
+  <link rel="stylesheet" href="style.css?v=20" />
 </head>
 <body data-ready="0">
 
@@ -18,6 +18,10 @@
   </div>
   <div class="glow" aria-hidden="true"></div>
   <div class="sky-glow" aria-hidden="true"></div>
+
+  <!-- ============ 留言特效层：背景大字（内容之下）+ 弹幕（内容之上、抽屉之下）============ -->
+  <div class="msgfx msgfx-amb" id="msgfx-amb" aria-hidden="true"></div>
+  <div class="msgfx msgfx-dm" id="msgfx-dm" aria-hidden="true"></div>
 
   <!-- ============ 欢迎页 ============ -->
   <div class="welcome" id="welcome" data-phase="in" aria-label="欢迎页，轻点或按回车进入">
@@ -111,6 +115,30 @@
       <div class="visit-sub" id="visit-sub">最近访问 —</div>
       <div class="visit-chart" id="visit-chart" role="img" aria-label="最近 7 天访问记录，暂无数据"></div>
     </section>
+
+    <!-- 留言板：昵称 + 内容自定义，留言化作弹幕漂移与背景大字 -->
+    <section class="card liquid-glass msg-card enter" aria-label="留言板" style="--i:5">
+      <div class="sc-head">
+        <span class="sc-k">留言板</span>
+        <span class="msg-count" id="msg-count">还没有留言</span>
+      </div>
+      <form class="msg-form" id="msg-form" autocomplete="off">
+        <div class="msg-fields">
+          <input class="msg-in" id="msg-nick" type="text" maxlength="12" placeholder="昵称（可留空）"
+                 aria-label="留言昵称" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          <input class="msg-in" id="msg-text" type="text" maxlength="60" placeholder="说点什么…最多 60 字"
+                 aria-label="留言内容" autocomplete="off" enterkeyhint="send" />
+        </div>
+        <button class="msg-send" id="msg-send" type="submit">发送</button>
+      </form>
+      <div class="msg-ctrl">
+        <button type="button" class="tg" id="tg-dm" aria-pressed="true">弹幕 · 开</button>
+        <button type="button" class="tg" id="tg-amb" aria-pressed="true">背景大字 · 开</button>
+        <button type="button" class="tg tg-del" id="msg-clear">清空</button>
+      </div>
+      <ul class="msg-list" id="msg-list"></ul>
+      <p class="msg-tip" id="msg-tip">留言保存在本机浏览器</p>
+    </section>
   </main>
 
   <!-- ============ 遮罩 + 抽屉 ============ -->
@@ -162,6 +190,6 @@
   <!-- ============ 轻量依赖（CDN，固定主版本） ============ -->
   <script src="https://cdn.jsdelivr.net/npm/chinese-days@1"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
-  <script src="app.js?v=19"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>
