@@ -79,8 +79,8 @@ function generatePassword() {
 function rateStrength(pwd, pool) {
   let score = pwd.length >= 12 ? 1 : 0;
   if (pwd.length >= 16) score++;
-  if (pool.length >= 26 + 10) score++; // 含字母+数字
-  if (pool.length >= 26 + 10 + 10) score++; // 再加符号
+  if (pool.length >= 26 + 10) score++;
+  if (pool.length >= 26 + 10 + 10) score++;
   const map = [
     ["弱", "var(--danger)"],
     ["中", "var(--warn)"],
@@ -96,7 +96,6 @@ document.getElementById("pw-gen").addEventListener("click", generatePassword);
 document.getElementById("pw-copy").addEventListener("click", (e) =>
   copyText(pwOutput.value, e.currentTarget)
 );
-// 首次加载生成一次
 generatePassword();
 
 /* ============================================================
@@ -235,52 +234,133 @@ document.getElementById("pomo-reset").addEventListener("click", () => {
 renderClock();
 
 /* ============================================================
-   4. 颜色工具
+   4. 日历（替换原颜色工具）
    ============================================================ */
-const picker = document.getElementById("color-picker");
-const swatch = document.getElementById("color-swatch");
-const cHex = document.getElementById("c-hex");
-const cRgb = document.getElementById("c-rgb");
-const cHsl = document.getElementById("c-hsl");
-
-function hexToRgb(hex) {
-  const h = hex.replace("#", "");
-  return {
-    r: parseInt(h.slice(0, 2), 16),
-    g: parseInt(h.slice(2, 4), 16),
-    b: parseInt(h.slice(4, 6), 16),
-  };
-}
-function rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
-  if (max === min) { h = s = 0; }
-  else {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      default: h = (r - g) / d + 4;
-    }
-    h /= 6;
+let calY, calM;
+function renderCalendar() {
+  const now = new Date();
+  if (calY === undefined) {
+    calY = now.getFullYear();
+    calM = now.getMonth();
   }
-  return {
-    h: Math.round(h * 360),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100),
-  };
+  const first = new Date(calY, calM, 1);
+  const startDay = first.getDay();
+  const days = new Date(calY, calM + 1, 0).getDate();
+  const isCur = calY === now.getFullYear() && calM === now.getMonth();
+  document.getElementById("cal-title").textContent = `${calY}年${calM + 1}月`;
+  const wk = ["日", "一", "二", "三", "四", "五", "六"];
+  let html = wk.map((w) => `<div class="cal-wk">${w}</div>`).join("");
+  for (let i = 0; i < startDay; i++) html += `<div class="cal-cell empty"></div>`;
+  for (let d = 1; d <= days; d++) {
+    const cls = isCur && d === now.getDate() ? "cal-cell today" : "cal-cell";
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  document.getElementById("cal-grid").innerHTML = html;
+}
+document.getElementById("cal-prev").addEventListener("click", () => {
+  calM--;
+  if (calM < 0) { calM = 11; calY--; }
+  renderCalendar();
+});
+document.getElementById("cal-next").addEventListener("click", () => {
+  calM++;
+  if (calM > 11) { calM = 0; calY++; }
+  renderCalendar();
+});
+renderCalendar();
+
+/* ============================================================
+   5. 实时天气（Open-Meteo，免费免密钥，支持浏览器跨域）
+   ============================================================ */
+const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
+const FC_API = "https://api.open-meteo.com/v1/forecast";
+
+const WMO = {
+  0: { desc: "晴", icon: "sun" },
+  1: { desc: "晴间多云", icon: "suncloud" },
+  2: { desc: "多云", icon: "cloud" },
+  3: { desc: "阴", icon: "cloud" },
+  45: { desc: "雾", icon: "fog" }, 48: { desc: "雾凇", icon: "fog" },
+  51: { desc: "毛毛雨", icon: "rain" }, 53: { desc: "毛毛雨", icon: "rain" }, 55: { desc: "毛毛雨", icon: "rain" },
+  56: { desc: "冻毛毛雨", icon: "rain" }, 57: { desc: "冻毛毛雨", icon: "rain" },
+  61: { desc: "小雨", icon: "rain" }, 63: { desc: "中雨", icon: "rain" }, 65: { desc: "大雨", icon: "rain" },
+  66: { desc: "冻雨", icon: "rain" }, 67: { desc: "冻雨", icon: "rain" },
+  71: { desc: "小雪", icon: "snow" }, 73: { desc: "中雪", icon: "snow" }, 75: { desc: "大雪", icon: "snow" }, 77: { desc: "雪粒", icon: "snow" },
+  80: { desc: "阵雨", icon: "rain" }, 81: { desc: "阵雨", icon: "rain" }, 82: { desc: "强阵雨", icon: "rain" },
+  85: { desc: "阵雪", icon: "snow" }, 86: { desc: "阵雪", icon: "snow" },
+  95: { desc: "雷阵雨", icon: "thunder" }, 96: { desc: "雷阵雨伴冰雹", icon: "thunder" }, 99: { desc: "雷阵雨伴冰雹", icon: "thunder" },
+};
+
+function weatherSVG(type) {
+  const cloud = `<path d="M13 28 a8 8 0 0 1 1 -16 a11 11 0 0 1 21 2 a7 7 0 0 1 1 14 Z" fill="#e8e8ed" stroke="#1d1d1f" stroke-width="3" stroke-linejoin="round"/>`;
+  const sun = `<circle cx="16" cy="16" r="6" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/><g stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"><path d="M16 4 V8"/><path d="M5 16 H9"/><path d="M8 8 L11 11"/><path d="M24 8 L21 11"/></g>`;
+  const open = `<svg viewBox="0 0 48 48" width="52" height="52">`;
+  const close = `</svg>`;
+  switch (type) {
+    case "sun":
+      return `${open}<circle cx="24" cy="24" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/><g stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"><path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/><path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/></g>${close}`;
+    case "suncloud":
+      return `${open}${sun}${cloud}${close}`;
+    case "cloud":
+      return `${open}${cloud}${close}`;
+    case "fog":
+      return `${open}${cloud}<g stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"><path d="M12 38 H34"/><path d="M16 43 H30"/></g>${close}`;
+    case "rain":
+      return `${open}${cloud}<g stroke="#0a84ff" stroke-width="3" stroke-linecap="round"><path d="M17 32 L15 39"/><path d="M25 32 L23 39"/><path d="M33 32 L31 39"/></g>${close}`;
+    case "snow":
+      return `${open}${cloud}<g fill="#0a84ff"><circle cx="17" cy="36" r="1.8"/><circle cx="25" cy="39" r="1.8"/><circle cx="33" cy="36" r="1.8"/></g>${close}`;
+    case "thunder":
+      return `${open}${cloud}<path d="M25 30 L20 40 L25 40 L22 47" fill="#ffd60a" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${close}`;
+    default:
+      return `${open}${cloud}${close}`;
+  }
 }
 
-function updateColor() {
-  const hex = picker.value;
-  const { r, g, b } = hexToRgb(hex);
-  const { h, s, l } = rgbToHsl(r, g, b);
-  swatch.style.background = hex;
-  cHex.textContent = hex.toUpperCase();
-  cRgb.textContent = `rgb(${r}, ${g}, ${b})`;
-  cHsl.textContent = `hsl(${h}, ${s}%, ${l}%)`;
+let currentCity = "北京";
+
+function setWeatherError(msg) {
+  document.getElementById("w-desc").textContent = msg;
+  document.getElementById("w-temp").textContent = "--";
+  document.getElementById("weather").classList.add("error");
 }
-picker.addEventListener("input", updateColor);
-updateColor();
+
+async function loadWeather(city) {
+  try {
+    const g = await fetch(`${GEO_API}?name=${encodeURIComponent(city)}&language=zh&count=1&format=json`);
+    const gj = await g.json();
+    if (!gj.results || !gj.results.length) {
+      setWeatherError(`未找到城市：${city}`);
+      return;
+    }
+    const loc = gj.results[0];
+    const w = await fetch(`${FC_API}?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`);
+    const wj = await w.json();
+    const c = wj.current;
+    const info = WMO[c.weather_code] || { desc: "未知", icon: "cloud" };
+    document.getElementById("w-ico").innerHTML = weatherSVG(info.icon);
+    document.getElementById("w-temp").textContent = Math.round(c.temperature_2m);
+    document.getElementById("w-desc").textContent = info.desc;
+    const region = loc.country ? `, ${loc.country}` : (loc.admin1 ? `, ${loc.admin1}` : "");
+    document.getElementById("w-city").textContent = `${loc.name}${region}`;
+    document.getElementById("w-extra").textContent = `湿度 ${c.relative_humidity_2m}% · 风 ${Math.round(c.wind_speed_10m)} km/h`;
+    document.getElementById("weather").classList.remove("error");
+    currentCity = loc.name;
+  } catch (e) {
+    setWeatherError("天气获取失败，请稍后重试");
+  }
+}
+
+document.getElementById("w-search").addEventListener("click", () => {
+  const v = document.getElementById("w-input").value.trim();
+  if (v) loadWeather(v);
+});
+document.getElementById("w-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const v = e.target.value.trim();
+    if (v) loadWeather(v);
+  }
+});
+
+// 启动时加载默认城市，并每 10 分钟自动刷新
+loadWeather("北京");
+setInterval(() => loadWeather(currentCity), 10 * 60 * 1000);
