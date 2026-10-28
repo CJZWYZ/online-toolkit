@@ -77,6 +77,52 @@ body::before {
   50% { transform: translateY(-6px); }
 }
 
+/* ---------- 实时天气（顶部常驻） ---------- */
+.weather {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(232,241,255,0.7));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 18px 22px;
+  margin: 0 0 18px;
+}
+.weather-ico { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.weather-info { flex: 0 0 auto; line-height: 1.15; }
+.weather-temp { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; }
+.weather-temp .deg { font-size: 1.4rem; font-weight: 600; color: var(--muted); }
+.weather-desc { color: var(--muted); font-size: 0.92rem; margin-top: 2px; }
+.weather-right { margin-left: auto; text-align: right; min-width: 0; }
+.weather-loc { font-weight: 600; font-size: 1.05rem; }
+.weather-extra { color: var(--muted); font-size: 0.85rem; margin: 2px 0 8px; }
+.weather-search { display: flex; gap: 8px; justify-content: flex-end; }
+.weather-search input {
+  width: 150px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 980px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.weather-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.16);
+}
+.weather-search .btn-copy {
+  border-radius: 980px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+}
+.weather.error .weather-desc { color: var(--danger); }
+
 /* ---------- Tabs ---------- */
 .tabs {
   display: flex;
@@ -258,28 +304,51 @@ input[readonly] { color: var(--muted); background: #fafafc; }
 .pomo-controls { display: flex; gap: 12px; justify-content: center; }
 .pomo-state { text-align: center; color: var(--muted); margin-top: 18px; }
 
-/* ---------- Color ---------- */
-.color-row { display: flex; align-items: center; gap: 20px; margin: 8px 0 22px; }
-input[type="color"] {
-  width: 76px; height: 76px; border: none; background: none; cursor: pointer;
-  border-radius: 18px;
-}
-.swatch {
-  width: 76px; height: 76px; border-radius: 18px;
-  background: #4f7cff; border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: inset 0 0 0 4px rgba(255,255,255,0.6);
-}
-.color-values { list-style: none; padding: 0; margin: 0; }
-.color-values li { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
-.color-values code {
-  background: #fff; padding: 5px 12px; border-radius: 10px;
-  font-size: 0.95rem; color: var(--text);
+/* ---------- 日历 ---------- */
+.cal-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+.cal-nav {
+  width: 38px; height: 38px;
   border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 50%;
+  font-size: 1.3rem; line-height: 1;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.cal-nav:hover { background: var(--accent-soft); }
+.cal-nav:active { transform: scale(0.94); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-wk { text-align: center; color: var(--muted); font-size: 0.82rem; padding: 4px 0; }
+.cal-cell {
+  aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid transparent;
+}
+.cal-cell.empty { background: transparent; }
+.cal-cell.today {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(0, 113, 227, 0.3);
 }
 
 /* ---------- Footer ---------- */
 .footer { text-align: center; color: var(--muted); padding: 36px 0 0; font-size: 0.85rem; }
 
+@media (max-width: 560px) {
+  .weather { flex-wrap: wrap; gap: 14px; }
+  .weather-info { order: 2; }
+  .weather-ico { order: 1; }
+  .weather-right { order: 3; margin-left: 0; width: 100%; text-align: left; }
+  .weather-search { justify-content: flex-start; }
+  .weather-search input { width: 1fr; flex: 1; }
+}
 @media (max-width: 520px) {
   .convert-grid { grid-template-columns: 1fr; }
   .convert-grid .arrow { text-align: center; padding: 4px 0; }
