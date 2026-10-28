@@ -225,31 +225,31 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
 /* 通用卡片（液态玻璃） */
 .card {
   position: relative; overflow: hidden;
-  background: linear-gradient(140deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.20) 100%);
-  border: 1px solid rgba(255,255,255,0.55);
+  background: linear-gradient(140deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 48%, rgba(255,255,255,0.11) 100%);
+  border: 1px solid rgba(255,255,255,0.45);
   border-radius: var(--radius);
-  box-shadow: 0 14px 38px rgba(31,74,110,0.16),
-    inset 0 1px 1px rgba(255,255,255,0.9),
-    inset 0 -10px 24px -14px rgba(255,255,255,0.65);
-  backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
-  -webkit-backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
+  box-shadow: 0 14px 38px rgba(31,74,110,0.14),
+    inset 0 1px 1px rgba(255,255,255,0.75),
+    inset 0 -10px 24px -14px rgba(255,255,255,0.45);
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
   padding: 22px; transition: background 0.6s ease, transform 0.2s ease;
 }
 .card::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(120% 70% at 8% 0%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 55%),
-    linear-gradient(125deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 35%,
-      rgba(255,255,255,0) 62%, rgba(255,255,255,0.35) 100%);
+    radial-gradient(120% 70% at 8% 0%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(125deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 35%,
+      rgba(255,255,255,0) 62%, rgba(255,255,255,0.22) 100%);
 }
 /* 天气卡同款液态玻璃 */
 .weather {
-  background: linear-gradient(140deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.20) 100%);
-  border-color: rgba(255,255,255,0.55);
-  box-shadow: 0 14px 38px rgba(31,74,110,0.16), inset 0 1px 1px rgba(255,255,255,0.9),
-    inset 0 -10px 24px -14px rgba(255,255,255,0.65);
-  backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
-  -webkit-backdrop-filter: blur(30px) saturate(210%) brightness(1.05);
+  background: linear-gradient(140deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 48%, rgba(255,255,255,0.11) 100%);
+  border-color: rgba(255,255,255,0.45);
+  box-shadow: 0 14px 38px rgba(31,74,110,0.14), inset 0 1px 1px rgba(255,255,255,0.75),
+    inset 0 -10px 24px -14px rgba(255,255,255,0.45);
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.04);
 }
 /* 按钮液态玻璃 */
 .city-chip, .menu-btn, .close-btn, .cal-nav {
@@ -420,8 +420,9 @@ body.sidebar-open .sidebar { transform: translateX(0); }
 .cal-hint { margin: 14px 0 0; text-align: center; color: var(--muted); font-size: 0.8rem; }
 .cal-lunar { margin: 12px 0 0; text-align: center; color: var(--muted); font-size: 0.74rem; letter-spacing: 0.02em; }
 
-/* 二十四节气：首页小卡片 + 侧边栏大卡片 */
-.mini-terms { max-width: 440px; margin: 22px auto 0; }
+/* 二十四节气：首页当前节气卡 + 侧边栏全部节气大卡片 */
+.mini-terms { max-width: 440px; margin: 22px auto 0; text-align: center; }
+.mini-terms .btn-detail { margin-top: 16px; }
 .mini-terms-title { font-weight: 600; font-size: 1.02rem; color: var(--text);
   margin-bottom: 12px; text-align: left; }
 .term-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
