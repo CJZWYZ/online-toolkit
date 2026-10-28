@@ -36,10 +36,18 @@
 
   <!-- ============ 顶部导航（极简磨砂） ============ -->
   <header class="topbar">
-    <span class="brand">
-      <svg class="brand-mark" viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
-      天气 · TIAQI
-    </span>
+    <div class="topbar-left">
+      <button class="menu-btn" id="news-open" aria-label="搜索与热点新闻">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <span class="brand">
+        <svg class="brand-mark" viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M24 12a12 12 0 0 1 0 24z" fill="currentColor"/></svg>
+        天气 · TIAQI
+      </span>
+    </div>
     <button class="menu-btn" id="menu-open" aria-label="打开日历与黄历">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
         <rect x="3.5" y="4.5" width="17" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
@@ -97,11 +105,15 @@
       <div class="weather-search">
         <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
         <button class="btn-search" id="w-search">搜索</button>
-        <button class="btn-web" id="w-web" title="用搜索引擎查询该城市天气">网页搜</button>
       </div>
     </section>
 
     <div class="city-bar" id="city-bar" aria-label="快捷切换城市"></div>
+
+    <section class="card fact-card" aria-label="天气小百科">
+      <span class="fact-k">天气小百科</span>
+      <span id="wx-fact">—</span>
+    </section>
 
     <section class="card brief" id="brief" aria-label="今日农历黄历简略">
       <div class="brief-lunar" id="b-lunar">农历 —</div>
@@ -113,16 +125,6 @@
       <button class="btn-detail" id="open-detail">查看完整日历与黄历</button>
     </section>
 
-    <section class="card science" id="science" aria-label="天气与二十四节气科普">
-      <div class="sci-head"><span>天气小百科</span><span id="wx-fact">—</span></div>
-      <div class="term-now">
-        <div class="term-name" id="term-name">—</div>
-        <div class="term-desc" id="term-desc">—</div>
-        <div class="term-next" id="term-next">—</div>
-      </div>
-      <div class="term-grid" id="term-grid"></div>
-    </section>
-
     <footer class="sale-footer">
       <span class="sale-line">本域名 / 整站 出售中</span>
       <a class="sale-mail" href="mailto:2324143400@qq.com">联系出让 · 2324143400@qq.com</a>
@@ -131,6 +133,23 @@
 
   <!-- ============ 遮罩（点空白关侧栏） ============ -->
   <div class="backdrop" id="backdrop"></div>
+
+  <!-- ============ 搜索·热点 抽屉（左侧） ============ -->
+  <aside class="newsbar" id="newsbar" aria-label="搜索与热点新闻">
+    <div class="sheet-grab" aria-hidden="true"></div>
+    <div class="sidebar-head">
+      <span>搜索 · 热点</span>
+      <button class="close-btn" id="news-close" aria-label="关闭">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="web-search">
+      <input type="text" id="web-input" placeholder="搜索一下，回车或点搜索" aria-label="网页搜索" />
+      <button class="btn-search" id="web-go">搜索</button>
+    </div>
+    <p class="news-cap">热点新闻</p>
+    <div class="news-list" id="news-list"><p class="news-loading">加载中…</p></div>
+  </aside>
 
   <!-- ============ 侧边栏 / 抽屉 / 底部 sheet ============ -->
   <aside class="sidebar" id="sidebar" aria-label="日历与黄历详情">
@@ -141,6 +160,12 @@
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
+
+    <section class="card term-side" aria-label="当前节气">
+      <div class="term-name" id="term-name">—</div>
+      <div class="term-desc" id="term-desc">—</div>
+      <div class="term-next" id="term-next">—</div>
+    </section>
 
     <section class="card calendar-card" id="calendar">
       <div class="cal-bar">
