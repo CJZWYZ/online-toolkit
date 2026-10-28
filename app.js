@@ -224,6 +224,7 @@ document.getElementById("cal-grid").addEventListener("click", (e) => {
   renderCalendar();
   const selDate = new Date(selY, selM, selD);
   renderAlmanac(selDate);
+  document.getElementById("cal-lunar").textContent = computeAlmanac(selDate).lunarText;
   const wd = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
   document.getElementById("cal-hint").textContent =
     `已选 ${selY}年${selM + 1}月${selD}日 · ${wd[selDate.getDay()]}`;
@@ -233,6 +234,7 @@ initCal();
 renderCalendar();
 renderAlmanac(new Date());
 renderBrief(new Date());
+document.getElementById("cal-lunar").textContent = computeAlmanac(new Date()).lunarText;
 
 /* ============================================================
    侧边栏开关
@@ -693,9 +695,18 @@ function renderTerms() {
     grid.innerHTML = TERMS.map((t) => {
       const dd = termDate(y, t);
       const isCur = cur.year === y && cur.n === t.n;
-      const isNext = next && next.year === y && next.n === t.n;
-      return `<div class="term-cell${isCur ? " cur" : ""}${isNext ? " nxt" : ""}">
+      return `<div class="term-cell${isCur ? " cur" : ""}">
         <div class="n">${t.n}</div><div class="d">${t.m}/${dd}</div></div>`;
+    }).join("");
+  }
+  const big = document.getElementById("term-big");
+  if (big) {
+    big.innerHTML = TERMS.map((t) => {
+      const dd = termDate(y, t);
+      const isCur = cur.year === y && cur.n === t.n;
+      return `<div class="term-bigcell${isCur ? " cur" : ""}">
+        <div class="n">${t.n}</div><div class="d">${t.m}月${dd}日</div>
+        <div class="desc">${t.d}</div></div>`;
     }).join("");
   }
 }
