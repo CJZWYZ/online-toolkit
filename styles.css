@@ -90,16 +90,16 @@ body[data-time="night"] .bg-stars { opacity: 1; }
   mix-blend-mode: overlay;
 }
 
-/* 背景天气联动：蒂芙尼冷调渐变叠加（动画与过渡保持不变） */
+/* 背景天气联动：与主页同色系的淡蓝冷调（动画与过渡保持不变） */
 .bg-tint { position: absolute; inset: 0; opacity: 0;
   transition: background 0.8s ease, opacity 0.8s ease; }
-body[data-weather="sun"]      .bg-tint { opacity: .16; background: linear-gradient(180deg, #7fd0c8 0%, #b2e6e1 100%); }
-body[data-weather="suncloud"] .bg-tint { opacity: .20; background: linear-gradient(180deg, #63b8b0 0%, #9fd8d2 100%); }
-body[data-weather="cloud"]    .bg-tint { opacity: .28; background: linear-gradient(180deg, #5f8a88 0%, #8fb5b2 100%); }
-body[data-weather="fog"]      .bg-tint { opacity: .28; background: linear-gradient(180deg, #8fa8a6 0%, #c0d4d2 100%); }
-body[data-weather="rain"]     .bg-tint { opacity: .36; background: linear-gradient(180deg, #2f6b66 0%, #5b938e 100%); }
-body[data-weather="snow"]     .bg-tint { opacity: .24; background: linear-gradient(180deg, #8fc2bd 0%, #c9eae6 100%); }
-body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradient(180deg, #1e3a3c 0%, #3d6360 100%); }
+body[data-weather="sun"]      .bg-tint { opacity: .14; background: linear-gradient(180deg, #8fc0e8 0%, #b9dcf3 100%); }
+body[data-weather="suncloud"] .bg-tint { opacity: .18; background: linear-gradient(180deg, #7fb2da 0%, #a9cde8 100%); }
+body[data-weather="cloud"]    .bg-tint { opacity: .24; background: linear-gradient(180deg, #7d94a8 0%, #a3b6c6 100%); }
+body[data-weather="fog"]      .bg-tint { opacity: .24; background: linear-gradient(180deg, #9aa9b4 0%, #c2ced6 100%); }
+body[data-weather="rain"]     .bg-tint { opacity: .30; background: linear-gradient(180deg, #4a6d8c 0%, #6f92ae 100%); }
+body[data-weather="snow"]     .bg-tint { opacity: .22; background: linear-gradient(180deg, #a7c8de 0%, #d3e7f2 100%); }
+body[data-weather="thunder"]  .bg-tint { opacity: .34; background: linear-gradient(180deg, #33455c 0%, #556b83 100%); }
 
 /* ===== 顶部导航 ===== */
 .topbar {
@@ -109,7 +109,7 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
   margin-top: calc(8px + env(safe-area-inset-top));
   padding: 10px 14px;
   border-radius: 20px;
-  background: linear-gradient(140deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 48%, rgba(255,255,255,0.11) 100%);
+  background: linear-gradient(140deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 48%, rgba(255,255,255,0.05) 100%);
   border: 1px solid rgba(255,255,255,0.45);
   box-shadow: 0 10px 30px rgba(31,74,110,0.12),
     inset 0 1px 1px rgba(255,255,255,0.75),
@@ -234,7 +234,7 @@ body[data-time="night"] .topbar {
 /* 通用卡片（液态玻璃） */
 .card {
   position: relative; overflow: hidden;
-  background: linear-gradient(140deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 48%, rgba(255,255,255,0.11) 100%);
+  background: linear-gradient(140deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 48%, rgba(255,255,255,0.05) 100%);
   border: 1px solid rgba(255,255,255,0.45);
   border-radius: var(--radius);
   box-shadow: 0 14px 38px rgba(31,74,110,0.14),
@@ -247,13 +247,13 @@ body[data-time="night"] .topbar {
 .card::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(120% 70% at 8% 0%, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0) 55%),
-    linear-gradient(125deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 35%,
-      rgba(255,255,255,0) 62%, rgba(255,255,255,0.22) 100%);
+    radial-gradient(120% 70% at 8% 0%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(125deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 35%,
+      rgba(255,255,255,0) 62%, rgba(255,255,255,0.11) 100%);
 }
 /* 天气卡同款液态玻璃 */
 .weather {
-  background: linear-gradient(140deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 48%, rgba(255,255,255,0.11) 100%);
+  background: linear-gradient(140deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 48%, rgba(255,255,255,0.05) 100%);
   border-color: rgba(255,255,255,0.45);
   box-shadow: 0 14px 38px rgba(31,74,110,0.14), inset 0 1px 1px rgba(255,255,255,0.75),
     inset 0 -10px 24px -14px rgba(255,255,255,0.45);
@@ -333,8 +333,8 @@ body[data-time="night"] .card, body[data-time="night"] .weather {
 }
 body.news-open .newsbar { transform: translateX(0); }
 .web-search { display: flex; gap: 8px; position: sticky; top: 0; z-index: 5;
-  background: var(--card-solid); padding: 10px;
-  border: 1px solid rgba(255,255,255,0.45); border-radius: 16px;
+  background: var(--card-solid); padding: 14px;
+  border: 1px solid rgba(255,255,255,0.45); border-radius: var(--radius);
   box-shadow: inset 0 1px 1px rgba(255,255,255,0.75), 0 8px 20px -12px rgba(0,0,0,0.3); }
 .web-search input {
   flex: 1; min-width: 0;
@@ -349,7 +349,7 @@ body.news-open .newsbar { transform: translateX(0); }
 .news-cap { margin: 4px 0 0; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.08em; }
 .news-list { display: flex; flex-direction: column; gap: 8px; }
 .news-item {
-  display: block; padding: 11px 14px; border-radius: 16px;
+  display: block; padding: 14px 16px; border-radius: var(--radius-sm);
   background: linear-gradient(140deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%);
   text-decoration: none;
   color: var(--text); font-size: 0.9rem; line-height: 1.45;
