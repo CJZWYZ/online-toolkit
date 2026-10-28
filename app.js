@@ -338,13 +338,19 @@ function setWeatherError(msg) {
   document.getElementById("weather").classList.add("error");
 }
 
+const WIND_DIRS = ["北", "东北", "东", "东南", "南", "西南", "西", "西北"];
+function degToDir(deg) {
+  if (deg === null || deg === undefined || isNaN(deg)) return "";
+  return WIND_DIRS[Math.round(deg / 45) % 8];
+}
+
 async function loadWeather(city) {
   try {
     const g = await fetch(`${GEO_API}?name=${encodeURIComponent(city)}&language=zh&count=1&format=json`);
     const gj = await g.json();
     if (!gj.results || !gj.results.length) { setWeatherError(`未找到城市：${city}`); return; }
     const loc = gj.results[0];
-    const w = await fetch(`${FC_API}?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=auto`);
+    const w = await fetch(`${FC_API}?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,is_day&timezone=auto`);
     const wj = await w.json();
     const c = wj.current;
     const info = WMO[c.weather_code] || { desc: "未知", icon: "cloud" };
@@ -353,7 +359,9 @@ async function loadWeather(city) {
     document.getElementById("w-desc").textContent = info.desc;
     const region = loc.country ? `, ${loc.country}` : (loc.admin1 ? `, ${loc.admin1}` : "");
     document.getElementById("w-city").textContent = `${loc.name}${region}`;
-    document.getElementById("w-extra").textContent = `湿度 ${c.relative_humidity_2m}% · 风 ${Math.round(c.wind_speed_10m)} km/h`;
+    document.getElementById("w-feel").textContent = Math.round(c.apparent_temperature);
+    document.getElementById("w-hum").textContent = c.relative_humidity_2m;
+    document.getElementById("w-wind").textContent = `${Math.round(c.wind_speed_10m)} km/h ${degToDir(c.wind_direction_10m)}`;
     document.getElementById("weather").classList.remove("error");
     currentCity = loc.name;
     applyTheme(info.icon, c.is_day);
