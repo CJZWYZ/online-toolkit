@@ -289,7 +289,7 @@
   function closeSearch() { document.getElementById("search").classList.remove("open"); }
 
   /* ============================================================
-     访问量统计（countapi.xyz 免费免密钥 + localStorage 兜底）
+     访问量统计（Abacus 免费免密钥计数 API + localStorage 兜底）
      ============================================================ */
   async function updateVisit() {
     const el = $("visit");
@@ -297,7 +297,7 @@
     localStorage.setItem("tiaqi_visits", local);
     el.textContent = `访问量 ${local.toLocaleString()}（本机）`;
     try {
-      const j = await fetchJSON("https://api.countapi.xyz/hit/tiaqi-dashboard-visits", 5000);
+      const j = await fetchJSON("https://abacus.jasoncameron.dev/hit/tiaqi/visits", 5000);
       if (j && typeof j.value === "number") el.textContent = `全站访问量 ${j.value.toLocaleString()}`;
     } catch (e) { /* 保持本机计数 */ }
   }
