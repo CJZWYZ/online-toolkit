@@ -3,28 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>今日 · 天气 · 黄历</title>
-  <meta name="description" content="极简日历黄历：首页显示当天日期、实时天气与农历黄历简略信息；侧边栏点开显示完整日历与详细黄历，自动适配电脑与手机。" />
+  <title>NEON 气象终端 · 天气 · 黄历</title>
+  <meta name="description" content="赛博朋克风格天气黄历：自动识别你所在地区显示实时天气，附农历黄历、日历与城市霓虹背景。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='8' y='12' width='32' height='30' rx='5' fill='%23fff' stroke='%231d1d1f' stroke-width='3'/><path d='M8 20 H40' stroke='%231d1d1f' stroke-width='3'/><path d='M16 8 V14 M32 8 V14' stroke='%231d1d1f' stroke-width='3' stroke-linecap='round'/><rect x='20' y='26' width='8' height='8' rx='2' fill='%230071e3'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='16' fill='none' stroke='%2300f0ff' stroke-width='4'/><circle cx='24' cy='24' r='6' fill='%23ff2bd6'/></svg>" />
 </head>
 <body>
-  <!-- 地区风景背景：跟随当前天气城市，苹果风毛玻璃叠加 -->
-  <div class="bg-photo" id="bg-photo" aria-hidden="true"></div>
-  <div class="bg-overlay" aria-hidden="true"></div>
-  <div class="bg-caption" id="bg-caption" aria-hidden="true"></div>
+  <!-- ============ 赛博朋克背景层 ============ -->
+  <div class="cyber-bg" aria-hidden="true">
+    <div class="cyber-sun"></div>
+    <div class="cyber-grid"></div>
+    <svg class="cyber-city" id="cyber-city" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+    <div class="cyber-scanlines"></div>
+    <div class="cyber-vignette"></div>
+    <div class="cyber-noise"></div>
+  </div>
 
-  <!-- 顶部极简导航：含打开侧边栏的按钮 -->
+  <!-- ============ 欢迎页（粒子消散） ============ -->
+  <div class="welcome" id="welcome">
+    <canvas id="welcome-canvas"></canvas>
+    <div class="welcome-content">
+      <div class="welcome-kicker">// SYSTEM ONLINE</div>
+      <h1 class="welcome-title glitch" data-text="赛博气象终端">赛博气象终端</h1>
+      <p class="welcome-sub">NEON WEATHER · 农历黄历 · 实时定位</p>
+      <button class="welcome-enter" id="welcome-enter">进入 / ENTER</button>
+      <div class="welcome-hint">点击任意位置亦可进入</div>
+    </div>
+  </div>
+
+  <!-- ============ 顶部栏 ============ -->
   <header class="topbar">
     <button class="menu-btn" id="menu-open" aria-label="打开日历与黄历">
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M4 7h16M4 12h16M4 17h16" stroke="#1d1d1f" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
       </svg>
     </button>
-    <span class="brand">今日 · 天气 · 黄历</span>
+    <span class="brand">◈ 赛博气象终端</span>
   </header>
 
-  <!-- 首页：当天日期 + 天气 + 农历黄历简略信息 -->
+  <!-- ============ 首页 ============ -->
   <main class="home">
     <p class="eyebrow" id="eyebrow">今天</p>
     <h1 class="date-hero" id="big-date">—</h1>
@@ -34,8 +54,8 @@
       <div class="weather-top">
         <div class="weather-ico" id="w-ico" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="52" height="52">
-            <circle cx="24" cy="24" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-            <g stroke="#1d1d1f" stroke-width="3" stroke-linecap="round">
+            <circle cx="24" cy="24" r="9" fill="#ffd166" stroke="currentColor" stroke-width="3"/>
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
               <path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/>
               <path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/>
             </g>
@@ -44,12 +64,12 @@
         <div class="weather-main">
           <div class="weather-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
           <div class="weather-meta">
-            <span id="w-desc">加载中…</span>
+            <span id="w-desc">定位中…</span>
             <span class="sep">·</span>
             <span class="loc" id="w-loc">
               <svg class="loc-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-                <path d="M12 2a7 7 0 0 0 -7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0 -7-7z" fill="none" stroke="#86868b" stroke-width="2" stroke-linejoin="round"/>
-                <circle cx="12" cy="9" r="2.6" fill="none" stroke="#86868b" stroke-width="2"/>
+                <path d="M12 2a7 7 0 0 0 -7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0 -7-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="12" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="2"/>
               </svg>
               <span id="w-city">—</span>
             </span>
@@ -67,7 +87,6 @@
       </div>
     </section>
 
-    <!-- 农历黄历简略信息 -->
     <section class="card brief" id="brief" aria-label="今日农历黄历简略">
       <div class="brief-lunar" id="b-lunar">农历 —</div>
       <div class="brief-ganzhi" id="b-ganzhi">—</div>
@@ -78,15 +97,17 @@
       <button class="btn-detail" id="open-detail">查看完整日历与黄历 ›</button>
     </section>
 
-    <footer class="footer">
-      <p>天气来自 Open-Meteo · 农历黄历为算法推算，仅供参考</p>
+    <!-- ============ 网址出售信息 ============ -->
+    <footer class="sale-footer">
+      <div class="sale-line">◆ 本域名 / 整站 出售中 ◆</div>
+      <a class="sale-mail" href="mailto:2324143400@qq.com">联系出让 · 2324143400@qq.com</a>
     </footer>
   </main>
 
-  <!-- 遮罩层（点击关闭侧边栏） -->
+  <!-- ============ 遮罩（点空白关侧栏） ============ -->
   <div class="backdrop" id="backdrop"></div>
 
-  <!-- 侧边栏 / 第二页：完整日历 + 详细农历黄历，默认收起 -->
+  <!-- ============ 侧边栏 / 第二页 ============ -->
   <aside class="sidebar" id="sidebar" aria-label="日历与黄历详情">
     <div class="sidebar-head">
       <span>日历 · 黄历</span>
