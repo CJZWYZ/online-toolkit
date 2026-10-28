@@ -84,11 +84,22 @@
         <span>湿度 <em id="w-hum">--</em>%</span>
         <span>风 <em id="w-wind">--</em></span>
       </div>
+      <div class="weather-aqi" id="w-aqi">
+        <span class="aqi-dot" id="w-aqi-dot"></span>
+        <span class="aqi-text">空气 <em id="w-aqi-val">--</em> <i id="w-aqi-label">—</i></span>
+      </div>
+      <div class="weather-indices" id="w-indices"></div>
+      <div class="weather-trend">
+        <div class="trend-head"><span>未来 24 小时温度</span><span id="w-trend-temp">--°</span></div>
+        <svg id="w-trend" viewBox="0 0 320 72" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
       <div class="weather-search">
         <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
         <button class="btn-search" id="w-search">搜索</button>
       </div>
     </section>
+
+    <div class="city-bar" id="city-bar" aria-label="快捷切换城市"></div>
 
     <section class="card brief" id="brief" aria-label="今日农历黄历简略">
       <div class="brief-lunar" id="b-lunar">农历 —</div>
