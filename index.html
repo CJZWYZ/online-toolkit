@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在线小工具箱 · Toolkit</title>
-  <meta name="description" content="一个纯前端、零依赖的在线小工具集合：密码生成器、单位换算、番茄钟、颜色工具。" />
+  <meta name="description" content="一个纯前端、零依赖的在线小工具集合：实时天气、密码生成器、单位换算、番茄钟、日历。" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='6' y='16' width='36' height='24' rx='4' fill='%238e8e93' stroke='%231d1d1f' stroke-width='3'/><path d='M16 16 V10 H32 V16' fill='none' stroke='%231d1d1f' stroke-width='3' stroke-linecap='round'/><rect x='18' y='22' width='12' height='12' rx='2' fill='%23ffd60a' stroke='%231d1d1f' stroke-width='3'/></svg>" />
 </head>
@@ -22,6 +22,31 @@
       <h1>在线小工具箱</h1>
       <p class="subtitle">纯前端 · 零依赖 · 在浏览器里本地运行，数据不外传</p>
     </header>
+
+    <!-- 实时天气（顶部常驻） -->
+    <section class="weather" id="weather" aria-label="实时天气">
+      <div class="weather-ico" id="w-ico" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="52" height="52">
+          <circle cx="24" cy="24" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
+          <g stroke="#1d1d1f" stroke-width="3" stroke-linecap="round">
+            <path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/>
+            <path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/>
+          </g>
+        </svg>
+      </div>
+      <div class="weather-info">
+        <div class="weather-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
+        <div class="weather-desc" id="w-desc">加载中…</div>
+      </div>
+      <div class="weather-right">
+        <div class="weather-loc"><span id="w-city">—</span></div>
+        <div class="weather-extra" id="w-extra">湿度 — · 风 —</div>
+        <div class="weather-search">
+          <input type="text" id="w-input" placeholder="切换城市，如 上海" aria-label="城市搜索" />
+          <button class="btn-copy small" id="w-search">搜索</button>
+        </div>
+      </div>
+    </section>
 
     <nav class="tabs" role="tablist" aria-label="工具切换">
       <button class="tab active" data-tab="password" role="tab" aria-selected="true">
@@ -57,15 +82,17 @@
         </span>
         番茄钟
       </button>
-      <button class="tab" data-tab="color" role="tab" aria-selected="false">
+      <button class="tab" data-tab="calendar" role="tab" aria-selected="false">
         <span class="tab-ico" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="26" height="26">
-            <circle cx="18" cy="20" r="9" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
-            <circle cx="30" cy="20" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-            <circle cx="24" cy="32" r="9" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
+            <rect x="9" y="13" width="30" height="28" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="3"/>
+            <path d="M9 20 H39" stroke="#1d1d1f" stroke-width="3"/>
+            <path d="M16 9 V15 M32 9 V15" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="17" cy="28" r="2" fill="#ff3b30"/><circle cx="24" cy="28" r="2" fill="#1d1d1f"/><circle cx="31" cy="28" r="2" fill="#0a84ff"/>
+            <circle cx="17" cy="35" r="2" fill="#1d1d1f"/><circle cx="24" cy="35" r="2" fill="#1d1d1f"/><circle cx="31" cy="35" r="2" fill="#34c759"/>
           </svg>
         </span>
-        颜色工具
+        日历
       </button>
     </nav>
 
@@ -169,36 +196,35 @@
         <p class="pomo-state" id="pomo-state">准备就绪</p>
       </section>
 
-      <!-- 颜色工具 -->
-      <section id="color" class="panel" role="tabpanel" hidden>
+      <!-- 日历（替换原颜色工具） -->
+      <section id="calendar" class="panel" role="tabpanel" hidden>
         <div class="panel-head">
           <span class="panel-ico" aria-hidden="true">
             <svg viewBox="0 0 48 48" width="40" height="40">
-              <circle cx="18" cy="20" r="9" fill="#ff3b30" stroke="#1d1d1f" stroke-width="3"/>
-              <circle cx="30" cy="20" r="9" fill="#ffd60a" stroke="#1d1d1f" stroke-width="3"/>
-              <circle cx="24" cy="32" r="9" fill="#0a84ff" stroke="#1d1d1f" stroke-width="3"/>
+              <rect x="9" y="13" width="30" height="28" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="3"/>
+              <path d="M9 20 H39" stroke="#1d1d1f" stroke-width="3"/>
+              <path d="M16 9 V15 M32 9 V15" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="17" cy="28" r="2" fill="#ff3b30"/><circle cx="24" cy="28" r="2" fill="#1d1d1f"/><circle cx="31" cy="28" r="2" fill="#0a84ff"/>
+              <circle cx="17" cy="35" r="2" fill="#1d1d1f"/><circle cx="24" cy="35" r="2" fill="#1d1d1f"/><circle cx="31" cy="35" r="2" fill="#34c759"/>
             </svg>
           </span>
           <div>
-            <h2>颜色工具</h2>
-            <p class="hint">选择颜色，自动给出 HEX / RGB / HSL 值。</p>
+            <h2>日历</h2>
+            <p class="hint">查看日期，自动标记今天，可前后翻月。</p>
           </div>
         </div>
-        <div class="color-row">
-          <input type="color" id="color-picker" value="#4f7cff" />
-          <div class="swatch" id="color-swatch"></div>
+        <div class="cal-bar">
+          <button class="cal-nav" id="cal-prev" aria-label="上个月">‹</button>
+          <div class="cal-title" id="cal-title">—</div>
+          <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
         </div>
-        <ul class="color-values">
-          <li>HEX：<code id="c-hex">#4f7cff</code> <button class="btn-copy small" data-copy="c-hex">复制</button></li>
-          <li>RGB：<code id="c-rgb">rgb(79,124,255)</code> <button class="btn-copy small" data-copy="c-rgb">复制</button></li>
-          <li>HSL：<code id="c-hsl">hsl(223,100%,65%)</code> <button class="btn-copy small" data-copy="c-hsl">复制</button></li>
-        </ul>
+        <div class="cal-grid" id="cal-grid"></div>
       </section>
 
     </main>
 
     <footer class="footer">
-      <p>用纯 JavaScript 打造 · 可自由修改与部署</p>
+      <p>用纯 JavaScript 打造 · 天气数据来自 Open-Meteo · 可自由修改与部署</p>
     </footer>
   </div>
 
