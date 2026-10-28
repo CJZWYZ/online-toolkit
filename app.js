@@ -243,8 +243,8 @@ function closeSidebar() { document.body.classList.remove("sidebar-open"); }
 document.getElementById("menu-open").addEventListener("click", openSidebar);
 document.getElementById("open-detail").addEventListener("click", openSidebar);
 document.getElementById("menu-close").addEventListener("click", closeSidebar);
-document.getElementById("backdrop").addEventListener("click", closeSidebar);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSidebar(); });
+document.getElementById("backdrop").addEventListener("click", () => { closeSidebar(); closeNews(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeSidebar(); closeNews(); } });
 
 /* ============================================================
    实时天气（Open-Meteo，免费免密钥，支持浏览器跨域）
@@ -581,11 +581,43 @@ document.getElementById("w-input").addEventListener("keydown", (e) => {
     if (v) loadWeather(v);
   }
 });
-// 网页搜：接入搜索引擎（Bing 搜索，免密钥）
-document.getElementById("w-web").addEventListener("click", () => {
-  const q = (currentLabel || currentCity || "北京") + " 天气";
-  window.open("https://www.bing.com/search?q=" + encodeURIComponent(q), "_blank", "noopener");
+/* ============================================================
+   搜索·热点抽屉（左上角按钮打开）
+   ============================================================ */
+function openNews() { document.body.classList.add("news-open"); }
+function closeNews() { document.body.classList.remove("news-open"); }
+document.getElementById("news-open").addEventListener("click", openNews);
+document.getElementById("news-close").addEventListener("click", closeNews);
+
+// 网页搜索：接入搜索引擎（Bing，免密钥，新窗口打开）
+function webSearch() {
+  const v = document.getElementById("web-input").value.trim();
+  if (v) window.open("https://www.bing.com/search?q=" + encodeURIComponent(v), "_blank", "noopener");
+}
+document.getElementById("web-go").addEventListener("click", webSearch);
+document.getElementById("web-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") webSearch();
 });
+
+// 热点新闻：60s API（免费已验证），点击跳转该新闻的来源检索页
+async function loadNews() {
+  const box = document.getElementById("news-list");
+  if (!box) return;
+  try {
+    const r = await fetchJSON("https://60s.viki.moe/v2/60s", 8000);
+    const items = r && r.data && r.data.news;
+    if (!items || !items.length) throw new Error("empty");
+    box.innerHTML = items.slice(0, 15).map((t, i) => {
+      const url = "https://www.bing.com/search?q=" + encodeURIComponent(t.slice(0, 30));
+      return `<a class="news-item" href="${url}" target="_blank" rel="noopener">
+        <span class="hot">${String(i + 1).padStart(2, "0")}</span>${t}</a>`;
+    }).join("");
+  } catch (e) {
+    box.innerHTML = `<p class="news-empty">热点加载失败，请稍后重试</p>`;
+  }
+}
+loadNews();
+setInterval(loadNews, 30 * 60 * 1000);
 
 // 定时刷新（用已知坐标或城市）
 setInterval(() => {
