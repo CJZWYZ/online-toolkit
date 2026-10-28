@@ -20,9 +20,9 @@
 
 /* 白天主题 */
 body[data-time="day"] {
-  --bg-top: #9adbd6;
-  --bg-mid: #c3ebe7;
-  --bg-bot: #e8f7f5;
+  --bg-top: #bfe0f8;
+  --bg-mid: #d9ecfa;
+  --bg-bot: #eef6fd;
   --text: #1d1d1f;
   --muted: #6e6e73;
   --card-bg: rgba(255,255,255,0.55);
@@ -30,14 +30,14 @@ body[data-time="day"] {
   --card-solid: rgba(255,255,255,0.82);
   --orb: radial-gradient(circle at 50% 45%, #ffffff 0%, #cdf3ef 28%, #8fd8d2 60%, #5fc4bd 100%);
   --orb-glow: rgba(129,216,208,0.5);
-  --topbar-bg: rgba(255,255,255,0.6);
+  --topbar-bg: #bfe0f8;
   --grain-op: 0.04;
 }
 /* 夜晚主题 */
 body[data-time="night"] {
-  --bg-top: #04181c;
-  --bg-mid: #0a2a2d;
-  --bg-bot: #0e3334;
+  --bg-top: #041020;
+  --bg-mid: #0a1f36;
+  --bg-bot: #0e2a44;
   --text: #f5f5f7;
   --muted: #a1a1a8;
   --card-bg: rgba(16,46,48,0.5);
@@ -45,7 +45,7 @@ body[data-time="night"] {
   --card-solid: rgba(10,34,36,0.88);
   --orb: radial-gradient(circle at 50% 45%, #fff5 0%, #bfeee9 24%, #5fc4bd 58%, #2e8f89 100%);
   --orb-glow: rgba(95,196,189,0.3);
-  --topbar-bg: rgba(8,30,32,0.6);
+  --topbar-bg: #041020;
   --grain-op: 0.06;
 }
 
@@ -70,17 +70,15 @@ body {
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bot) 100%);
   transition: background 0.8s ease;
 }
-.bg-orb {
-  position: absolute; top: 6%; left: 50%; width: min(52vw, 420px); aspect-ratio: 1/1;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: var(--orb);
-  box-shadow: 0 0 120px 40px var(--orb-glow);
-  filter: saturate(1.1);
-  transition: background 0.8s ease, box-shadow 0.8s ease;
-  animation: orbFloat 9s ease-in-out infinite;
+/* 简笔画太阳（线条风格与天气图标统一，替代大太阳光球） */
+.bg-doodle {
+  position: absolute; top: 5%; left: 50%; transform: translateX(-50%);
+  width: min(38vw, 280px); color: #ffffff; opacity: 0.65;
+  animation: doodleFloat 9s ease-in-out infinite;
 }
-@keyframes orbFloat { 50% { transform: translate(-50%, -2.4%); } }
+@keyframes doodleFloat { 50% { transform: translate(-50%, -2%); } }
+body[data-time="night"] .bg-doodle { color: #9cc4ee; opacity: 0.3; }
+body[data-weather="rain"] .bg-doodle, body[data-weather="thunder"] .bg-doodle { opacity: 0.25; }
 
 .bg-stars { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease; }
 body[data-time="night"] .bg-stars { opacity: 1; }
@@ -112,7 +110,7 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
   background: var(--topbar-bg);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 0.5px solid var(--card-border);
+  border-bottom: 0.5px solid transparent;
 }
 .brand { display: inline-flex; align-items: center; gap: 8px;
   font-size: 1.05rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text); }
@@ -224,16 +222,31 @@ body[data-weather="thunder"]  .bg-tint { opacity: .40; background: linear-gradie
 .city-chip:active { transform: scale(0.96); }
 .city-chip.active { background: var(--accent); color: #fff; border-color: transparent; }
 
-/* 通用磨砂卡片 */
+/* 通用磨砂卡片（液态玻璃质感） */
 .card {
-  background: var(--card-bg);
-  border: 0.5px solid var(--card-border);
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.22) 100%);
+  border: 0.5px solid rgba(255,255,255,0.65);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 10px 40px rgba(31,74,110,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.65),
+    inset 0 -1px 1px rgba(255,255,255,0.2);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   padding: 22px; transition: background 0.6s ease, transform 0.2s ease;
 }
+.card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(120deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 32%,
+    rgba(255,255,255,0) 68%, rgba(255,255,255,0.28) 100%);
+}
+/* 按钮液态玻璃质感 */
+.btn-search, .btn-detail, .city-chip, .menu-btn, .close-btn, .cal-nav {
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 14px rgba(31,74,110,0.10);
+}
+body[data-time="night"] .card { border-color: rgba(255,255,255,0.14); }
 
 /* 首页农历黄历简略 */
 .brief { max-width: 440px; margin: 26px auto 0; text-align: center; }
@@ -374,6 +387,29 @@ body.sidebar-open .sidebar { transform: translateX(0); }
 .cal-compact .cal-cell.today { background: var(--accent); color: #fff; font-weight: 600; }
 .cal-compact .cal-cell.selected { box-shadow: inset 0 0 0 2px var(--accent); color: var(--accent); }
 .cal-hint { margin: 14px 0 0; text-align: center; color: var(--muted); font-size: 0.8rem; }
+.cal-lunar { margin: 12px 0 0; text-align: center; color: var(--muted); font-size: 0.74rem; letter-spacing: 0.02em; }
+
+/* 二十四节气：首页小卡片 + 侧边栏大卡片 */
+.mini-terms { max-width: 440px; margin: 22px auto 0; }
+.mini-terms-title { font-weight: 600; font-size: 1.02rem; color: var(--text);
+  margin-bottom: 12px; text-align: left; }
+.term-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.term-cell { text-align: center; padding: 8px 2px; border-radius: 12px;
+  background: rgba(127,127,127,0.08); }
+.term-cell .n { font-size: 0.8rem; font-weight: 500; color: var(--text); }
+.term-cell .d { font-size: 0.66rem; color: var(--muted); margin-top: 2px; }
+.term-cell.cur { background: var(--accent); }
+.term-cell.cur .n { color: #fff; font-weight: 600; }
+.term-cell.cur .d { color: rgba(255,255,255,0.85); }
+.term-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.term-bigcell { padding: 14px; border-radius: 16px; background: rgba(127,127,127,0.08);
+  border: 0.5px solid transparent; }
+.term-bigcell .n { font-weight: 600; font-size: 1.05rem; color: var(--text); }
+.term-bigcell .d { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.term-bigcell .desc { font-size: 0.8rem; color: var(--muted); margin-top: 6px; line-height: 1.55; }
+.term-bigcell.cur { background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--accent); }
+@media (max-width: 420px) { .term-grid { grid-template-columns: repeat(3, 1fr); } }
 
 /* 黄历 */
 .almanac { padding: 22px; }
