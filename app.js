@@ -53,6 +53,7 @@
   /* ---------- 24 节气 / 节日中文名（搜索索引用） ---------- */
   const TERMS_CN = ["小寒","大寒","立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑","立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至"];
   const HOLIDAYS_CN = ["元旦","春节","清明节","劳动节","端午节","中秋节","国庆节","元宵节","重阳节","情人节","儿童节","妇女节","青年节","教师节","植树节","建军节","建党节","抗战胜利日","母亲节","父亲节"];
+  const CITIES = ["北京","上海","广州","深圳","成都","杭州","西安","武汉","南京","重庆","天津","苏州","长沙","青岛","厦门","香港","台北","哈尔滨","昆明","大连"];
 
   /* ============================================================
      IP 定位（geo.kamero.ai → ipapi.co 兜底 → 浏览器时区）
@@ -211,7 +212,8 @@
       { type: "weather", key: "体感", label: "体感温度", action: "pulse" },
       { type: "weather", key: "风速", label: "风速 / 风力", action: "pulse" },
       ...TERMS_CN.map((t) => ({ type: "calendar", key: t, label: "节气 · " + t, action: "openCalendar" })),
-      ...HOLIDAYS_CN.map((t) => ({ type: "calendar", key: t, label: "节日 · " + t, action: "openCalendar" }))
+      ...HOLIDAYS_CN.map((t) => ({ type: "calendar", key: t, label: "节日 · " + t, action: "openCalendar" })),
+      ...CITIES.map((c) => ({ type: "city", key: c, label: "城市天气 · " + c, action: "loadCity" }))
     ];
   }
   function buildWikiIndex(evs) {
@@ -230,7 +232,7 @@
     if (typeof Fuse === "undefined") { box.style.display = "none"; return; }
     fuse = new Fuse(searchItems, { keys: ["key", "label", "snippet"], threshold: 0.4, ignoreLocation: true });
   }
-  const typeLabel = (t) => (t === "weather" ? "天气" : t === "calendar" ? "日历" : "百科");
+  const typeLabel = (t) => (t === "weather" ? "天气" : t === "calendar" ? "日历" : t === "city" ? "城市" : "百科");
   function renderSearchResults(q) {
     const box = $("search-results");
     if (!q) { box.innerHTML = `<p class="search-empty">输入关键词，实时检索天气、节气与百科</p>`; return; }
@@ -254,6 +256,7 @@
     if (!it) return;
     if (it.type === "weather") pulseWeather();
     else if (it.type === "calendar") openCalendarToTerm(it.key);
+    else if (it.type === "city") loadCityWeather(it.key);
     else if (it.type === "wiki" && it.ev) openWikiDrawer(it.ev);
     closeSearch();
   }
@@ -272,6 +275,16 @@
     const w = $("weather");
     w.classList.remove("pulse"); void w.offsetWidth; w.classList.add("pulse");
     setTimeout(() => w.classList.remove("pulse"), 700);
+  }
+  async function loadCityWeather(city) {
+    try {
+      const g = await fetchJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&language=zh&count=1&format=json`, 5000);
+      const r = g.results && g.results[0];
+      if (!r) return;
+      $("w-city").textContent = r.name + (r.country ? " · " + r.country : "");
+      $("w-ip").textContent = `城市 · ${r.name}`;
+      fetchWeather(r.latitude, r.longitude);
+    } catch (e) {}
   }
   function closeSearch() { document.getElementById("search").classList.remove("open"); }
 
