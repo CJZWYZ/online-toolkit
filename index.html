@@ -6,7 +6,7 @@
   <title>液态玻璃 · 天气 / 日历 / 百科 / 搜索</title>
   <meta name="description" content="液态玻璃风格日常信息仪表盘：IP 天气、农历节气、历史上的今天百科与全站搜索。纯前端、免费开源 API、无需密钥。" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230a84ff' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230a84ff'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=17" />
+  <link rel="stylesheet" href="style.css?v=18" />
 </head>
 <body data-ready="0">
 
@@ -39,6 +39,15 @@
       <div class="search-panel liquid-glass" id="search-panel" aria-live="polite">
         <div class="search-results" id="search-results">
           <p class="search-empty">输入关键词，实时检索天气、节气与百科</p>
+        </div>
+        <div class="search-engine" id="search-engine" hidden>
+          <div class="se-title">在搜索引擎打开「<span id="se-q"></span>」</div>
+          <div class="se-chips">
+            <button type="button" class="se-chip" data-engine="bing">必应 网页</button>
+            <button type="button" class="se-chip" data-engine="baidu">百度 网页</button>
+            <button type="button" class="se-chip" data-engine="news">百度 资讯</button>
+          </div>
+          <div class="se-hint">将以小窗打开搜索结果，点击结果跳转</div>
         </div>
       </div>
     </div>
@@ -82,8 +91,21 @@
       </section>
     </div>
 
-    <!-- 访问量 -->
-    <div class="visit" id="visit">访问量 —</div>
+    <!-- 访问统计（含访问记录曲线） -->
+    <section class="card liquid-glass visit-card" aria-label="访问统计">
+      <div class="visit-row">
+        <div class="visit-col">
+          <div class="visit-k">全站访问量</div>
+          <div class="visit-num" id="visit-num">—</div>
+        </div>
+        <div class="visit-col visit-col-r">
+          <div class="visit-k">本机累计</div>
+          <div class="visit-num-sm" id="visit-local-num">—</div>
+        </div>
+      </div>
+      <div class="visit-sub" id="visit-sub">最近访问 —</div>
+      <div class="visit-chart" id="visit-chart" aria-label="访问记录曲线（近 7 天）"></div>
+    </section>
   </main>
 
   <!-- ============ 遮罩 + 抽屉（bottom sheet） ============ -->
@@ -121,11 +143,15 @@
     <img class="wiki-img" id="wiki-img" alt="" hidden />
     <div class="wiki-body" id="wiki-body">—</div>
     <a class="wiki-link" id="wiki-link" href="#" target="_blank" rel="noopener">阅读原文 ›</a>
+    <div class="wiki-news" id="wiki-news">
+      <div class="wn-title">🔥 热点新闻</div>
+      <div class="wn-list" id="wn-list"><p class="wn-loading">加载中…</p></div>
+    </div>
   </section>
 
   <!-- ============ 轻量依赖（CDN，固定主版本） ============ -->
   <script src="https://cdn.jsdelivr.net/npm/chinese-days@1"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=18"></script>
 </body>
 </html>
