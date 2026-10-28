@@ -6,6 +6,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const tz = () => (Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai");
+  const pad2 = (n) => String(n).padStart(2, "0");
 
   /* ---------- 通用：带超时的 fetch（默认 5s） ---------- */
   function fetchJSON(url, ms = 5000) {
@@ -276,6 +277,23 @@
     $("wiki-title").textContent = "暂无内容";
     $("wiki-text").textContent = "百科内容暂时无法加载";
   }
+  /* 热点新闻（60s API；条目点击 → 小窗搜索跳转） */
+  async function loadNews() {
+    const list = $("wn-list");
+    if (!list) return;
+    try {
+      const j = await fetchJSON("https://60s.viki.moe/v2/60s", 6000);
+      const news = (j && j.data && j.data.news) || [];
+      if (!news.length) { list.innerHTML = `<p class="wn-loading">暂无热点新闻</p>`; return; }
+      list.innerHTML = news.slice(0, 8).map((s, i) => {
+        const q = encodeURIComponent(String(s).trim());
+        return `<a class="wn-item" data-q="${q}" href="https://www.bing.com/search?q=${q}" target="_blank" rel="noopener">` +
+          `<span class="wn-i">${i + 1}</span><span class="wn-t">${esc(s)}</span></a>`;
+      }).join("");
+    } catch (e) {
+      list.innerHTML = `<p class="wn-loading">热点新闻加载失败</p>`;
+    }
+  }
   function openWikiDrawer(ev) {
     if (!ev) return;
     const page = ev.pages && ev.pages[0];
@@ -374,18 +392,81 @@
   }
   function closeSearch() { document.getElementById("search").classList.remove("open"); }
 
+  /* 在搜索引擎以小窗打开结果；点击结果在新窗跳转 */
+  let _lastOpenUrl = "", _lastOpenAt = 0;
+  function openSearchEngine(q, engine) {
+    q = (q || "").trim();
+    if (!q) return;
+    const u = engine === "baidu"
+      ? `https://www.baidu.com/s?wd=${encodeURIComponent(q)}`
+      : engine === "news"
+        ? `https://www.baidu.com/s?wd=${encodeURIComponent(q)}&tn=news`
+        : `https://www.bing.com/search?q=${encodeURIComponent(q)}`;
+    const now = Date.now();
+    if (u === _lastOpenUrl && now - _lastOpenAt < 600) return; /* 去抖，避免单次手势重复弹窗 */
+    _lastOpenUrl = u; _lastOpenAt = now;
+    const w = window.open(u, "_blank", "popup,noopener,width=520,height=780,left=240,top=80");
+    if (!w) window.open(u, "_blank", "noopener"); /* 弹窗被拦截时退回新标签页 */
+  }
+
   /* ============================================================
-     访问量统计（Abacus 免费免密钥计数 API + localStorage 兜底）
+     访问量统计 + 访问记录曲线（Abacus 全站计数 + localStorage 时间序列）
      ============================================================ */
+  function renderVisitChart(ts) {
+    const box = $("visit-chart");
+    if (!ts || !ts.length) { box.innerHTML = `<p class="wn-loading">暂无访问记录</p>`; return; }
+    /* 近 7 天分桶（含今天），y 轴随时间递增 */
+    const days = [];
+    const base = new Date(); base.setHours(0, 0, 0, 0);
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(base); d.setDate(d.getDate() - i);
+      days.push({ key: d.getTime(), label: `${d.getMonth() + 1}/${d.getDate()}`, count: 0 });
+    }
+    const map = new Map(days.map((x) => [x.key, x]));
+    ts.forEach((t) => {
+      const k = new Date(t); k.setHours(0, 0, 0, 0);
+      const c = map.get(k.getTime()); if (c) c.count++;
+    });
+    const counts = days.map((x) => x.count);
+    const max = Math.max(1, ...counts);
+    const W = 300, H = 84, pad = 8, n = counts.length, bw = (W - pad * 2) / n;
+    const xy = (i) => [pad + bw * i + bw / 2, H - pad - (counts[i] / max) * (H - pad * 2 - 10)];
+    const pts = counts.map((_, i) => xy(i));
+    const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const area = line + ` L ${pts[n - 1][0].toFixed(1)} ${H - pad} L ${pts[0][0].toFixed(1)} ${H - pad} Z`;
+    const bars = counts.map((c, i) => {
+      const x = pad + bw * i + bw * 0.2, w = bw * 0.6;
+      const y = H - pad - (c / max) * (H - pad * 2 - 10);
+      return `<rect class="vc-bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - pad - y).toFixed(1)}" rx="2"/>`;
+    }).join("");
+    const labels = days.map((x, i) => `<text class="vc-label" x="${(pad + bw * i + bw / 2).toFixed(1)}" y="${H - 1}">${x.label}</text>`).join("");
+    box.innerHTML = `<svg class="vc-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs><linearGradient id="vcg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="#0a84ff" stop-opacity="0.02"/></linearGradient></defs>
+      ${bars}
+      <path d="${area}" fill="url(#vcg)"/>
+      <path d="${line}" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${labels}</svg>`;
+  }
   async function updateVisit() {
-    const el = $("visit");
+    const numEl = $("visit-num"), localEl = $("visit-local-num"), subEl = $("visit-sub");
     const local = (parseInt(localStorage.getItem("tiaqi_visits") || "0", 10) + 1);
     localStorage.setItem("tiaqi_visits", local);
-    el.textContent = `访问量 ${local.toLocaleString()}（本机）`;
+    localEl.textContent = local.toLocaleString();
+    let ts = [];
+    try { ts = JSON.parse(localStorage.getItem("tiaqi_visits_ts") || "[]"); } catch (e) {}
+    ts.push(Date.now());
+    if (ts.length > 200) ts = ts.slice(-200);
+    localStorage.setItem("tiaqi_visits_ts", JSON.stringify(ts));
+    const last = new Date(ts[ts.length - 1]);
+    subEl.textContent = `最近访问 ${pad2(last.getHours())}:${pad2(last.getMinutes())}`;
+    renderVisitChart(ts);
+    numEl.textContent = "—";
     try {
       const j = await fetchJSON("https://abacus.jasoncameron.dev/hit/tiaqi/visits", 5000);
-      if (j && typeof j.value === "number") el.textContent = `全站访问量 ${j.value.toLocaleString()}`;
-    } catch (e) { /* 保持本机计数 */ }
+      if (j && typeof j.value === "number") numEl.textContent = j.value.toLocaleString();
+    } catch (e) { numEl.textContent = "—"; }
   }
 
   /* ============================================================
@@ -454,13 +535,32 @@
         enterHome();
     });
     const input = $("search-input");
+    const toggleEngine = (q) => {
+      const eng = $("search-engine");
+      if (q) { $("se-q").textContent = q; eng.hidden = false; }
+      else eng.hidden = true;
+    };
     input.addEventListener("focus", () => document.getElementById("search").classList.add("open"));
-    input.addEventListener("input", () => renderSearchResults(input.value.trim()));
+    input.addEventListener("input", () => { renderSearchResults(input.value.trim()); toggleEngine(input.value.trim()); });
+    /* 回车 → 在搜索引擎以小窗打开结果 */
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const q = input.value.trim(); if (q) openSearchEngine(q, "bing"); } });
     /* pointerdown 在 blur 之前触发，避免 iOS 上点击结果被 blur→closeSearch 吞掉 */
     input.addEventListener("blur", () => setTimeout(closeSearch, 300));
     $("search-results").addEventListener("pointerdown", (e) => {
       const el = e.target.closest(".search-item");
       if (el) { e.preventDefault(); onSearchSelect(lastResults[+el.dataset.i]); }
+    });
+    /* 搜索引擎小窗入口 */
+    $("search-engine").addEventListener("click", (e) => {
+      const chip = e.target.closest(".se-chip");
+      if (!chip) return;
+      openSearchEngine(input.value.trim(), chip.dataset.engine);
+    });
+    /* 热点新闻条目 → 小窗搜索 */
+    $("wn-list").addEventListener("click", (e) => {
+      const a = e.target.closest(".wn-item");
+      if (!a) return;
+      e.preventDefault(); openSearchEngine(a.dataset.q, "bing");
     });
 
     $("cal-card").addEventListener("click", () => { highlightIso = null; renderCalendarSheet(new Date()); openSheet("cal"); });
@@ -487,6 +587,7 @@
     renderCalendarSheet(new Date());
     updateVisit();
     loadWiki();
+    loadNews();
     const geo = await getGeo();
     $("w-ip").textContent = geo.ip ? `IP ${geo.ip} · ${geo.city}` : `IP · ${geo.city}`;
     $("w-city").textContent = geo.city;
