@@ -1127,10 +1127,26 @@
       list.appendChild(li);
     });
   }
+  /* 时间归一化：容忍 "9:30" "0930" "9点30" 等写法，非法返回 "" */
+  function normWhen(v) {
+    const d = String(v || "").replace(/[^\d]/g, "");
+    if (!d.length) return "";
+    let h, mi;
+    if (d.length <= 2) { h = +d; mi = 0; }
+    else { const s = d.padStart(4, "0"); h = +s.slice(0, 2); mi = +s.slice(2); }
+    if (!(h >= 0 && h <= 23 && mi >= 0 && mi <= 59)) return "";
+    return pad2(h) + ":" + pad2(mi);
+  }
   function addPlan(rawWhen, rawT) {
     const t = String(rawT || "").trim().slice(0, 40);
     if (!t) { toast("排班事项不能为空"); return false; }
-    const p = { when: String(rawWhen || "").trim(), t, ts: Date.now(), done: false };
+    let when = "";
+    const rw = String(rawWhen || "").trim();
+    if (rw) {
+      when = normWhen(rw);
+      if (!when) { toast("时间格式不对，试试 09:30"); return false; }
+    }
+    const p = { when, t, ts: Date.now(), done: false };
     plans.push(p);
     if (plans.length > PLAN_MAX) plans = plans.slice(-PLAN_MAX);
     writePlans(plans);
@@ -1164,7 +1180,11 @@
       e.preventDefault();
       const when = ($("plan-when") || {}).value || "";
       const text = ($("plan-text") || {}).value || "";
-      if (addPlan(when, text)) { if ($("plan-text")) $("plan-text").value = ""; announce("已添加排班"); }
+      if (addPlan(when, text)) {
+        if ($("plan-text")) $("plan-text").value = "";
+        if ($("plan-when")) $("plan-when").value = "";
+        announce("已添加排班");
+      }
     });
     const clr = $("plan-clear");
     if (clr) clr.addEventListener("click", clearPlans);
