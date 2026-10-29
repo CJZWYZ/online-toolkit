@@ -1,0 +1,7 @@
+{
+  "motifs": [
+    { "slug": "threshold", "name": "阈值", "gloss": "越过某条线之后，事情就不再一样了。" },
+    { "slug": "boundary", "name": "边界", "gloss": "边界既是保护，也是隔绝；被划定的与被跨越的。" },
+    { "slug": "signal-noise", "name": "信噪", "gloss": "在噪声里辨认信号，是判读的全部工作。" }
+  ]
+}
