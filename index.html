@@ -2,218 +2,114 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Tiaqi —— 天气 / 日历 / 百科 / 搜索</title>
-  <meta name="description" content="Tiaqi：薄釉质感的日常信息仪表盘，含 IP 天气、农历节气、历史上的今天与全站搜索。纯前端、免费开源 API、无需密钥。" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='3' width='26' height='26' rx='8' fill='none' stroke='%230B6E7C' stroke-width='2.4'/><circle cx='16' cy='16' r='5' fill='%230B6E7C'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=22" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tiaqi —— 把散落的信号读成判断</title>
+  <meta name="description" content="天启 Tiaqi：一边记录现实的脉动，一边收藏虚构的回声。情报站按期发布简报，小说档案按卷归档，全部为纯静态构建。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tiaqi —— 把散落的信号读成判断" />
+  <meta property="og:description" content="情报站与小说档案的双线站点，纯静态构建，无追踪、无数据库。" />
+  <meta property="og:url" content="https://www.tiaqi.com/" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="style.css?v=1" />
 </head>
-<body data-ready="0">
+<body>
+  <a class="skip" href="#main">跳到正文</a>
 
-  <!-- ============ 背景：L1 光晕呼吸 + L3 噪点（L0 在 body，L2 指针天光见下） ============ -->
-  <div class="bg" aria-hidden="true">
-    <span class="aura aura-a"></span>
-    <span class="aura aura-b"></span>
-    <div class="grain"></div>
-  </div>
-  <div class="glow" aria-hidden="true"></div>
-  <div class="sky-glow" aria-hidden="true"></div>
-
-  <!-- ============ 留言特效层：背景大字（内容之下）+ 弹幕（内容之上、抽屉之下）============ -->
-  <div class="msgfx msgfx-amb" id="msgfx-amb" aria-hidden="true"></div>
-  <div class="msgfx msgfx-dm" id="msgfx-dm" aria-hidden="true"></div>
-
-  <!-- ============ 欢迎页 ============ -->
-  <div class="welcome" id="welcome" data-phase="in" aria-label="欢迎页，轻点或按回车进入">
-    <div class="welcome-panel liquid-glass" id="welcome-panel">
-      <p class="welcome-greet">你好，今天过得怎样</p>
-      <button class="enter-btn" id="enter">进入</button>
-      <p class="welcome-hint">轻点进入仪表盘</p>
-    </div>
-  </div>
-
-  <!-- ============ 顶栏 + 搜索 ============ -->
-  <header class="topbar enter" style="--i:0">
-    <div class="brand">Tiaqi</div>
-    <div class="search" id="search">
-      <svg class="search-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-        <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
+        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
+        <path d="M12 1.6V6M12 18v4.4M1.6 12H6M18 12h4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+        <path d="M12 12 18.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
       </svg>
-      <input type="text" id="search-input" placeholder="搜索天气 / 节气 / 百科" aria-label="全站搜索"
-             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true"
-             role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" />
-      <div class="search-panel liquid-glass" id="search-panel">
-        <div class="search-results" id="search-results" role="listbox" aria-label="搜索结果">
-          <p class="search-empty">输入关键词，实时检索天气、节气与百科</p>
-        </div>
-        <div class="search-engine" id="search-engine" hidden>
-          <div class="se-title">在搜索引擎打开「<span id="se-q"></span>」</div>
-          <div class="se-chips">
-            <button type="button" class="se-chip" data-engine="bing">必应 网页</button>
-            <button type="button" class="se-chip" data-engine="baidu">百度 网页</button>
-            <button type="button" class="se-chip" data-engine="news">百度 资讯</button>
-          </div>
-          <div class="se-hint">将以小窗打开搜索结果，点击结果跳转</div>
-        </div>
-      </div>
-    </div>
+      <span>Tiaqi</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="#intel">情报站</a>
+      <a href="#fiction">小说档案</a>
+      <a href="about.html">关于</a>
+    </nav>
   </header>
 
-  <!-- ============ 主页 ============ -->
-  <main class="home" id="home" tabindex="-1">
-    <!-- IP + 天气主卡 -->
-    <section class="card liquid-glass weather enter" id="weather" aria-label="天气" style="--i:1">
-      <div class="w-ip" id="w-ip">IP · 定位中…</div>
-      <div class="w-top">
-        <div class="w-ico" id="w-ico" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="54" height="54"><g class="wi-float"><circle class="wi-sun" cx="24" cy="24" r="9" stroke="currentColor" stroke-width="3"/><g class="wi-rays" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 6 V11"/><path d="M24 37 V42"/><path d="M6 24 H11"/><path d="M37 24 H42"/><path d="M11 11 L15 15"/><path d="M33 33 L37 37"/><path d="M37 11 L33 15"/><path d="M15 33 L11 37"/></g></g></svg>
-        </div>
-        <div class="w-main">
-          <div class="w-temp"><span id="w-temp">--</span><span class="deg">°</span></div>
-          <div class="w-desc" id="w-desc">定位中…</div>
-        </div>
-      </div>
-      <div class="w-detail" id="w-detail">
-        <div class="w-m"><span class="k">体感</span><span class="v"><em id="w-feel">--</em>°</span></div>
-        <div class="w-m"><span class="k">风速</span><span class="v"><em id="w-wind">--</em></span></div>
-        <div class="w-m"><span class="k">城市</span><span class="v" id="w-city">—</span></div>
-      </div>
-      <div class="w-err" id="w-err" hidden>天气暂不可用</div>
+  <main id="main">
+    <!-- ============ 品牌引言 ============ -->
+    <section class="hero">
+      <p class="eyebrow">SIGNAL · ARCHIVE</p>
+      <h1 class="display">把散落的信号<br />读成判断</h1>
+      <p class="lede">
+        天启不是预告终局的号角，而是一台把信号读成判断的仪器。<br />
+        一边记录现实的脉动，一边收藏虚构的回声——同一套观测，两种刻度。
+      </p>
     </section>
 
-    <!-- 小卡片：日历 + 百科 -->
-    <div class="small-grid">
-      <section class="card liquid-glass cal-card enter" id="cal-card" aria-label="日历，展开月历"
-               style="--i:2" tabindex="0" role="button" aria-haspopup="dialog" aria-expanded="false">
-        <div class="sc-head"><span class="sc-k">日历</span><span class="sc-go">展开 ›</span></div>
-        <div class="cal-date" id="cal-greg">—</div>
-        <div class="cal-sub" id="cal-lunar">农历 —</div>
-        <div class="cal-tags" id="cal-tags"></div>
+    <!-- ============ 双轨：深色情报 / 浅色虚构 ============ -->
+    <div class="tracks">
+      <!-- 情报站：恒定深色 -->
+      <section class="track track-intel" id="intel" aria-labelledby="intel-h">
+        <div class="track-head">
+          <p class="track-kicker">SIGNAL</p>
+          <h2 class="track-title" id="intel-h">情报站</h2>
+        </div>
+        <div class="beam" aria-hidden="true"></div>
+        <div class="door">
+          <p class="door-meta mono">第 — 期</p>
+          <p class="door-headline">本期核心判断</p>
+          <div class="empty">
+            <p class="empty-title">首期简报正在归集信号</p>
+            <p class="empty-hint">
+              信号来自公开信源，按周期自动归集；核心判断由人工撰写后发布。
+            </p>
+          </div>
+        </div>
+        <p class="track-note">
+          情报为「简报制」：一期一页，含核心判断、分维度信号与本期母题，不做倒序博客流。
+        </p>
       </section>
 
-      <section class="card liquid-glass wiki-card enter" id="wiki-card" aria-label="历史上的今天，展开详情"
-               style="--i:3" tabindex="0" role="button" aria-haspopup="dialog" aria-expanded="false">
-        <div class="sc-head"><span class="sc-k">历史上的今天</span><span class="sc-go">展开 ›</span></div>
-        <div class="wiki-title" id="wiki-title">加载中…</div>
-        <div class="wiki-text" id="wiki-text">—</div>
+      <!-- 小说档案：恒定浅色 -->
+      <section class="track track-fiction" id="fiction" aria-labelledby="fiction-h">
+        <div class="track-head">
+          <p class="track-kicker">ARCHIVE</p>
+          <h2 class="track-title serif" id="fiction-h">小说档案</h2>
+        </div>
+        <div class="rule" aria-hidden="true"></div>
+        <div class="door">
+          <p class="door-meta mono">卷 — · 第 — 章</p>
+          <p class="door-headline serif">尚未开卷</p>
+          <div class="empty">
+            <p class="empty-title">档案尚未开卷</p>
+            <p class="empty-hint">
+              章节以 Markdown 管理，按「书目 → 卷 → 章」归档，讨论区托管在 GitHub Discussions。
+            </p>
+          </div>
+        </div>
+        <p class="track-note">
+          小说为「档案制」：按卷组织而非按时间倒序，正文限宽、适合长文阅读，讨论入口收在文末。
+        </p>
       </section>
     </div>
 
-    <!-- 访问统计（含访问记录曲线） -->
-    <section class="card liquid-glass visit-card enter" aria-label="访问统计" style="--i:4">
-      <div class="visit-row">
-        <div class="visit-col">
-          <div class="visit-k">全站访问量</div>
-          <div class="visit-num" id="visit-num">—</div>
-        </div>
-        <div class="visit-col visit-col-r">
-          <div class="visit-k">本机累计</div>
-          <div class="visit-num-sm" id="visit-local-num">—</div>
-        </div>
-      </div>
-      <div class="visit-sub" id="visit-sub">最近访问 —</div>
-      <div class="visit-chart" id="visit-chart" role="img" aria-label="最近 7 天访问记录，暂无数据"></div>
-    </section>
-
-    <!-- 留言板：昵称 + 内容自定义，留言化作弹幕漂移与背景大字 -->
-    <section class="card liquid-glass msg-card enter" aria-label="留言板" style="--i:5">
-      <div class="sc-head">
-        <span class="sc-k">留言板</span>
-        <span class="msg-count" id="msg-count">还没有留言</span>
-      </div>
-      <form class="msg-form" id="msg-form" autocomplete="off">
-        <div class="msg-fields">
-          <input class="msg-in" id="msg-nick" type="text" maxlength="12" placeholder="昵称（可留空）"
-                 aria-label="留言昵称" autocomplete="off" autocapitalize="off" spellcheck="false" />
-          <input class="msg-in" id="msg-text" type="text" maxlength="60" placeholder="说点什么…最多 60 字"
-                 aria-label="留言内容" autocomplete="off" enterkeyhint="send" />
-        </div>
-        <button class="msg-send" id="msg-send" type="submit">发送</button>
-      </form>
-      <div class="msg-ctrl">
-        <button type="button" class="tg" id="tg-dm" aria-pressed="true">弹幕 · 开</button>
-        <button type="button" class="tg" id="tg-amb" aria-pressed="true">背景大字 · 开</button>
-        <button type="button" class="tg tg-del" id="msg-clear">清空</button>
-      </div>
-      <ul class="msg-list" id="msg-list"></ul>
-      <p class="msg-tip" id="msg-tip">留言保存在本机浏览器</p>
-    </section>
-
-    <!-- 排班板：时间 + 事项，可标记完成/删除；事项与留言共用背景氛围层 -->
-    <section class="card liquid-glass plan-card enter" aria-label="今日排班" style="--i:6">
-      <div class="sc-head">
-        <span class="sc-k">今日排班</span>
-        <span class="plan-count" id="plan-count">还没有安排</span>
-      </div>
-      <form class="plan-form" id="plan-form" autocomplete="off">
-        <div class="plan-fields">
-          <input class="plan-in plan-when" id="plan-when" type="text" inputmode="numeric" maxlength="8"
-                 placeholder="时间（可选，如 09:30）" aria-label="时间，可选，格式如 09:30"
-                 autocomplete="off" />
-          <input class="plan-in plan-text" id="plan-text" type="text" maxlength="40"
-                 placeholder="安排点什么…最多 40 字" aria-label="排班事项"
-                 autocomplete="off" enterkeyhint="send" />
-        </div>
-        <button class="msg-send plan-add" id="plan-add" type="submit">添加</button>
-      </form>
-      <div class="msg-ctrl">
-        <button type="button" class="tg tg-del" id="plan-clear">清空</button>
-      </div>
-      <ul class="plan-list" id="plan-list"></ul>
-      <p class="msg-tip" id="plan-tip">排班保存在本机浏览器，也会浮现在背景里（由「背景大字」开关统一控制）</p>
+    <!-- ============ 母题缝合带 ============ -->
+    <section class="motif-band" aria-labelledby="motif-h">
+      <h2 class="motif-title" id="motif-h">本期母题</h2>
+      <p class="motif-empty">
+        母题是缝合两条线的结构：情报信号与小说章节共享同一母题，可双向跳转。当前尚无已发布内容。
+      </p>
+      <p class="motif-note">情报侧 <span class="mono">0</span> 条 · 虚构侧 <span class="mono">0</span> 章</p>
     </section>
   </main>
 
-  <!-- ============ 遮罩 + 抽屉 ============ -->
-  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
-
-  <section class="sheet liquid-glass" id="cal-sheet" aria-label="当月日历" role="dialog" aria-modal="true"
-           aria-labelledby="cal-sheet-title" tabindex="-1" hidden>
-    <div class="sheet-grab" id="cal-grab" aria-hidden="true"></div>
-    <div class="sheet-head">
-      <span class="sheet-title" id="cal-sheet-title">日历 · 农历 · 节气</span>
-      <button class="close-btn" id="cal-close" aria-label="关闭">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
+  <footer class="footer">
+    <div class="foot-row">
+      <p class="foot-brand">Tiaqi</p>
+      <nav class="foot-nav" aria-label="页脚导航">
+        <a href="about.html">关于与更新机制</a>
+        <a href="https://github.com/CJZWYZ/online-toolkit" rel="noopener">在 GitHub 关注更新</a>
+      </nav>
     </div>
-    <div class="cal-bar">
-      <button class="cal-nav" id="cal-prev" aria-label="上个月">‹</button>
-      <div class="cal-title" id="cal-title">—</div>
-      <button class="cal-nav" id="cal-next" aria-label="下个月">›</button>
-    </div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-legend">
-      <span><i class="dot holiday"></i>节假日</span>
-      <span><i class="dot work"></i>调休上班</span>
-      <span><i class="dot term"></i>节气</span>
-    </div>
-  </section>
-
-  <section class="sheet liquid-glass" id="wiki-sheet" aria-label="百科详情" role="dialog" aria-modal="true"
-           aria-labelledby="wiki-sheet-title" tabindex="-1" hidden>
-    <div class="sheet-grab" id="wiki-grab" aria-hidden="true"></div>
-    <div class="sheet-head">
-      <span class="sheet-title" id="wiki-sheet-title">历史上的今天</span>
-      <button class="close-btn" id="wiki-close" aria-label="关闭">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-    </div>
-    <img class="wiki-img" id="wiki-img" alt="" hidden />
-    <div class="wiki-body" id="wiki-body">—</div>
-    <a class="wiki-link" id="wiki-link" href="#" target="_blank" rel="noopener">阅读原文 ›</a>
-    <div class="wiki-news" id="wiki-news">
-      <div class="wn-title">🔥 热点新闻</div>
-      <div class="wn-list" id="wn-list"><p class="wn-loading">加载中…</p></div>
-    </div>
-  </section>
-
-  <!-- 独立的 live region：只播报「找到 N 条结果」等，避免整块结果被重读 -->
-  <div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
-
-  <!-- ============ 轻量依赖（CDN，固定主版本） ============ -->
-  <script src="https://cdn.jsdelivr.net/npm/chinese-days@1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
-  <script src="app.js?v=22"></script>
+    <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
+  </footer>
 </body>
 </html>
