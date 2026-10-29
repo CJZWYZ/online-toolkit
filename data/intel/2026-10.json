@@ -224,6 +224,42 @@
     {
       "level": "confirmed",
       "dimension": "tech",
+      "title": "A Pig, the State, and War: Porco Rosso (Kurenai No Buta) (2014)",
+      "source": "Hacker News",
+      "url": "https://journal.animationstudies.org/article/id/66/",
+      "date": "2026-10-29",
+      "note": "Article URL: https://journal.animationstudies.org/article/id/66/ Comments URL: https://news.ycombinator.com/item?id=50297089 Points: 8 # Comments: 0",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "The Great American Rascal: Tom Sawyer at 150",
+      "source": "Hacker News",
+      "url": "https://claremontreviewofbooks.com/the-great-american-rascal/",
+      "date": "2026-10-29",
+      "note": "Article URL: https://claremontreviewofbooks.com/the-great-american-rascal/ Comments URL: https://news.ycombinator.com/item?id=50296947 Points: 18 # Comments: 1",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Should a medical diagnosis reshape the past? (2025)",
+      "source": "Hacker News",
+      "url": "https://chengela.substack.com/p/should-a-medical-diagnosis-reshape",
+      "date": "2026-10-29",
+      "note": "Article URL: https://chengela.substack.com/p/should-a-medical-diagnosis-reshape Comments URL: https://news.ycombinator.com/item?id=50296920 Points: 9 # Comments: 0",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
       "title": "OpenAI 称其模型证明了局部光滑化猜想，并推翻指数时间假设",
       "source": "开源中国·资讯",
       "url": "https://www.oschina.net/news/503268",
@@ -236,59 +272,23 @@
     {
       "level": "confirmed",
       "dimension": "tech",
+      "title": "El Niño Is Flooding California's Coasts with the Highest Tides to Come",
+      "source": "Hacker News",
+      "url": "https://gizmodo.com/el-nino-is-already-flooding-californias-coasts-and-the-years-highest-tides-havent-arrived-2000832574",
+      "date": "2026-10-29",
+      "note": "Article URL: https://gizmodo.com/el-nino-is-already-flooding-californias-coasts-and-the-years-highest-tides-havent-arrived-2000832574 Comments URL: https://news.ycombinator.com/ite",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
       "title": "Termexo v0.11.0 发布：macOS 安装包、多标签预览与常用操作审核",
       "source": "开源中国·资讯",
       "url": "https://www.oschina.net/news/503267",
       "date": "2026-10-28",
       "note": "Termexo v0.11.0 已发布。Termexo 是 MIT 开源的本地编程 Agent 工作台，用项目工作区组织真实终端、原生会话和任务。本次提供 Windows x64、macOS Apple Silicon 与 Intel 安装包，并更新内容预览、常用操作和第三方通知体验。 本文由项目维护者提交，使用 AI 辅助整理，已对照正式更新记录核对。下图",
-      "motif": [
-        "threshold"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "tech",
-      "title": "We ran AI agent swarms in Minecraft and Mindustry",
-      "source": "Hacker News",
-      "url": "https://labs.ycombinator.com/projects/games/index.html",
-      "date": "2026-10-29",
-      "note": "Article URL: https://labs.ycombinator.com/projects/games/index.html Comments URL: https://news.ycombinator.com/item?id=50296486 Points: 27 # Comments: 12",
-      "motif": [
-        "threshold"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "security",
-      "title": "Binance-hacker-1029 – $5.6B stolen from Binance",
-      "source": "Hacker News",
-      "url": "https://arkm.com/explorer/entity/21a94755-f604-45e5-9501-6542e23005e8",
-      "date": "2026-10-29",
-      "note": "Article URL: https://arkm.com/explorer/entity/21a94755-f604-45e5-9501-6542e23005e8 Comments URL: https://news.ycombinator.com/item?id=50296470 Points: 178 # Comments: 84",
-      "motif": [
-        "boundary"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "security",
-      "title": "Sylphide OS: a general-purpose OS for microcontroller-based computers",
-      "source": "Hacker News",
-      "url": "https://projects.freehackers.org/sylphide-os/",
-      "date": "2026-10-29",
-      "note": "Article URL: https://projects.freehackers.org/sylphide-os/ Comments URL: https://news.ycombinator.com/item?id=50295868 Points: 13 # Comments: 1",
-      "motif": [
-        "boundary"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "tech",
-      "title": "ElementaryUI – Swift, in the Browser",
-      "source": "Hacker News",
-      "url": "https://elementary.codes",
-      "date": "2026-10-29",
-      "note": "Article URL: https://elementary.codes Comments URL: https://news.ycombinator.com/item?id=50295821 Points: 21 # Comments: 1",
       "motif": [
         "threshold"
       ]
