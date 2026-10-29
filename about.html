@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>关于 —— Tiaqi</title>
   <meta name="description" content="天启 Tiaqi 的方法论、更新机制、信源声明与隐私说明。纯静态站点，无数据库、无追踪。" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
-  <meta name="color-scheme" content="light dark" />
-  <link rel="stylesheet" href="style.css?v=1" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
+  <meta name="color-scheme" content="light" />
+  <link rel="stylesheet" href="style.css?v=3" />
 </head>
-<body>
+<body class="theme-about">
   <a class="skip" href="#main">跳到正文</a>
 
   <header class="topbar">
-    <a class="brand" href="/">
+    <a class="brand" href="./">
       <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
         <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
         <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
@@ -23,13 +23,23 @@
       <span>Tiaqi</span>
     </a>
     <nav class="nav" aria-label="主导航">
-      <a href="/#intel">情报站</a>
-      <a href="/#fiction">小说档案</a>
+      <a href="intel/">情报站</a>
+      <a href="fiction/">小说档案</a>
       <a href="about.html" aria-current="page">关于</a>
     </nav>
   </header>
 
-  <main id="main" class="page">
+  <main id="main" class="page" tabindex="-1">
+    <nav class="sections" aria-label="站点主分区">
+      <ul role="list">
+        <li><a href="intel/"><span class="s-dot" aria-hidden="true"></span>情报站</a></li>
+        <li><a href="fiction/"><span class="s-dot" aria-hidden="true"></span>小说档案</a></li>
+        <li><a href="motif/"><span class="s-dot" aria-hidden="true"></span>母题</a></li>
+        <li><a href="intel/archive/"><span class="s-dot" aria-hidden="true"></span>归档</a></li>
+        <li><a href="about.html" aria-current="page"><span class="s-dot" aria-hidden="true"></span>关于</a></li>
+      </ul>
+    </nav>
+
     <article class="prose">
       <p class="eyebrow">ABOUT</p>
       <h1 class="h1">关于天启</h1>
@@ -56,6 +66,9 @@
         让同一母题下的<strong>现实信号</strong>与<strong>虚构章节</strong>可以双向跳转。这不是两个割裂的站点，
         而是同一台仪器的两个刻度盘。
       </p>
+      <p class="cta-row">
+        <a class="cta cta-ghost" href="motif/">浏览全部母题 →</a>
+      </p>
 
       <h2>更新机制</h2>
       <ul class="list">
@@ -81,7 +94,7 @@
       </p>
       <p class="cta-row">
         <a class="cta" href="https://github.com/CJZWYZ/online-toolkit" rel="noopener">在 GitHub 关注更新</a>
-        <a class="cta cta-ghost" href="/">返回首页</a>
+        <a class="cta cta-ghost" href="./">返回首页</a>
       </p>
     </article>
   </main>
@@ -90,8 +103,9 @@
     <div class="foot-row">
       <p class="foot-brand">Tiaqi</p>
       <nav class="foot-nav" aria-label="页脚导航">
-        <a href="/#intel">情报站</a>
-        <a href="/#fiction">小说档案</a>
+        <a href="intel/">情报站</a>
+        <a href="fiction/">小说档案</a>
+        <a href="feed.xml">RSS</a>
       </nav>
     </div>
     <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
