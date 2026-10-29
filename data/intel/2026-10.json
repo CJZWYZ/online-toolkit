@@ -248,6 +248,30 @@
     {
       "level": "confirmed",
       "dimension": "tech",
+      "title": "Hermes and REA and GLM 5.3 = Reverse engineering TikTok app for less than $20",
+      "source": "Hacker News",
+      "url": "https://www.scraping.club/p/tiktok-scraping-metadata",
+      "date": "2026-10-29",
+      "note": "Article URL: https://www.scraping.club/p/tiktok-scraping-metadata Comments URL: https://news.ycombinator.com/item?id=50295503 Points: 11 # Comments: 5",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "A tiny world model running games on a Raspberry Pi Pico 2 W",
+      "source": "Hacker News",
+      "url": "https://github.com/SheepSeb/tinyworldformer",
+      "date": "2026-10-29",
+      "note": "Article URL: https://github.com/SheepSeb/tinyworldformer Comments URL: https://news.ycombinator.com/item?id=50295450 Points: 19 # Comments: 1",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
       "title": "深度使用 Zig 四个月：最爱的设计和最失望的坑，来自同一种偏执",
       "source": "开源中国·资讯",
       "url": "https://www.oschina.net/news/503266/four-months-of-zig",
@@ -260,35 +284,11 @@
     {
       "level": "confirmed",
       "dimension": "tech",
-      "title": "Patrick Stewart Has Died",
+      "title": "Patrick Stewart has died",
       "source": "Hacker News",
       "url": "https://www.nytimes.com/2026/10/29/arts/television/patrick-stewart-dead.html",
       "date": "2026-10-29",
-      "note": "Article URL: https://www.nytimes.com/2026/10/29/arts/television/patrick-stewart-dead.html Comments URL: https://news.ycombinator.com/item?id=50294770 Points: 47 # Comments: 3",
-      "motif": [
-        "threshold"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "tech",
-      "title": "The importance of communities around software",
-      "source": "Hacker News",
-      "url": "https://lumi.codeberg.page/blog/software-community.html",
-      "date": "2026-10-29",
-      "note": "Article URL: https://lumi.codeberg.page/blog/software-community.html Comments URL: https://news.ycombinator.com/item?id=50294507 Points: 26 # Comments: 14",
-      "motif": [
-        "threshold"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "tech",
-      "title": "Show HN: Auto Dismiss Mac OS \"Allow to find devices on local networks?\"",
-      "source": "Hacker News",
-      "url": "https://github.com/johncassil/dontallow",
-      "date": "2026-10-29",
-      "note": "This popup has been a constant gripe of mine for years. I almost NEVER want to allow this permission and there is no system setting to disable it globally and prevent the popup fro",
+      "note": "https://archive.ph/y4Egm https://en.wikipedia.org/wiki/Patrick_Stewart Comments URL: https://news.ycombinator.com/item?id=50294702 Points: 1354 # Comments: 254",
       "motif": [
         "threshold"
       ]
