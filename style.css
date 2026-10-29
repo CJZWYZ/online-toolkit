@@ -1,5 +1,7 @@
 /* ============================================================
-   天启 · Tiaqi —— 白灰体系（v3）
+   天启 · Tiaqi —— 白灰体系（v4）
+   v4 三处减法：① 顶栏去文字标只留几何图标 ② 去拆解字，背景改静态点阵
+                ③ 5 个入口改为侧边栏（零 JS details 折叠 + 桌面常驻 sticky）
    点 6px 正圆 · 线 1px hairline · 面 灰阶 + hairline（圆角 2px，不靠阴影）
    尺度 Fibonacci：8 13 21 34 55 89 144 / 字号 13 16 21 34 55 89
    零 webfont（系统字体栈）· 零第三方请求
@@ -48,6 +50,15 @@
   --pad: 21px;
   --radius: 2px;
 
+  /* 侧栏：1024–1279 → 144px；≥1280 → 233px；间距恒定 34px */
+  --sb: 144px;
+  --sb-gap: 34px;
+  --shell: calc(var(--maxw) + var(--sb) + var(--sb-gap) + var(--pad) * 2);
+  /* 正文列在视口中的左右边界（% 在 .bg-plane 上按固定定位视口解析，故不含滚动条宽度） */
+  --shell-l: max(var(--pad), calc((100% - var(--shell)) / 2 + var(--pad)));
+  --text-l: calc(var(--shell-l) + var(--sb) + var(--sb-gap));
+  --text-r: calc(var(--text-l) + var(--col));
+
   /* 动效 */
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ease-gold: cubic-bezier(.618, 0, .382, 1);
@@ -63,9 +74,11 @@
              "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
   --font-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "SimSun", serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
 
-  /* 背景层聚合进度（由内联 JS 写入；默认终态 = 1） */
-  --p: 1;
+/* 断点：≥1280 侧栏加宽到 233px */
+@media (min-width: 1280px) {
+  :root { --sb: 233px; }
 }
 
 /* ---------- 基础 ---------- */
@@ -84,7 +97,8 @@ body {
   color: var(--c-text);
   background: var(--c-bg);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* clip 而非 hidden：不创建滚动容器，侧栏 position:sticky 才能相对视口生效 */
+  overflow-x: clip;
 }
 
 h1, h2, h3 { margin: 0; line-height: 1.35; font-weight: 600; }
@@ -125,65 +139,36 @@ main:focus { outline: none; }
 /* ---------- 顶栏 ---------- */
 .topbar {
   position: relative; z-index: 2;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--s-2); flex-wrap: wrap;
-  max-width: var(--maxw); margin: 0 auto;
-  padding: var(--s-2) var(--pad);
+  display: flex; align-items: center; gap: var(--s-2);
+  max-width: var(--shell); margin: 0 auto;
+  padding: var(--s-1) var(--pad);
   background: var(--c-bg);
   border-bottom: 1px solid var(--c-line);
 }
+/* 品牌：只留极简几何图标，可见文字已移除，可访问名由 .sr-only 提供 */
 .brand {
-  display: inline-flex; align-items: center; gap: var(--s-1);
-  font-size: var(--fs-16); font-weight: 600; letter-spacing: .01em;
-  color: var(--c-text); text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 auto;
+  width: 44px; height: 44px;      /* 触控区 44×44 */
+  margin-left: -11px;             /* 图标视觉左缘与版心内容对齐 */
+  color: var(--c-accent);         /* #1F4FD8 on #FFF → 6.6:1 */
+  text-decoration: none;
 }
-.brand .mark { color: var(--c-accent); flex: 0 0 auto; }
-.nav { display: flex; gap: var(--s-3); flex-wrap: wrap; }
-.nav a {
-  font-size: var(--fs-13); color: var(--c-text-2); text-decoration: none;
-  padding: var(--s-1) 0; border-bottom: 1px solid transparent;
-  transition: color var(--t-233) var(--ease), border-color var(--t-233) var(--ease);
-}
-.nav a:hover { color: var(--c-text); border-bottom-color: var(--c-accent); }
-.nav a[aria-current="page"] { color: var(--c-text); font-weight: 600; border-bottom-color: var(--c-accent); }
+.brand .mark { display: block; color: inherit; }
+.brand[aria-current="page"] .mark { color: var(--c-text); }
 
-/* ---------- 「天启」拆解字背景层 ---------- */
-.deco {
-  position: fixed; inset: 0; z-index: 0;
-  pointer-events: none; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  gap: var(--s-3);
-  font-family: var(--font-serif);
+/* ---------- 静态点阵底噪层（零 JS · 零动画） ---------- */
+.bg-plane {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #0b0b0c0f 1px, transparent 1px);
+  background-size: 21px 21px;
 }
-:root[data-bg="off"] .deco { display: none; }
-.dc {
-  position: relative;
-  width: 1.2em; height: 1.6em;
-  font-size: clamp(89px, 14vw, 233px);
-  line-height: 1;
+@media print {
+  .bg-plane { display: none; }
 }
-.dp {
-  position: absolute; left: 50%; top: 50%;
-  display: block; font-size: 1em; line-height: 1;
-  color: var(--c-text);
-  opacity: calc(.03 + .03 * var(--p));
-  transform:
-    translate(-50%, -50%)
-    translate(calc(var(--fx) + (1 - var(--p)) * var(--sx)), calc(var(--fy) + (1 - var(--p)) * var(--sy)))
-    rotate(calc((1 - var(--p)) * var(--r)))
-    scale(calc(var(--k) * (.236 + .764 * var(--p))));
-  transition: transform var(--t-377) var(--ease), opacity var(--t-377) linear;
-}
-/* 天 → 一 + 大 ；启 → 户 + 口 + 攵（部件按比例缩放后拼合） */
-.dp-1, .wp-1 { --fx: 0em;    --fy: -.34em; --k: .78; }
-.dp-2, .wp-2 { --fx: 0em;    --fy: .18em;  --k: .92; }
-/* 启 = 户(上) + 口(下) */
-.dp-3, .wp-3 { --fx: 0em;    --fy: -.26em; --k: .68; }
-.dp-4, .wp-4 { --fx: 0em;    --fy: .34em;  --k: .58; }
-.dp-1 { --sx: -38.2vw; --sy: -8vh;  --r: -21deg; }
-.dp-2 { --sx: 38.2vw;  --sy: 8vh;   --r: 21deg; }
-.dp-3 { --sx: -38.2vw; --sy: 13vh;  --r: -21deg; }
-.dp-4 { --sx: 38.2vw;  --sy: -13vh; --r: 13deg; }
 
 /* ---------- 欢迎页（Hello, World） ---------- */
 /* 无 JS：普通可见区块；JS 激活（data-js=1）：覆盖层 */
@@ -218,24 +203,12 @@ html[data-js="1"] .welcome.w-gone {
   letter-spacing: .08em; margin-bottom: var(--s-2);
 }
 .w-title {
-  position: relative; height: 1.25em; margin-bottom: var(--s-2);
+  margin-bottom: var(--s-2);
   font-family: var(--font-serif); font-size: var(--fs-55); line-height: 1.25;
   letter-spacing: .21em;
+  text-indent: .21em;             /* 补偿末字后多出的字距，保持视觉居中 */
 }
-.wq {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center; gap: var(--s-3);
-}
-.wc { position: relative; width: 1em; height: 1em; }
-.wp {
-  position: absolute; left: 50%; top: 50%; display: block;
-  font-size: 1em; line-height: 1;
-  transform: translate(-50%, -50%) translate(var(--fx), var(--fy)) scale(var(--k));
-}
-.wp-1 { --sx: -.7em;  --sy: -.5em;  --r: -21deg; }
-.wp-2 { --sx: .7em;   --sy: .5em;   --r: 21deg; }
-.wp-3 { --sx: -.7em;  --sy: -.55em; --r: -21deg; }
-.wp-4 { --sx: .7em;   --sy: .55em;  --r: 21deg; }
+.wq { display: inline-block; }
 .w-sub { font-size: var(--fs-16); color: var(--c-text-2); margin-bottom: var(--s-1); }
 .w-tag { font-size: var(--fs-13); color: var(--c-text-3); margin-bottom: var(--s-3); }
 .w-enter {
@@ -252,37 +225,107 @@ html:not([data-js="1"]) .w-enter { display: none; }
 @keyframes w-dot-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes w-rule-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes w-up { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes w-part {
-  from {
-    opacity: .03;
-    transform: translate(-50%, -50%) translate(var(--sx), var(--sy)) rotate(var(--r)) scale(calc(var(--k) * .5));
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) translate(var(--fx), var(--fy)) rotate(0deg) scale(var(--k));
-  }
-}
 html[data-js="1"] .welcome:not(.w-gone) .w-dot { animation: w-dot-in var(--t-144) var(--ease) both; }
 html[data-js="1"] .welcome:not(.w-gone) .w-rule { transform-origin: center; animation: w-rule-in var(--t-480) var(--ease) 144ms both; }
 html[data-js="1"] .welcome:not(.w-gone) .w-hello { animation: w-up var(--t-233) var(--ease) 480ms both; }
-html[data-js="1"] .welcome:not(.w-gone) .wp { animation: w-part var(--t-610) var(--ease-gold) 620ms both; }
+/* 「天启」整体一次性上浮淡入，不再拆解部件聚合 */
+html[data-js="1"] .welcome:not(.w-gone) .wq { animation: w-up var(--t-610) var(--ease) 620ms both; }
 html[data-js="1"] .welcome:not(.w-gone) .w-sub { animation: w-up var(--t-233) var(--ease) 1230ms both; }
 html[data-js="1"] .welcome:not(.w-gone) .w-tag { animation: w-up var(--t-233) var(--ease) 1285ms both; }
 html[data-js="1"] .welcome:not(.w-gone) .w-enter { animation: w-up var(--t-233) var(--ease) 1340ms both; }
 
-/* ---------- 分区入口（5 个真实链接） ---------- */
-.sections {
-  max-width: var(--maxw); margin: 0 auto;
-  padding: 0 var(--pad) var(--s-4);
+/* ---------- 分区入口：侧边栏（5 个真实 URL） ---------- */
+/* 主区 + 侧栏：≥1024 起为两列栅格，主区永不被挤压 */
+.shell { display: grid; grid-template-columns: minmax(0, 1fr); }
+
+/* 移动端 / 平板：<details open> 折叠块，零 JS */
+.sidebar {
+  position: relative; z-index: 1;
+  /* width:100% 必需：栅格项上的 auto 外边距会吞掉剩余空间、令其收缩为 fit-content */
+  width: 100%; max-width: var(--maxw); margin: 0 auto;
+  padding: 0 var(--pad);
+  border-bottom: 1px solid var(--c-line);
 }
-.sections ul { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); }
+.sb-sum {
+  display: flex; align-items: center; gap: var(--s-1);
+  min-height: 44px; cursor: pointer;
+  font-size: var(--fs-13); font-weight: 600; letter-spacing: .21em;
+  color: var(--c-text-3);
+  list-style: none;
+}
+.sb-sum::-webkit-details-marker { display: none; }
+.sb-sum::before {
+  content: ""; flex: 0 0 auto; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--c-accent);
+}
+.sb-sum::after {
+  content: ""; margin-left: auto; width: 6px; height: 6px;
+  border-right: 1px solid var(--c-line-strong);
+  border-bottom: 1px solid var(--c-line-strong);
+  transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform var(--t-233) var(--ease);
+}
+.sidebar[open] > .sb-sum::after { transform: rotate(-135deg) translate(-1px, -1px); }
+
+/* 390：竖排 */
+.sections { padding: var(--s-1) 0 var(--s-2); }
+.sections ul { display: flex; flex-direction: column; gap: 2px; }
+/* 768：5 项横排平铺 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sections ul { flex-direction: row; flex-wrap: wrap; gap: var(--s-1) var(--s-3); }
+}
+
+/* ≥1024：隐藏 summary，变常驻侧栏 */
+@media (min-width: 1024px) {
+  .shell {
+    grid-template-columns: var(--sb) minmax(0, 1fr);
+    gap: var(--sb-gap);
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding: 0 var(--pad);
+  }
+  .sidebar {
+    position: sticky; top: 55px; align-self: start;
+    max-height: calc(100vh - 89px); overflow: auto;
+    max-width: none; margin: 0; padding: var(--s-3) 0 0;
+    border: 0;
+  }
+  .sidebar > .sb-sum { display: none; }
+  /* 桌面端强制常驻：即便在窄屏被手动折叠过，放大后也恢复可见（零 JS） */
+  .sidebar::details-content { content-visibility: visible; }
+  .sidebar .sections { padding: 0; }
+  .sidebar .sections ul { flex-direction: column; gap: 2px; }
+  /* 主区内容统一左对齐，右侧留白 377，保证正文列几何可预测。
+     用 .shell 前缀提升特异性，压过后文各容器自带的 margin:0 auto */
+  .shell .brief,
+  .shell .hero,
+  .shell .tracks,
+  .shell .motif-band,
+  .shell .page,
+  .shell .chapter { margin-left: 0; margin-right: 0; }
+
+  /* 正文列（610px）内保持纯白：点阵只铺在版心外侧 */
+  .bg-plane {
+    -webkit-mask-image: linear-gradient(90deg,
+      #000 0, #000 var(--text-l),
+      transparent var(--text-l), transparent var(--text-r),
+      #000 var(--text-r), #000 100%);
+    mask-image: linear-gradient(90deg,
+      #000 0, #000 var(--text-l),
+      transparent var(--text-l), transparent var(--text-r),
+      #000 var(--text-r), #000 100%);
+  }
+  /* 章节页正文列宽 610，左对齐，右侧留白 377 */
+  .chapter { margin-left: 0; margin-right: 0; }
+}
+
 .sections a {
   position: relative;
   display: inline-flex; align-items: center; gap: var(--s-1);
   min-height: 44px; padding: var(--s-1) 0;
   color: var(--c-text-2); text-decoration: none;
   font-size: var(--fs-16);
-  transition: color var(--t-233) var(--ease), transform var(--t-233) var(--ease);
+  transition: color var(--t-233) var(--ease);
 }
 .sections a .s-dot {
   flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%;
@@ -297,13 +340,17 @@ html[data-js="1"] .welcome:not(.w-gone) .w-enter { animation: w-up var(--t-233) 
   transition: transform var(--t-480) var(--ease), background var(--t-233) var(--ease),
               height var(--t-233) var(--ease);
 }
-.sections a:hover { color: var(--c-text); transform: translateY(-1px); }
+.sections a:hover { color: var(--c-text); }
 .sections a:hover::after { transform: scaleX(1); background: var(--c-accent); }
+/* 当前页 */
 .sections a[aria-current="page"] { color: var(--c-text); font-weight: 700; }
 .sections a[aria-current="page"] .s-dot {
   background: var(--c-accent); border-color: var(--c-accent);
   box-shadow: 0 0 0 2px var(--c-accent-wash); /* 10px 外环 */
 }
+/* 所属栏目（如章节 → 小说档案）：同组只标一个 */
+.sections a[aria-current="true"] { color: var(--c-text); font-weight: 600; }
+.sections a[aria-current="true"] .s-dot { background: currentColor; }
 .sections a[aria-current="page"]::after {
   transform: scaleX(1); height: 2px; background: var(--c-accent);
 }
@@ -375,32 +422,10 @@ html[data-js="1"] .welcome:not(.w-gone) .w-enter { animation: w-up var(--t-233) 
 .chip:hover { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-wash); }
 .motif-line { margin-bottom: var(--s-2); }
 
-/* ---------- 背景层开关 ---------- */
-.bgbar {
-  max-width: var(--maxw); margin: 0 auto;
-  padding: 0 var(--pad) var(--s-4);
-}
-.btn {
-  font: inherit; font-size: var(--fs-13); cursor: pointer;
-  display: inline-flex; align-items: center; gap: var(--s-1);
-  min-height: 44px; padding: 0 var(--s-2);
-  color: var(--c-text-2); background: transparent;
-  border: 1px solid var(--c-line); border-radius: var(--radius);
-  transition: color var(--t-233) var(--ease), border-color var(--t-233) var(--ease),
-              background var(--t-233) var(--ease);
-}
-.btn::before {
-  content: ""; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%;
-  background: currentColor; border: 1px solid currentColor;
-}
-.btn:hover { color: var(--c-text); border-color: var(--c-line-strong); }
-.btn[aria-pressed="true"] { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-wash); }
-.btn[aria-pressed="true"]::before { background: transparent; }
-
-/* ---------- 页脚 ---------- */
+/* ---------- 页脚（5 个入口全断点常驻平铺） ---------- */
 .footer {
   position: relative; z-index: 1;
-  max-width: var(--maxw); margin: 0 auto;
+  max-width: var(--shell); margin: 0 auto;
   padding: var(--s-3) var(--pad) var(--s-5);
   border-top: 1px solid var(--c-line);
 }
@@ -617,12 +642,6 @@ main { position: relative; z-index: 1; }
 .issue-nav a:hover { text-decoration: underline; }
 .issue-nav .disabled { color: var(--c-text-3); }
 
-/* ---------- 移动端：背景层仅留「启」单字、静态 ---------- */
-@media (max-width: 430px) {
-  .dc-tian { display: none; }
-  .dp { --p: 1; }
-}
-
 /* ---------- 减少动效 ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -631,8 +650,6 @@ main { position: relative; z-index: 1; }
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
-  :root { --p: 1; }
-  .dp { transition: none; }
-  html[data-js="1"] .welcome:not(.w-gone) .wp { animation: none; }
-  .sections a:hover { transform: none; }
+  /* 欢迎页不做上浮，直接呈现终态 */
+  html[data-js="1"] .welcome:not(.w-gone) .wq { animation: none; }
 }
