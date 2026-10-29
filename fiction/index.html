@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>门扉 —— Tiaqi</title>
 <meta name="description" content="按卷归档的章节目录。" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
-<meta name="color-scheme" content="light dark" />
-<link rel="stylesheet" href="../style.css?v=2" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
+<meta name="color-scheme" content="light" />
+<link rel="stylesheet" href="../style.css?v=3" />
 </head>
 <body class="theme-fiction">
 <a class="skip" href="#main">跳到正文</a>
+<div class="deco" aria-hidden="true">
+  <span class="dc dc-tian"><span class="dp dp-1">一</span><span class="dp dp-2">大</span></span>
+  <span class="dc dc-qi"><span class="dp dp-3">户</span><span class="dp dp-4">口</span></span>
+</div>
 <header class="topbar">
   <a class="brand" href="../">
     <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -26,7 +30,8 @@
     <a href="../about.html">关于</a>
   </nav>
 </header>
-<main id="main"><section class="brief theme-paper">
+
+<main id="main" tabindex="-1"><nav class="sections" aria-label="站点主分区"><ul role="list"><li><a href="../intel/"><span class="s-dot" aria-hidden="true"></span>情报站</a></li><li><a href="../fiction/" aria-current="page"><span class="s-dot" aria-hidden="true"></span>小说档案</a></li><li><a href="../motif/"><span class="s-dot" aria-hidden="true"></span>母题</a></li><li><a href="../intel/archive/"><span class="s-dot" aria-hidden="true"></span>归档</a></li><li><a href="../about.html"><span class="s-dot" aria-hidden="true"></span>关于</a></li></ul></nav><section class="brief theme-paper">
     <p class="eyebrow">ARCHIVE</p>
     <h1 class="h1 serif">门扉</h1>
     <div class="rule wide" aria-hidden="true"></div>
@@ -57,5 +62,52 @@
   </div>
   <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
 </footer>
+<p class="sr-only" role="status" id="bg-status"></p>
+<script>
+(function(){
+var R=document.documentElement;R.dataset.js='1';
+var RED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
+function setP(){
+  var max=(R.scrollHeight-window.innerHeight)*.618;
+  var p=RED?1:(max>0?Math.min(1,Math.max(0,window.scrollY/max)):1);
+  R.style.setProperty('--p',p.toFixed(3));
+}
+var tick=0;
+window.addEventListener('scroll',function(){if(tick)return;tick=1;requestAnimationFrame(function(){tick=0;setP();});},{passive:true});
+window.addEventListener('resize',setP,{passive:true});
+setP();
+var bg=R.querySelector('[data-bg-toggle]'),st=R.querySelector('#bg-status');
+function setBG(off){
+  R.dataset.bg=off?'off':'on';
+  if(bg){bg.setAttribute('aria-pressed',off?'true':'false');bg.textContent=off?'开启背景层':'关闭背景层';}
+  ls('tq_bg',off?'off':'on');
+}
+setBG(ls('tq_bg')==='off');
+if(bg){bg.addEventListener('click',function(){
+  var off=R.dataset.bg!=='off';setBG(off);
+  if(st){st.textContent=off?'背景层已关闭':'背景层已开启';}
+});}
+var w=R.querySelector('[data-welcome]'),main=R.querySelector('#main'),t=0,done=0;
+function dismiss(){
+  if(done||!w)return;done=1;clearTimeout(t);
+  w.classList.add('w-gone');w.setAttribute('aria-hidden','true');w.inert=true;
+  if(main){main.inert=false;main.focus({preventScroll:true});}
+  ls('tq_w',String(Date.now()));
+  try{history.replaceState(history.state,'',location.href);}catch(e){}
+}
+if(w){
+  var seen=Number(ls('tq_w'));
+  if(seen&&Date.now()-seen<6048e5){dismiss();}
+  else{
+    if(main){main.inert=true;}
+    t=setTimeout(dismiss,3500);
+    w.addEventListener('click',dismiss);
+    window.addEventListener('keydown',dismiss);
+    window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
+  }
+}
+})();
+</script>
 </body>
 </html>
