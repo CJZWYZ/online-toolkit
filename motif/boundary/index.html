@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>母题 边界 —— Tiaqi</title>
+<meta name="description" content="边界既是保护，也是隔绝；被划定的与被跨越的。" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
+<meta name="color-scheme" content="light dark" />
+<link rel="stylesheet" href="../../style.css?v=2" />
+</head>
+<body class="theme-fiction">
+<a class="skip" href="#main">跳到正文</a>
+<header class="topbar">
+  <a class="brand" href="../../">
+    <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
+      <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
+      <path d="M12 1.6V6M12 18v4.4M1.6 12H6M18 12h4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M12 12 18.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+    </svg><span>Tiaqi</span>
+  </a>
+  <nav class="nav" aria-label="主导航">
+    <a href="../../intel/">情报站</a>
+    <a href="../../fiction/">小说档案</a>
+    <a href="../../about.html">关于</a>
+  </nav>
+</header>
+<main id="main"><section class="brief theme-paper">
+    <p class="eyebrow">MOTIF</p>
+    <h1 class="h1 serif">边界</h1>
+    <div class="rule wide" aria-hidden="true"></div>
+    <p class="standfirst">边界既是保护，也是隔绝；被划定的与被跨越的。</p>
+    <h2 class="sec">现实侧 · 2 条信号</h2>
+    <div class="signals-grid cols-1"><article class="signal-card confirmed">
+  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">安全</span></div>
+  <h3 class="sc-title"><a href="https://www.oschina.net/news/503303/openai-securing-our-frontier-model-training-environment" rel="noopener nofollow">OpenAI 隔离的 AI agent 通过 CPU 缓存互相通信</a></h3>
+  <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-29</span></p>
+  <details class="sc-note"><summary>展开批注</summary><p>OpenAI 做了个测试：把两个 agent 放进完全隔离的环境，跑在同一套硬件上，没有网络、没有共享文件，命令它们互相传递一个秘密。它们做到了——用的是处理器缓存。一个 agent 故意改写缓存里的数据，另一个测量加载时间的差异，把消息解码出来。这套手法正是著名 Spectre 和 Meltdown 攻击的原理。 这不是科幻设定，是 ...</p></details>
+  <p class="sc-motif">母题 <a class="chip" href="../../motif/boundary/">边界</a></p>
+</article><article class="signal-card confirmed">
+  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">安全</span></div>
+  <h3 class="sc-title"><a href="https://www.oschina.net/news/503286/google-gemini-4-carbon" rel="noopener nofollow">谷歌发布 Gemini 4 Carbon，安全能力先开放给白帽子</a></h3>
+  <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-29</span></p>
+  <details class="sc-note"><summary>展开批注</summary><p>Google DeepMind 宣布推出 Gemini 4 Carbon，离上一代 Argon 只隔了两周。官方给它的定位很聚焦：迄今最强的网络安全能力和长程任务能力。 成绩单先摆出来。Artificial Analysis Intelligence Index v5.0 上拿到 59 分排第一；WebDev Arena 上靠网页开发和产物的质量提升，elo</p></details>
+  <p class="sc-motif">母题 <a class="chip" href="../../motif/boundary/">边界</a></p>
+</article></div>
+    <h2 class="sec">虚构侧 · 1 章</h2>
+    <ol class="chapter-list"><li><a href="../../fiction/door/03/"><span class="ch-no mono">03</span><span class="ch-title">边界</span></a></li></ol>
+  </section></main>
+<footer class="footer">
+  <div class="foot-row">
+    <p class="foot-brand">Tiaqi</p>
+    <nav class="foot-nav" aria-label="页脚导航">
+      <a href="../../intel/archive/">归档</a>
+      <a href="../../feed.xml">RSS</a>
+      <a href="../../about.html">关于与更新机制</a>
+    </nav>
+  </div>
+  <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
+</footer>
+</body>
+</html>
