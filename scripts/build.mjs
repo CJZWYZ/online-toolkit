@@ -197,7 +197,91 @@ function loadFiction() {
 }
 
 /* ---------------- 渲染骨架 ---------------- */
-function layout({ title, desc, theme, body, pre = '' }) {
+/* 「天启」拆解字背景层：天 → 一 + 大；启 → 户 + 口（系统字体渲染，不导出 path） */
+const DECO = `<div class="deco" aria-hidden="true">
+  <span class="dc dc-tian"><span class="dp dp-1">一</span><span class="dp dp-2">大</span></span>
+  <span class="dc dc-qi"><span class="dp dp-3">户</span><span class="dp dp-4">口</span></span>
+</div>`;
+
+/* 欢迎页：无 JS 时是普通可见区块，JS 激活后才成为覆盖层 */
+const WELCOME = `<div class="welcome" data-welcome>
+  <div class="w-inner">
+    <span class="w-dot" aria-hidden="true"></span>
+    <div class="w-rule" aria-hidden="true"></div>
+    <p class="w-hello">Hello, World.</p>
+    <p class="w-title"><span class="sr-only">天启</span><span class="wq" aria-hidden="true">
+      <span class="wc"><span class="wp wp-1">一</span><span class="wp wp-2">大</span></span>
+      <span class="wc"><span class="wp wp-3">户</span><span class="wp wp-4">口</span></span>
+    </span></p>
+    <p class="w-sub">抵达此处，即为第一个信号。</p>
+    <p class="w-tag">Tiaqi — insight, opened.</p>
+    <button type="button" class="w-enter" data-welcome-enter>进入</button>
+  </div>
+</div>`;
+
+/* 全站唯一一段内联脚本：① data-js ② 欢迎页 dismiss ③ 背景层 --p 与开关 */
+const APP_JS = `<script>
+(function(){
+var R=document.documentElement;R.dataset.js='1';
+var RED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
+function setP(){
+  var max=(R.scrollHeight-window.innerHeight)*.618;
+  var p=RED?1:(max>0?Math.min(1,Math.max(0,window.scrollY/max)):1);
+  R.style.setProperty('--p',p.toFixed(3));
+}
+var tick=0;
+window.addEventListener('scroll',function(){if(tick)return;tick=1;requestAnimationFrame(function(){tick=0;setP();});},{passive:true});
+window.addEventListener('resize',setP,{passive:true});
+setP();
+var bg=R.querySelector('[data-bg-toggle]'),st=R.querySelector('#bg-status');
+function setBG(off){
+  R.dataset.bg=off?'off':'on';
+  if(bg){bg.setAttribute('aria-pressed',off?'true':'false');bg.textContent=off?'开启背景层':'关闭背景层';}
+  ls('tq_bg',off?'off':'on');
+}
+setBG(ls('tq_bg')==='off');
+if(bg){bg.addEventListener('click',function(){
+  var off=R.dataset.bg!=='off';setBG(off);
+  if(st){st.textContent=off?'背景层已关闭':'背景层已开启';}
+});}
+var w=R.querySelector('[data-welcome]'),main=R.querySelector('#main'),t=0,done=0;
+function dismiss(){
+  if(done||!w)return;done=1;clearTimeout(t);
+  w.classList.add('w-gone');w.setAttribute('aria-hidden','true');w.inert=true;
+  if(main){main.inert=false;main.focus({preventScroll:true});}
+  ls('tq_w',String(Date.now()));
+  try{history.replaceState(history.state,'',location.href);}catch(e){}
+}
+if(w){
+  var seen=Number(ls('tq_w'));
+  if(seen&&Date.now()-seen<6048e5){dismiss();}
+  else{
+    if(main){main.inert=true;}
+    t=setTimeout(dismiss,3500);
+    w.addEventListener('click',dismiss);
+    window.addEventListener('keydown',dismiss);
+    window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
+  }
+}
+})();
+</script>`;
+
+/* 5 个分区入口：真实链接跳转（非 tab），pre 前缀跟随页面层级 */
+function sectionNav(pre, active) {
+  const items = [
+    ['intel', `${pre}intel/`, '情报站'],
+    ['fiction', `${pre}fiction/`, '小说档案'],
+    ['motif', `${pre}motif/`, '母题'],
+    ['archive', `${pre}intel/archive/`, '归档'],
+    ['about', `${pre}about.html`, '关于']
+  ];
+  return `<nav class="sections" aria-label="站点主分区"><ul role="list">${items.map(([k, href, label]) =>
+    `<li><a href="${href}"${active === k ? ' aria-current="page"' : ''}><span class="s-dot" aria-hidden="true"></span>${esc(label)}</a></li>`
+  ).join('')}</ul></nav>`;
+}
+
+function layout({ title, desc, theme, body, pre = '', active = '', welcome = false, nav = true }) {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -205,12 +289,13 @@ function layout({ title, desc, theme, body, pre = '' }) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
-<meta name="color-scheme" content="light dark" />
-<link rel="stylesheet" href="${pre}style.css?v=2" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
+<meta name="color-scheme" content="light" />
+<link rel="stylesheet" href="${pre}style.css?v=3" />
 </head>
 <body class="theme-${theme}">
 <a class="skip" href="#main">跳到正文</a>
+${DECO}
 <header class="topbar">
   <a class="brand" href="${pre}">
     <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -223,10 +308,11 @@ function layout({ title, desc, theme, body, pre = '' }) {
   <nav class="nav" aria-label="主导航">
     <a href="${pre}intel/">情报站</a>
     <a href="${pre}fiction/">小说档案</a>
-    <a href="${pre}about.html">关于</a>
+    <a href="${pre}about.html"${active === 'about' ? ' aria-current="page"' : ''}>关于</a>
   </nav>
 </header>
-<main id="main">${body}</main>
+${welcome ? WELCOME : ''}
+<main id="main" tabindex="-1">${nav ? sectionNav(pre, active) : ''}${body}</main>
 <footer class="footer">
   <div class="foot-row">
     <p class="foot-brand">Tiaqi</p>
@@ -238,6 +324,8 @@ function layout({ title, desc, theme, body, pre = '' }) {
   </div>
   <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
 </footer>
+<p class="sr-only" role="status" id="bg-status"></p>
+${APP_JS}
 </body>
 </html>
 `;
@@ -265,80 +353,74 @@ function signalCard(s, motifPre = 'motif/') {
 /* ---------------- 页面 ---------------- */
 function renderHome(issue, chapters) {
   const latest = chapters[chapters.length - 1];
-  const n = issue?.signals?.length || 0;
-  const dimCount = {};
-  (issue?.signals || []).forEach((s) => { dimCount[s.dimension] = (dimCount[s.dimension] || 0) + 1; });
-  const dimLine = Object.entries(dimCount).map(([d, c]) => `${cfg.dimensions[d]?.label || d} ${c}`).join(' · ') || '暂无';
-  const top = (issue?.signals || []).slice(0, 3).map(signalCard).join('');
-  const book = chapters[0];
+  const sig = (issue?.signals || []).slice(0, 3);
 
-  const intelBody = n
-    ? `<p class="door-meta mono">第 ${esc(issue.issue)} 期 · ${esc(issue.date)}</p>
-       <p class="door-headline">本期概览</p>
-       <div class="empty"><p class="empty-title">已归集 ${n} 条信号</p>
-       <p class="empty-hint">${esc(dimLine)}。核心判断由人工撰写，当前状态：待补充。</p></div>
-       <div class="signals-grid cols-1">${top}</div>
-       <p class="track-note"><a class="cta cta-dark" href="intel/${esc(issue.issue)}/">查看本期简报 →</a></p>`
-    : `<p class="door-meta mono">第 — 期</p>
-       <p class="door-headline">本期核心判断</p>
-       <div class="empty"><p class="empty-title">首期简报正在归集信号</p>
-       <p class="empty-hint">信号来自公开信源，按周期自动归集；核心判断由人工撰写后发布。</p></div>`;
+  /* 双轨精简：情报只要标题 + 日期；小说只要标题 + 章节号 */
+  const intelList = sig.length
+    ? `<ul class="mini" role="list">${sig.map((s) => `<li>
+      <a href="intel/${esc(issue.issue)}/">${esc(s.title)}</a>
+      <span class="m-date mono">${esc(s.date)}</span></li>`).join('')}</ul>`
+    : '<p class="m-empty">首期简报正在归集信号。</p>';
 
-  const ficBody = latest
-    ? `<p class="door-meta mono">第 ${esc(latest.volume)} 卷 · 第 ${pad2(latest.chapter)} 章</p>
-       <p class="door-headline serif">${esc(latest.title)}</p>
-       <div class="empty"><p class="empty-hint">${esc(latest.synopsis || '')}</p></div>
-       <p class="track-note"><a class="cta cta-light" href="fiction/${esc(latest.slug)}/">开始阅读 →</a>
-       <a class="cta cta-ghost" href="fiction/">全部目录 →</a></p>`
-    : `<p class="door-meta mono">卷 — · 第 — 章</p>
-       <p class="door-headline serif">尚未开卷</p>
-       <div class="empty"><p class="empty-title">档案尚未开卷</p>
-       <p class="empty-hint">章节以 Markdown 管理，按「书目 → 卷 → 章」归档。</p></div>`;
+  const ficList = latest
+    ? `<ul class="mini" role="list"><li>
+      <a href="fiction/${esc(latest.slug)}/">${esc(latest.title)}</a>
+      <span class="m-date mono">第 ${pad2(latest.chapter)} 章</span></li></ul>`
+    : '<p class="m-empty">档案尚未开卷。</p>';
 
-  const motifBand = [...MOTIFS.values()].map((m) => {
-    const ic = (issue?.signals || []).filter((s) => (s.motif || []).includes(m.slug)).length;
-    const fc = chapters.filter((c) => (c.motif || []).includes(m.slug)).length;
-    return `<a class="motif-card" href="motif/${esc(m.slug)}/"><span class="motif-name">${esc(m.name)}</span>
-      <span class="motif-count mono">情报 ${ic} · 虚构 ${fc}</span></a>`;
-  }).join('');
+  /* 母题缝合带：chip 只留名称 */
+  const chips = [...MOTIFS.values()]
+    .map((m) => `<a class="chip" href="motif/${esc(m.slug)}/">${esc(m.name)}</a>`).join('');
 
   const body = `
 <section class="hero">
-  <p class="eyebrow">SIGNAL · ARCHIVE</p>
-  <h1 class="display">把散落的信号<br />读成判断</h1>
-  <p class="lede">天启不是预告终局的号角，而是一台把信号读成判断的仪器。<br />一边记录现实的脉动，一边收藏虚构的回声——同一套观测，两种刻度。</p>
+  <h1 class="display">抵达此处，即为第一个信号。</h1>
 </section>
+${sectionNav('', 'home')}
 <div class="tracks">
-  <section class="track track-intel" aria-labelledby="intel-h">
-    <div class="track-head"><p class="track-kicker">SIGNAL</p><h2 class="track-title" id="intel-h">情报站</h2></div>
-    <div class="beam" aria-hidden="true"></div>${intelBody}
-    <p class="track-note">情报为「简报制」：一期一页，含核心判断、分维度信号与本期母题，不做倒序博客流。</p>
+  <section class="track" aria-labelledby="intel-h">
+    <h2 class="track-h" id="intel-h">情报站</h2>
+    ${intelList}
+    <p class="track-more"><a href="intel/">全部简报 →</a></p>
   </section>
-  <section class="track track-fiction" aria-labelledby="fiction-h">
-    <div class="track-head"><p class="track-kicker">ARCHIVE</p><h2 class="track-title serif" id="fiction-h">小说档案</h2></div>
-    <div class="rule" aria-hidden="true"></div>${ficBody}
-    <p class="track-note">小说为「档案制」：按卷组织而非按时间倒序，正文限宽、适合长文阅读，讨论入口收在文末。</p>
+  <section class="track" aria-labelledby="fiction-h">
+    <h2 class="track-h" id="fiction-h">小说档案</h2>
+    ${ficList}
+    <p class="track-more"><a href="fiction/">全部目录 →</a></p>
   </section>
 </div>
 <section class="motif-band">
-  <h2 class="motif-title">母题：两条线的缝合处</h2>
-  <div class="motif-cards">${motifBand}</div>
-</section>`;
-  return layout({ title: 'Tiaqi —— 把散落的信号读成判断', desc: '情报站与小说档案的双线站点，纯静态构建。', theme: 'home', body });
+  <h2 class="band-h">母题</h2>
+  <div class="chips">${chips}</div>
+</section>
+<div class="bgbar">
+  <button type="button" class="btn" aria-pressed="false" data-bg-toggle>关闭背景层</button>
+</div>`;
+  return layout({
+    title: 'Tiaqi —— 抵达此处，即为第一个信号',
+    desc: '情报站与小说档案的双线站点，纯静态构建。',
+    theme: 'home', body, pre: '', active: 'home', welcome: true, nav: false
+  });
 }
 
-function renderBriefing(issue, all) {
+function renderBriefing(issue, all, pre = '../../', entry = false) {
   const idx = all.findIndex((x) => x.issue === issue.issue);
   const prev = all[idx + 1], next = all[idx - 1];
   const dims = [...new Set(issue.signals.map((s) => s.dimension))];
-  const filters = `<div class="filters" role="group" aria-label="按维度筛选">
-    <button type="button" class="tg" data-dim="all" aria-pressed="true">全部 ${issue.signals.length}</button>
-    ${dims.map((d) => `<button type="button" class="tg" data-dim="${esc(d)}" aria-pressed="false">${esc(cfg.dimensions[d]?.label || d)} ${issue.signals.filter((s) => s.dimension === d).length}</button>`).join('')}
-  </div>`;
-  const cards = issue.signals.map((s) => `<div class="sig-wrap" data-dim="${esc(s.dimension)}">${signalCard(s, '../../motif/')}</div>`).join('');
+  const cards = issue.signals.map((s) => `<div class="sig-wrap" data-dim="${esc(s.dimension)}">${signalCard(s, `${pre}motif/`)}</div>`).join('');
+  /* 筛选：radio + CSS 兄弟选择器，无需 JS（无 JS 时全部信号可见） */
+  const dimKeys = ['all', ...dims];
+  const radios = dimKeys.map((d) => `<input class="vh" type="radio" name="dim" id="dim-${esc(d)}"${d === 'all' ? ' checked' : ''} />`).join('');
+  const labels = dimKeys.map((d) => {
+    const n = d === 'all' ? issue.signals.length : issue.signals.filter((s) => s.dimension === d).length;
+    return `<label class="tg" for="dim-${esc(d)}">${d === 'all' ? '全部' : esc(cfg.dimensions[d]?.label || d)} ${n}</label>`;
+  }).join('');
+  const dimCss = dimKeys.map((d) => `#dim-${esc(d)}:checked ~ .filters label[for="dim-${esc(d)}"]{color:var(--c-accent);border-color:var(--c-accent);background:var(--c-accent-wash);}
+#dim-${esc(d)}:focus-visible ~ .filters label[for="dim-${esc(d)}"]{outline:2px solid var(--c-accent);outline-offset:3px;}
+${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data-dim="${esc(d)}"]){display:none;}`}`).join('\n');
   const body = `
 <section class="brief">
-  <p class="eyebrow"><a href="../archive/">← 归档</a></p>
+  <p class="eyebrow"><a href="${pre}intel/archive/">← 归档</a></p>
   <p class="issue-no mono">第 ${esc(issue.issue)} 期</p>
   <h1 class="h1">本期核心判断</h1>
   <div class="beam wide" aria-hidden="true"></div>
@@ -347,36 +429,26 @@ function renderBriefing(issue, all) {
       : `<div class="empty pending"><p class="empty-title">本期判断待补充</p>
          <p class="empty-hint">信号已由机器归集完成（${issue.signals.length} 条），核心判断由人工撰写后发布。下方信号可先行查阅。</p></div>`}
   <h2 class="sec">分维度信号</h2>
-  ${filters}
-  <div class="signals-grid" id="signals">${cards || '<p class="empty-hint">本期暂无信号。</p>'}</div>
+  <fieldset class="filterbar">
+    <legend class="sr-only">按维度筛选</legend>
+    ${radios}
+    <div class="filters">${labels}</div>
+    <div class="signals-grid" id="signals">${cards || '<p class="empty-hint">本期暂无信号。</p>'}</div>
+  </fieldset>
+  <style>${dimCss}</style>
   <h2 class="sec">本期母题</h2>
-  <p class="motif-line">${[...new Set(issue.signals.flatMap((s) => s.motif || []))].map((m) => `<a class="chip chip-d" href="../../motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('') || '<span class="empty-hint">本期信号未命中母题。</span>'}</p>
+  <p class="motif-line"><span class="chips">${[...new Set(issue.signals.flatMap((s) => s.motif || []))].map((m) => `<a class="chip" href="${pre}motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('') || '<span class="empty-hint">本期信号未命中母题。</span>'}</span></p>
   <nav class="issue-nav">
-    ${prev ? `<a href="../${esc(prev.issue)}/">← ${esc(prev.issue)}</a>` : '<span class="disabled">← 已是最早</span>'}
-    ${next ? `<a href="../${esc(next.issue)}/">${esc(next.issue)} →</a>` : '<span class="disabled">已是最新 →</span>'}
+    ${prev ? `<a href="${pre}intel/${esc(prev.issue)}/">← ${esc(prev.issue)}</a>` : '<span class="disabled">← 已是最早</span>'}
+    ${next ? `<a href="${pre}intel/${esc(next.issue)}/">${esc(next.issue)} →</a>` : '<span class="disabled">已是最新 →</span>'}
   </nav>
-</section>
-<script>
-document.querySelectorAll('.filters .tg').forEach(function(b){
-  b.addEventListener('click',function(){
-    var d=b.getAttribute('data-dim');
-    document.querySelectorAll('.filters .tg').forEach(function(x){x.setAttribute('aria-pressed', x===b?'true':'false');});
-    document.querySelectorAll('#signals .sig-wrap').forEach(function(w){
-      w.hidden = !(d==='all' || w.getAttribute('data-dim')===d);
-    });
-  });
-});
-</script>`;
-  return layout({ title: `第 ${issue.issue} 期简报 —— Tiaqi 情报站`, desc: `第 ${issue.issue} 期简报，共 ${issue.signals.length} 条信号。`, theme: 'intel', body, pre: '../../' });
+</section>`;
+  return layout({ title: entry ? '情报站 —— Tiaqi' : `第 ${issue.issue} 期简报 —— Tiaqi 情报站`, desc: `第 ${issue.issue} 期简报，共 ${issue.signals.length} 条信号。`, theme: 'intel', body, pre, active: 'intel' });
 }
 
-function renderIntelLatest(issue) {
-  const body = `<section class="brief"><p class="eyebrow">正在跳转到最新一期…</p>
-  <p class="h1"><a href="${esc(issue.issue)}/">第 ${esc(issue.issue)} 期简报 →</a></p></section>`;
-  return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8" />
-<meta http-equiv="refresh" content="0; url=${esc(issue.issue)}/" />
-<link rel="canonical" href="${esc(issue.issue)}/" />
-<title>情报站 —— Tiaqi</title></head><body>${body}</body></html>`;
+function renderIntelLatest(issue, all) {
+  /* 分区入口页：直接渲染最新一期简报正文（真内容，无 meta-refresh 跳转） */
+  return renderBriefing(issue, all, '../', true);
 }
 
 function renderArchive(all) {
@@ -391,7 +463,7 @@ function renderArchive(all) {
     <div class="beam wide" aria-hidden="true"></div>
     ${all.length ? `<ul class="timeline">${rows}</ul>` : '<div class="empty"><p class="empty-title">还没有已发布的简报</p><p class="empty-hint">首期简报将在下一次归集后生成。</p></div>'}
   </section>`;
-  return layout({ title: '情报归档 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../' });
+  return layout({ title: '情报归档 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive' });
 }
 
 function renderFictionIndex(chapters) {
@@ -411,7 +483,7 @@ function renderFictionIndex(chapters) {
     <div class="rule wide" aria-hidden="true"></div>
     ${chapters.length ? vols : '<div class="empty"><p class="empty-title">档案尚未开卷</p><p class="empty-hint">章节以 Markdown 管理，按卷发布。</p></div>'}
   </section>`;
-  return layout({ title: `${book?.bookTitle || '小说档案'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../' });
+  return layout({ title: `${book?.bookTitle || '小说档案'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction' });
 }
 
 function renderChapter(c, chapters, all) {
@@ -421,7 +493,7 @@ function renderChapter(c, chapters, all) {
     <p class="eyebrow"><a href="../../">《${esc(c.bookTitle)}》 · 第 ${esc(c.volume)} 卷 · 第 ${pad2(c.chapter)} 章</a></p>
     <h1 class="h1 serif">${esc(c.title)}</h1>
     <p class="ch-info">${esc(c.published || '')} · ${esc(c.words || '')} 字 ${c.demo ? '<span class="badge-demo">示例章节</span>' : ''}</p>
-    ${(c.motif || []).length ? `<p class="motif-line">母题 ${c.motif.map((m) => `<a class="chip chip-l" href="../../../motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('')}</p>` : ''}
+    ${(c.motif || []).length ? `<p class="motif-line"><span class="chips">${c.motif.map((m) => `<a class="chip" href="../../../motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('')}</span></p>` : ''}
     ${c.synopsis ? `<p class="standfirst">${esc(c.synopsis)}</p>` : ''}
     <div class="prose-body">${c.html}</div>
     <nav class="chapter-nav">
@@ -433,15 +505,15 @@ function renderChapter(c, chapters, all) {
       <div class="discussion-body"><p class="empty-hint">讨论区将在 giscus 配置完成后启用（托管于 GitHub Discussions，需 GitHub 账号）。</p></div>
     </details>
   </article>`;
-  return layout({ title: `${c.title} · 《${c.bookTitle}》第 ${pad2(c.chapter)} 章 —— Tiaqi`, desc: c.synopsis || `${c.title}`, theme: 'fiction', body, pre: '../../../' });
+  return layout({ title: `${c.title} · 《${c.bookTitle}》第 ${pad2(c.chapter)} 章 —— Tiaqi`, desc: c.synopsis || `${c.title}`, theme: 'fiction', body, pre: '../../../', active: 'fiction' });
 }
 
 function renderMotif(slug, all, chapters) {
   const m = MOTIFS.get(slug);
   const sig = all.flatMap((i) => i.signals.filter((s) => (s.motif || []).includes(slug)).map((s) => ({ ...s, issue: i.issue })));
   const chs = chapters.filter((c) => (c.motif || []).includes(slug));
-  const body = `<section class="brief theme-paper">
-    <p class="eyebrow">MOTIF</p>
+  const body = `<section class="brief">
+    <p class="eyebrow"><a href="../">← 全部母题</a></p>
     <h1 class="h1 serif">${esc(m.name)}</h1>
     <div class="rule wide" aria-hidden="true"></div>
     <p class="standfirst">${esc(m.gloss)}</p>
@@ -450,7 +522,28 @@ function renderMotif(slug, all, chapters) {
     <h2 class="sec">虚构侧 · ${chs.length} 章</h2>
     ${chs.length ? `<ol class="chapter-list">${chs.map((c) => `<li><a href="../../fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a></li>`).join('')}</ol>` : '<p class="empty-hint">该母题暂无小说映照。</p>'}
   </section>`;
-  return layout({ title: `母题 ${m.name} —— Tiaqi`, desc: m.gloss, theme: 'fiction', body, pre: '../../' });
+  return layout({ title: `母题 ${m.name} —— Tiaqi`, desc: m.gloss, theme: 'motif', body, pre: '../../', active: 'motif' });
+}
+
+function renderMotifIndex(all, chapters) {
+  const items = [...MOTIFS.values()].map((m) => {
+    const ic = all.reduce((n, i) => n + i.signals.filter((s) => (s.motif || []).includes(m.slug)).length, 0);
+    const fc = chapters.filter((c) => (c.motif || []).includes(m.slug)).length;
+    return `<li class="motif-item"><a class="motif-card" href="${esc(m.slug)}/">
+      <span class="motif-name">${esc(m.name)}</span>
+      <span class="motif-gloss">${esc(m.gloss)}</span>
+      <span class="motif-count mono">情报 ${ic} · 虚构 ${fc}</span>
+    </a></li>`;
+  }).join('');
+  const body = `<section class="brief">
+    <p class="eyebrow">MOTIF</p>
+    <h1 class="h1">母题</h1>
+    <div class="rule wide" aria-hidden="true"></div>
+    <p class="standfirst">母题是两条线的缝合处：同一命题下的现实信号与虚构章节，可双向跳转。</p>
+    ${items ? `<ul class="motif-cards" role="list">${items}</ul>`
+      : '<div class="empty"><p class="empty-title">尚未定义母题</p><p class="empty-hint">母题在 content/motifs.json 中维护。</p></div>'}
+  </section>`;
+  return layout({ title: '母题 —— Tiaqi', desc: '全部母题索引：现实信号与虚构章节的缝合处。', theme: 'motif', body, pre: '../', active: 'motif' });
 }
 
 function renderFeed(issue, chapters) {
@@ -497,9 +590,11 @@ if (fs.existsSync(file)) {
   try {
     const old = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (old.human_locked) { issue.headline = old.headline; issue.judgments = old.judgments; issue.status = old.status || 'published'; }
+    /* 不抓取时直接复用已归集的数据，避免把已发布的信号清空 */
+    if (NO_FETCH) issue = old;
   } catch {}
 }
-fs.writeFileSync(file, JSON.stringify(issue, null, 2));
+if (!NO_FETCH) fs.writeFileSync(file, JSON.stringify(issue, null, 2));
 
 const allIssues = fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
   .map((f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')))
@@ -509,9 +604,10 @@ console.log('生成页面…');
 write('index.html', renderHome(allIssues[0], chapters));
 write('feed.xml', renderFeed(allIssues[0], chapters));
 for (const i of allIssues) write(`intel/${i.issue}/index.html`, renderBriefing(i, allIssues));
-write('intel/index.html', renderIntelLatest(allIssues[0]));
+write('intel/index.html', renderIntelLatest(allIssues[0], allIssues));
 write('intel/archive/index.html', renderArchive(allIssues));
 write('fiction/index.html', renderFictionIndex(chapters));
 for (const c of chapters) write(`fiction/${c.slug}/index.html`, renderChapter(c, chapters, allIssues));
+write('motif/index.html', renderMotifIndex(allIssues, chapters));
 for (const m of MOTIFS.values()) write(`motif/${m.slug}/index.html`, renderMotif(m.slug, allIssues, chapters));
 console.log('完成。');
