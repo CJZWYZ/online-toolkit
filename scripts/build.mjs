@@ -200,15 +200,6 @@ function loadFiction() {
 /* 静态点阵底噪层：零 JS、零动画、零第三方请求 */
 const BG_PLANE = `<div class="bg-plane" aria-hidden="true"></div>`;
 
-/* 顶栏品牌图标：极简几何（圆 + 光束），描边 --c-accent，白底对比 6.6:1 */
-function brandMark() {
-  return `<svg class="mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-      <circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7" />
-      <circle cx="12" cy="12" r="1.8" fill="currentColor" />
-      <path d="M12 12 18.4 6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-    </svg>`;
-}
-
 /* 欢迎页：无 JS 时是普通可见区块，JS 激活后才成为覆盖层 */
 const WELCOME = `<div class="welcome" data-welcome>
   <div class="w-inner">
@@ -222,10 +213,11 @@ const WELCOME = `<div class="welcome" data-welcome>
   </div>
 </div>`;
 
-/* 全站唯一一段内联脚本：① data-js 标记 ② 欢迎页 dismiss */
+/* 全站唯一一段内联脚本：① no-js → js 标记 ② 欢迎页 dismiss ③ 移动端抽屉 */
 const APP_JS = `<script>
 (function(){
-var R=document.documentElement;R.dataset.js='1';
+var R=document.documentElement;
+R.classList.remove('no-js');R.classList.add('js');R.dataset.js='1';
 var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
 var w=R.querySelector('[data-welcome]'),s=R.querySelector('.shell'),main=R.querySelector('#main'),t=0,done=0;
 function dismiss(){
@@ -246,42 +238,88 @@ if(w){
     window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
   }
 }
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim'),cb=R.querySelector('.drawer-close');
+if(!btn||!dr||!sc||!cb)return;
+btn.hidden=false;
+var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
+function shut(){return !dr.classList.contains('is-open');}
+function open(){
+  var bw=window.innerWidth-R.clientWidth;
+  if(bw>0)R.style.setProperty('--sbw',bw+'px');
+  dr.hidden=false;sc.hidden=false;
+  void dr.offsetWidth;
+  dr.classList.add('is-open');sc.classList.add('is-on');
+  btn.setAttribute('aria-expanded','true');
+  R.classList.add('dq-open');
+  cb.focus({preventScroll:true});
+}
+function close(back){
+  dr.classList.remove('is-open');sc.classList.remove('is-on');
+  btn.setAttribute('aria-expanded','false');
+  R.classList.remove('dq-open');R.style.removeProperty('--sbw');
+  if(back)btn.focus({preventScroll:true});
+  setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
+}
+btn.addEventListener('click',function(){shut()?open():close(1);});
+cb.addEventListener('click',function(){close(1);});
+sc.addEventListener('click',function(){close(1);});
+document.addEventListener('keydown',function(e){
+  if(shut())return;
+  if(e.key==='Escape'){close(1);return;}
+  if(e.key!=='Tab')return;
+  var f=fo();if(!f.length)return;
+  var i=f.indexOf(document.activeElement);if(i<0)i=0;
+  e.preventDefault();f[e.shiftKey?(i+f.length-1)%f.length:(i+1)%f.length].focus();
+});
+var mq=window.matchMedia('(min-width:1024px)'),onMq=function(){if(mq.matches&&!shut())close(0);};
+if(mq.addEventListener)mq.addEventListener('change',onMq);else if(mq.addListener)mq.addListener(onMq);
 })();
 </script>`;
 
-/* 5 个分区入口：真实 URL 直出。
+/* 5 个分区入口：真实 URL 直出。序号 01–05 由索引生成，不加英文小标。
    page = 当前页 key（标 aria-current="page"）
    section = 所属栏目 key（无精确命中时标 aria-current="true"，同组只标一个） */
 const NAV_ITEMS = [
   ['intel', 'intel/', '情报站'],
-  ['fiction', 'fiction/', '小说档案'],
+  ['fiction', 'fiction/', '档案室'],
   ['motif', 'motif/', '母题'],
-  ['archive', 'intel/archive/', '归档'],
+  ['archive', 'intel/archive/', '时间线'],
   ['about', 'about.html', '关于']
 ];
 
 function navList(pre, page = '', section = '') {
-  return NAV_ITEMS.map(([k, href, label]) => {
+  return NAV_ITEMS.map(([k, href, label], i) => {
     const cur = page === k ? 'page' : (!page && section === k ? 'true' : '');
-    return `<li><a href="${pre}${href}"${cur ? ` aria-current="${cur}"` : ''}><span class="s-dot" aria-hidden="true"></span>${esc(label)}</a></li>`;
+    return `<li><a href="${pre}${href}"${cur ? ` aria-current="${cur}"` : ''}><span class="s-num mono">${pad2(i + 1)}</span><span class="s-txt">${esc(label)}</span></a></li>`;
   }).join('');
 }
 
+/* 移动端抽屉：<1024 由汉堡按钮唤出；按钮与抽屉默认 hidden，JS 激活后才可用 */
+function drawer(pre, page = '', section = '') {
+  return `<div class="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" hidden>
+  <h2 class="sr-only" id="drawer-t">站点导航</h2>
+  <button class="drawer-close" type="button">关闭<span class="sr-only">导航</span></button>
+  <nav class="sections" aria-label="站点导航"><ul role="list">${navList(pre, page, section)}</ul></nav>
+</aside>`;
+}
+
+/* 桌面侧栏：≥1024 常驻 sticky；<1024 由抽屉承担，此处 display:none */
 function sidebar(pre, page = '', section = '') {
-  return `<details class="sidebar" open>
-  <summary class="sb-sum">分区导航</summary>
-  <nav class="sections" aria-label="站点主分区"><ul role="list">${navList(pre, page, section)}</ul></nav>
-</details>`;
+  return `<aside class="sidebar">
+  <nav class="sections" aria-label="分区导航"><ul role="list">${navList(pre, page, section)}</ul></nav>
+</aside>`;
 }
 
 function footNav(pre) {
-  return NAV_ITEMS.map(([, href, label]) => `<a href="${pre}${href}">${esc(label)}</a>`).join('')
+  return NAV_ITEMS.map(([, href, label], i) => `<a href="${pre}${href}">${pad2(i + 1)} ${esc(label)}</a>`).join('')
     + `<a href="${pre}feed.xml">RSS</a>`;
 }
 
 function layout({ title, desc, theme, body, pre = '', active = '', section = '', welcome = false }) {
   return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="no-js">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -289,14 +327,16 @@ function layout({ title, desc, theme, body, pre = '', active = '', section = '',
 <meta name="description" content="${esc(desc)}" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="${pre}style.css?v=4" />
+<link rel="stylesheet" href="${pre}style.css?v=5" />
 </head>
 <body class="theme-${theme}">
 <a class="skip" href="#main">跳到正文</a>
 ${BG_PLANE}
 <header class="topbar">
-  <a class="brand" href="${pre}"${active === 'home' ? ' aria-current="page"' : ''}>${brandMark()}<span class="sr-only">天启 Tiaqi · 回到首页</span></a>
+  <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
+  <a class="brand" href="${pre || './'}"${active === 'home' ? ' aria-current="page"' : ''}>Tiaqi</a>
 </header>
+${drawer(pre, active, section)}
 ${welcome ? WELCOME : ''}
 <div class="shell">
 ${sidebar(pre, active, section)}
@@ -335,50 +375,81 @@ function signalCard(s, motifPre = 'motif/') {
 }
 
 /* ---------------- 页面 ---------------- */
-function renderHome(issue, chapters) {
+/* 首页：一个焦点区原则。① 焦点区（最新简报 | 最新章节）② 情报最新 3 条
+   ③ 档案室章节列表 ④ 关于·订阅一行。空集合不渲染容器。 */
+function renderHome(all, chapters) {
+  const issue = all[0];
   const latest = chapters[chapters.length - 1];
   const sig = (issue?.signals || []).slice(0, 3);
+  let h1used = false;
+  const h = () => { const t = h1used ? 'h2' : 'h1'; h1used = true; return t; };
+  const kw = (ms) => (ms || []).length
+    ? `<span class="kws">${ms.map((m) => `<a class="kw" href="motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('')}</span>`
+    : '';
 
-  /* 双轨精简：情报只要标题 + 日期；小说只要标题 + 章节号 */
-  const intelList = sig.length
-    ? `<ul class="mini" role="list">${sig.map((s) => `<li>
-      <a href="intel/${esc(issue.issue)}/">${esc(s.title)}</a>
-      <span class="m-date mono">${esc(s.date)}</span></li>`).join('')}</ul>`
-    : '<p class="m-empty">首期简报正在归集信号。</p>';
+  /* ① 焦点区：两轨并列（主：简报 34px / 并列：章节 21px）；任一缺失 → 单轨占满整行 */
+  const cells = [];
+  if (issue) {
+    const dims = [...new Set(issue.signals.map((s) => cfg.dimensions[s.dimension]?.label || s.dimension))];
+    const ht = h();
+    cells.push(`<section class="f-cell">
+    <p class="f-kicker mono">01 情报站 · ${esc(issue.issue)}</p>
+    <${ht} class="f-title"><a href="intel/${esc(issue.issue)}/">${esc(issue.headline || `第 ${issue.issue} 期简报`)}</a></${ht}>
+    <p class="f-sum">${esc((issue.judgments || []).length
+      ? issue.judgments.slice(0, 3).join(' ')
+      : `本期已归集 ${issue.signals.length} 条信号，覆盖${dims.join('、') || '多个维度'}。核心判断由人工撰写后发布。`)}</p>
+    ${kw([...new Set(issue.signals.flatMap((s) => s.motif || []))])}
+    <p class="f-go"><a href="intel/${esc(issue.issue)}/">阅读全文 →</a></p>
+  </section>`);
+  }
+  if (latest) {
+    const firstP = (latest.html.match(/<p>([\s\S]*?)<\/p>/) || [, ''])[1].replace(/<[^>]+>/g, '');
+    const ht = h();
+    cells.push(`<section class="f-cell">
+    <p class="f-kicker mono">02 档案室 · 第 ${pad2(latest.chapter)} 章</p>
+    <${ht} class="f-title f-title-sm"><a href="fiction/${esc(latest.slug)}/">${esc(latest.title)}</a></${ht}>
+    <p class="f-sum f-sum-2">${esc(latest.synopsis || firstP || '')}</p>
+    <p class="f-go"><a href="fiction/${esc(latest.slug)}/">阅读章节 →</a></p>
+  </section>`);
+  }
+  const focus = cells.length
+    ? `<div class="focus focus-${cells.length}">${cells.join('')}</div>`
+    : `<div class="focus focus-1"><section class="f-cell"><h1 class="f-title">抵达此处，即为第一个信号。</h1>
+    <p class="f-sum">情报站与档案室的双线站点，内容正在归集。</p></section></div>`;
 
-  const ficList = latest
-    ? `<ul class="mini" role="list"><li>
-      <a href="fiction/${esc(latest.slug)}/">${esc(latest.title)}</a>
-      <span class="m-date mono">第 ${pad2(latest.chapter)} 章</span></li></ul>`
-    : '<p class="m-empty">档案尚未开卷。</p>';
+  /* ② 情报站最新 3 条：仅 1 期时整块不渲染（焦点区已承载该期） */
+  const latestBlock = (all.length > 1 && sig.length)
+    ? `<section class="latest">
+    <h2 class="lst-h">情报站 · 最新 3 条</h2>
+    <ul class="lst" role="list">${sig.map((s) => `<li>
+      <span class="m-date mono">${esc(s.date)}</span>
+      <a class="lst-a" href="intel/${esc(issue.issue)}/">${esc(s.title)}</a>${kw(s.motif)}</li>`).join('')}</ul>
+  </section>`
+    : '';
 
-  /* 母题缝合带：chip 只留名称 */
-  const chips = [...MOTIFS.values()]
-    .map((m) => `<a class="chip" href="motif/${esc(m.slug)}/">${esc(m.name)}</a>`).join('');
+  /* ③ 档案室章节列表（弱）：章节少时全量展示并去掉「查看全部」 */
+  const CH_MAX = 5;
+  const showAll = chapters.length <= CH_MAX;
+  const ficBlock = chapters.length
+    ? `<section class="chapters">
+    <h2 class="lst-h">02 档案室 · 章节</h2>
+    <ol class="chapter-list">${chapters.slice(0, showAll ? chapters.length : CH_MAX).map((c) => `<li>
+      <a href="fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a>
+      <span class="ch-meta mono">${esc(c.date || c.published || '')}</span>
+    </li>`).join('')}</ol>
+    ${showAll ? '' : '<p class="track-more"><a href="fiction/">查看全部 →</a></p>'}
+  </section>`
+    : '';
 
-  const body = `
-<section class="hero">
-  <h1 class="display">抵达此处，即为第一个信号。</h1>
-</section>
-<div class="tracks">
-  <section class="track" aria-labelledby="intel-h">
-    <h2 class="track-h" id="intel-h">情报站</h2>
-    ${intelList}
-    <p class="track-more"><a href="intel/">全部简报 →</a></p>
-  </section>
-  <section class="track" aria-labelledby="fiction-h">
-    <h2 class="track-h" id="fiction-h">小说档案</h2>
-    ${ficList}
-    <p class="track-more"><a href="fiction/">全部目录 →</a></p>
-  </section>
-</div>
-<section class="motif-band">
-  <h2 class="band-h">母题</h2>
-  <div class="chips">${chips}</div>
-</section>`;
+  /* ④ 关于·订阅一行（弱，13px，上 hairline） */
+  const aboutLine = `<section class="about-line">
+    <p><a href="about.html">05 关于</a> · <a href="feed.xml">订阅 RSS</a> · 无追踪、无统计脚本</p>
+  </section>`;
+
+  const body = `${focus}${latestBlock}${ficBlock}${aboutLine}`;
   return layout({
     title: 'Tiaqi —— 抵达此处，即为第一个信号',
-    desc: '情报站与小说档案的双线站点，纯静态构建。',
+    desc: '情报站与档案室的双线站点，纯静态构建。',
     theme: 'home', body, pre: '', active: 'home', section: '', welcome: true
   });
 }
@@ -400,7 +471,7 @@ function renderBriefing(issue, all, pre = '../../', entry = false) {
 ${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data-dim="${esc(d)}"]){display:none;}`}`).join('\n');
   const body = `
 <section class="brief">
-  <p class="eyebrow"><a href="${pre}intel/archive/">← 归档</a></p>
+  <p class="eyebrow"><a href="${pre}intel/archive/">← 时间线</a></p>
   <p class="issue-no mono">第 ${esc(issue.issue)} 期</p>
   <h1 class="h1">本期核心判断</h1>
   <div class="beam wide" aria-hidden="true"></div>
@@ -444,11 +515,11 @@ function renderArchive(all) {
     <span class="tl-meta mono">${i.signals.length} 信号 / ${new Set(i.signals.map((s) => s.dimension)).size} 维度</span></span>
   </li>`).join('');
   const body = `<section class="brief">
-    <p class="eyebrow">ARCHIVE</p><h1 class="h1">情报归档</h1>
+    <p class="eyebrow">04 · 时间线</p><h1 class="h1">时间线</h1>
     <div class="beam wide" aria-hidden="true"></div>
     ${all.length ? `<ul class="timeline">${rows}</ul>` : '<div class="empty"><p class="empty-title">还没有已发布的简报</p><p class="empty-hint">首期简报将在下一次归集后生成。</p></div>'}
   </section>`;
-  return layout({ title: '情报归档 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive', section: 'intel' });
+  return layout({ title: '时间线 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive', section: 'intel' });
 }
 
 function renderFictionIndex(chapters) {
@@ -463,12 +534,12 @@ function renderFictionIndex(chapters) {
       ${c.demo ? '<span class="badge-demo">示例</span>' : ''}
     </li>`).join('')}</ol>`).join('');
   const body = `<section class="brief theme-paper">
-    <p class="eyebrow">ARCHIVE</p>
-    <h1 class="h1 serif">${esc(book?.bookTitle || '小说档案')}</h1>
+    <p class="eyebrow">02 · 档案室</p>
+    <h1 class="h1 serif">${esc(book?.bookTitle || '档案室')}</h1>
     <div class="rule wide" aria-hidden="true"></div>
     ${chapters.length ? vols : '<div class="empty"><p class="empty-title">档案尚未开卷</p><p class="empty-hint">章节以 Markdown 管理，按卷发布。</p></div>'}
   </section>`;
-  return layout({ title: `${book?.bookTitle || '小说档案'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
+  return layout({ title: `${book?.bookTitle || '档案室'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
 }
 
 function renderChapter(c, chapters, all) {
@@ -521,7 +592,7 @@ function renderMotifIndex(all, chapters) {
     </a></li>`;
   }).join('');
   const body = `<section class="brief">
-    <p class="eyebrow">MOTIF</p>
+    <p class="eyebrow">03 · 母题</p>
     <h1 class="h1">母题</h1>
     <div class="rule wide" aria-hidden="true"></div>
     <p class="standfirst">母题是两条线的缝合处：同一命题下的现实信号与虚构章节，可双向跳转。</p>
@@ -538,7 +609,7 @@ function renderFeed(issue, chapters) {
   ].join('');
   return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>
 <title>Tiaqi · 天启</title><link>https://www.tiaqi.com/</link>
-<description>情报站与小说档案的双线站点</description><language>zh-CN</language>
+<description>情报站与档案室的双线站点</description><language>zh-CN</language>
 ${items}</channel></rss>`;
 }
 
@@ -586,7 +657,7 @@ const allIssues = fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
   .sort((a, b) => b.issue.localeCompare(a.issue));
 
 console.log('生成页面…');
-write('index.html', renderHome(allIssues[0], chapters));
+write('index.html', renderHome(allIssues, chapters));
 write('feed.xml', renderFeed(allIssues[0], chapters));
 for (const i of allIssues) write(`intel/${i.issue}/index.html`, renderBriefing(i, allIssues));
 write('intel/index.html', renderIntelLatest(allIssues[0], allIssues));
