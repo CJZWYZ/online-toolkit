@@ -248,47 +248,47 @@
     {
       "level": "confirmed",
       "dimension": "tech",
-      "title": "Hermes and REA and GLM 5.3 = Reverse engineering TikTok app for less than $20",
+      "title": "We ran AI agent swarms in Minecraft and Mindustry",
       "source": "Hacker News",
-      "url": "https://www.scraping.club/p/tiktok-scraping-metadata",
+      "url": "https://labs.ycombinator.com/projects/games/index.html",
       "date": "2026-10-29",
-      "note": "Article URL: https://www.scraping.club/p/tiktok-scraping-metadata Comments URL: https://news.ycombinator.com/item?id=50295503 Points: 11 # Comments: 5",
+      "note": "Article URL: https://labs.ycombinator.com/projects/games/index.html Comments URL: https://news.ycombinator.com/item?id=50296486 Points: 27 # Comments: 12",
       "motif": [
         "threshold"
       ]
     },
     {
       "level": "confirmed",
-      "dimension": "tech",
-      "title": "A tiny world model running games on a Raspberry Pi Pico 2 W",
+      "dimension": "security",
+      "title": "Binance-hacker-1029 – $5.6B stolen from Binance",
       "source": "Hacker News",
-      "url": "https://github.com/SheepSeb/tinyworldformer",
+      "url": "https://arkm.com/explorer/entity/21a94755-f604-45e5-9501-6542e23005e8",
       "date": "2026-10-29",
-      "note": "Article URL: https://github.com/SheepSeb/tinyworldformer Comments URL: https://news.ycombinator.com/item?id=50295450 Points: 19 # Comments: 1",
+      "note": "Article URL: https://arkm.com/explorer/entity/21a94755-f604-45e5-9501-6542e23005e8 Comments URL: https://news.ycombinator.com/item?id=50296470 Points: 178 # Comments: 84",
       "motif": [
-        "threshold"
+        "boundary"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "security",
+      "title": "Sylphide OS: a general-purpose OS for microcontroller-based computers",
+      "source": "Hacker News",
+      "url": "https://projects.freehackers.org/sylphide-os/",
+      "date": "2026-10-29",
+      "note": "Article URL: https://projects.freehackers.org/sylphide-os/ Comments URL: https://news.ycombinator.com/item?id=50295868 Points: 13 # Comments: 1",
+      "motif": [
+        "boundary"
       ]
     },
     {
       "level": "confirmed",
       "dimension": "tech",
-      "title": "深度使用 Zig 四个月：最爱的设计和最失望的坑，来自同一种偏执",
-      "source": "开源中国·资讯",
-      "url": "https://www.oschina.net/news/503266/four-months-of-zig",
-      "date": "2026-10-28",
-      "note": "Anna Liberty 放弃 Zig 后转用了几年 Rust，近日她表示自己大约四个月前重新开始使用 Zig，还攒了一篇挺有料的体验报告。有意思的地方在于：她最爱的几个特性和最失望的那件事，来自同一套设计哲学的两面。 先说不爽的。她第一个项目写 snurl（小网络协议库，Gemini、Finger、Gopher 那类），想按 TigerStyle 做测试和",
-      "motif": [
-        "threshold"
-      ]
-    },
-    {
-      "level": "confirmed",
-      "dimension": "tech",
-      "title": "Patrick Stewart has died",
+      "title": "ElementaryUI – Swift, in the Browser",
       "source": "Hacker News",
-      "url": "https://www.nytimes.com/2026/10/29/arts/television/patrick-stewart-dead.html",
+      "url": "https://elementary.codes",
       "date": "2026-10-29",
-      "note": "https://archive.ph/y4Egm https://en.wikipedia.org/wiki/Patrick_Stewart Comments URL: https://news.ycombinator.com/item?id=50294702 Points: 1354 # Comments: 254",
+      "note": "Article URL: https://elementary.codes Comments URL: https://news.ycombinator.com/item?id=50295821 Points: 21 # Comments: 1",
       "motif": [
         "threshold"
       ]
