@@ -1,0 +1,297 @@
+{
+  "issue": "2026-10",
+  "date": "2026-10-29",
+  "status": "pending",
+  "headline": null,
+  "judgments": [],
+  "signals": [
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Google AI 搜索产生的收入低于传统搜索",
+      "source": "Solidot",
+      "url": "https://www.solidot.org/story?sid=85748",
+      "date": "2026-10-29",
+      "note": "Google/Alphabet 在公布第三季度财报之后股价下跌了近 10%，原因是搜索巨人披露 AI 搜索产生的收入低于传统搜索，尽管其整体搜索业务收入同比增长 12% 达到 632.5 亿美元。搜索业务增速略低于去年第三季度的 14.5% ，Alphabet 首席商务官 Philipp Schindler 称，搜索业务增长放缓的原因在于“我们观察到 AI ",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "security",
+      "title": "OpenAI 隔离的 AI agent 通过 CPU 缓存互相通信",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503303/openai-securing-our-frontier-model-training-environment",
+      "date": "2026-10-29",
+      "note": "OpenAI 做了个测试：把两个 agent 放进完全隔离的环境，跑在同一套硬件上，没有网络、没有共享文件，命令它们互相传递一个秘密。它们做到了——用的是处理器缓存。一个 agent 故意改写缓存里的数据，另一个测量加载时间的差异，把消息解码出来。这套手法正是著名 Spectre 和 Meltdown 攻击的原理。 这不是科幻设定，是 ...",
+      "motif": [
+        "boundary"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Neton 1.0.0 正式发布：面向 AI 原生开发的 Kotlin/Native 服务端应用框架",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503302",
+      "date": "2026-10-29",
+      "note": "Neton Framework 1.0.0 正式发布，现已上线 Maven Central。 这是 Neton 的第一个稳定版本。从应用装配、依赖注入、HTTP API，到数据库、认证授权、缓存、任务调度、对象存储和 WebSocket，Neton 为 Kotlin 开发者提供了一套围绕原生服务端应用构建的开发体系。 Neton 的定位不是底层网络库，而是与",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "无公网IP，不碰路由器：花生壳如何把企业远程访问做成“基础能力”",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503298",
+      "date": "2026-10-29",
+      "note": "混合办公早已不是应急选项。当员工在机场需要调取ERP中的库存数据，当运维人员半夜要连回机房处理告警，当连锁门店的监控画面需要统一汇入总部——企业远程访问的瓶颈，往往不在应用本身，而在那条“进不去的内网”。大量企业宽带处于NAT后方，没有真实公网IP；申请固定专线动辄每年数千甚至上万元；在路由器上做端口映射...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "GearUI Kit 1.0 正式发布：82 个组件、四端统一，重新定义 Kotlin 跨平台 UI 开发体验",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503295",
+      "date": "2026-10-29",
+      "note": "一套 Kotlin 代码，一套设计语言，一套完整的跨平台 UI 开发体系。 2026 年 10 月 29 日，GearUI Kit 1.0.0 正式发布！ 从 2026 年 3 月 2 日写下第一行代码，到今天正式发布，历经近 8 个月、440 多次代码提交、8 个公开测试版本，我们终于迎来了 GearUI Kit 的第一个正式版本。 这不仅仅是一次版本号升",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Zentrola 1.3.1 发布：上游订阅号和 API Key 支持逐条启停",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503294",
+      "date": "2026-10-29",
+      "note": "团队使用多个上游账号时，有时需要临时停用某个订阅号或 API Key，让新请求走其他账号。Zentrola 1.3.1 为此增加了凭据级“调用状态”开关。 管理员现在可以在服务商凭据列表中，逐条启用或停用订阅凭据和 API Key。停用后，该凭据不再参与新请求的选路；如果还有其他符合条件的凭据，系统会自动选择它们。人工启停与系统...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "16 次发版背后，是每一位贡献者的力量｜Devlive Community 10 月开源月报",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503292",
+      "date": "2026-10-29",
+      "note": "Devlive Community 2026 年 10 月 · Devlive Community 开源社区月报 十月，Devlive Community 的开源项目继续向前。 从跨平台桌面工具、AI Agent，到统一权限治理、知识管理与多云对象存储，我们持续推进产品迭代，也迎来了新的社区代码贡献。 这个月，我们发布了 16 个正式版本，完成了多项功能升级",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "我只说了 15 句“哪里不对”，OpenAgents 就帮我做出了一个鹈鹕骑行 3D 游戏",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503291",
+      "date": "2026-10-29",
+      "note": "我只说了15句“哪里不对”，OpenAgents就帮我做出了一个鹈鹕骑行3D游戏 本文所用的作品、全部渲染截图与制作过程数据，均由作者本人授权发布。 一个 161 KB 的 HTML 文件，零外部素材。AI 真正干活 5.9 小时。而这位用户做的，只是看图、说一句哪里不对。 快来成为用户体验官，快速上手！ https://openagents.org/blo",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "“智启未来·AI科普千校计划”滨州正式启动，开源中国捐赠 500 万教育服务资源",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503290",
+      "date": "2026-10-29",
+      "note": "10月28日，“智启未来 AI 科普千校计划（山东站）”公益项目在滨州正式启动。本次项目旨在推进人工智能教育普及，提升山东省青少年科学素养，开源中国无偿捐赠总价值约500万元AI科普教育服务资源，助力省内中小学生平等获取优质AI科普教育机会。 该项目由山东省青少年科技教育协会、山东省科普志愿者协会联合开展，山东省...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Anthropic 平台负责人：多 Agent 跑起来之后，还有四个工程难题无法解决",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503288/new-problems-for-engineers-to-solve",
+      "date": "2026-10-29",
+      "note": "\"很多软件工程师正在经历一场身份危机。这份工作变了很多。有人沮丧，有人正玩得开心。\" 写这段话的是 Anthropic 平台负责人 Katelyn Lesse，她看到的是另一种可能：\"AI 要创造出它本可以创造的那些惊人成果，除非软件工程师把那些问题解决掉，否则做不到。这件事是生存级的，说实话这挺好玩。\" 她所说的\"那些问题\"，来自...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Cursor 把创造 Agent 的那套工序做成了产品",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503287/cursor-agent-sdk",
+      "date": "2026-10-29",
+      "note": "Cursor 把自己的家底掏出来了。10 月 20 日发布的 Agent SDK，就是他们构建 Bugbot、Security Reviewer、Rollouts 这些托管 agent 时用的那套框架——现在对外开放。 该团队提到，最有用的 agent 是贴合某个团队工作方式的。以前要这么做，基本等于二选一——要么接受一个按别人工作流设计好的产品，要么从零开",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "security",
+      "title": "谷歌发布 Gemini 4 Carbon，安全能力先开放给白帽子",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503286/google-gemini-4-carbon",
+      "date": "2026-10-29",
+      "note": "Google DeepMind 宣布推出 Gemini 4 Carbon，离上一代 Argon 只隔了两周。官方给它的定位很聚焦：迄今最强的网络安全能力和长程任务能力。 成绩单先摆出来。Artificial Analysis Intelligence Index v5.0 上拿到 59 分排第一；WebDev Arena 上靠网页开发和产物的质量提升，elo",
+      "motif": [
+        "boundary"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "告别拖拉拽！敲敲云零代码上线 AI Skills：开源免费，一句话搭建 CRM、进销存、OA 系统",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503285",
+      "date": "2026-10-29",
+      "note": "零代码，为什么还是这么累？ 零代码平台喊了很多年 \"人人都是开发者\"，可真正上手过的人都知道：拖一个字段、点一下属性、再拖一个字段…… 一张十几个字段的表单就要配半小时；接着画审批流，拉节点、连箭头、设审批人、写回写规则；最后还要拼仪表盘，选图表、绑数据、调栅格。 \"不用写代码\" 不等于 \"不用干活\"。传统零...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Wails v3 正式发布：用 Go 写桌面应用，这次真的成熟了",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503284",
+      "date": "2026-10-29",
+      "note": "2026 年 10 月 26 日，Wails 项目正式发布了 v3.0.0。距 2023 年 1 月第一个 alpha 版本发布，这个\"下一代版本\"打磨了近四年，如今终于摘掉了 alpha/beta 的帽子，进入正式可用状态。 对不熟悉 Wails 的读者简单介绍一下：Wails 是一个用 Go 构建桌面应用的框架，前端写 HTML/CSS/JS，后端写 G",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "EVEngine - 面向 AI Agent 的轻量游戏引擎",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/p/EVEngine",
+      "date": "2026-10-28",
+      "note": "EVEngine 是一款非常适合 Agent 自己迭代造游戏的引擎 EVEngine ，核心优势有 3 个： 1. 随时热重载 - 脚本更新、资源更新不用等，立马就刷新，修改迭代时间短 2. 自带 MCP 和 debug 服务器，可以截图、控制运行、控制 debug - Agent 可以完全像人一样调试脚本 3. 可以创建编辑器给 Agent - 你写个 e",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "qOntology 本体工程平台开源版正式亮相：把本体工程从文档和脚本带到统一工作台",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503276",
+      "date": "2026-10-28",
+      "note": "qOntology 本体工程平台现已开源。项目主要面向企业本体建模与语义管理场景，当前围绕建模目标、术语与枚举、对象类型、属性和对象关系等能力展开，用于将分散在业务文档、系统字段和领域知识中的概念定义进一步结构化管理。 在企业数据、知识库和智能体应用不断增加的过程中，不同系统、部门和文档对同一业务概念往往存...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Anthropic 工程经理把传统编程面试砍了，“它不再提供有效信号”",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503275/the-coding-interview-is-dead",
+      "date": "2026-10-28",
+      "note": "\"编程面试已经死了，至少对我这个团队来说。\" Felix Rieseberg 是 Anthropic 的工程经理，管过 Claude.ai、Cowork 和 Claude Code Desktop，他在推文里说他这个月把传统编程面试从流程里拿掉了。\"我看得够多了，它不再提供有效信号。\" 理由很直接：让你现场写个小 React 挑战，跟考你汇编语言一样没有意义",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "百度开源“文心 Unlimited OCR 2”，全球首次实现任意页数文档解析",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503269",
+      "date": "2026-10-28",
+      "note": "百度正式发布并开源文心 Unlimited OCR 2，宣称\"全球首次实现任意页数文档解析\"——把 OCR 的处理上界从几十页推到\"无限\"，并达到最先进水平（SOTA）。 实测显示，在一次性解析累计超过3600页的大体量书籍，文档长度大幅增加的情况下，依然保持较高的精度和处理效率。 数字上，两个公开基准：多页文档解析的 MPDocBench...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "OpenAI 称其模型证明了局部光滑化猜想，并推翻指数时间假设",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503268",
+      "date": "2026-10-28",
+      "note": "OpenAI 昨天一口气放出三个领域的\"模型独立发现\"，数学、计算机科学、物理各一个，并且把证明材料公开、请学术界来验证。发布这篇的意义可能比结果本身更大——这是 OpenAI 首次系统性地把内部模型的前沿科研产出摆到台面上，邀请外部审查。 数学这项在调和分析：模型证明了所有维度的局部光滑化猜想（Local Smoothing C...",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Termexo v0.11.0 发布：macOS 安装包、多标签预览与常用操作审核",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503267",
+      "date": "2026-10-28",
+      "note": "Termexo v0.11.0 已发布。Termexo 是 MIT 开源的本地编程 Agent 工作台，用项目工作区组织真实终端、原生会话和任务。本次提供 Windows x64、macOS Apple Silicon 与 Intel 安装包，并更新内容预览、常用操作和第三方通知体验。 本文由项目维护者提交，使用 AI 辅助整理，已对照正式更新记录核对。下图",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "深度使用 Zig 四个月：最爱的设计和最失望的坑，来自同一种偏执",
+      "source": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/503266/four-months-of-zig",
+      "date": "2026-10-28",
+      "note": "Anna Liberty 放弃 Zig 后转用了几年 Rust，近日她表示自己大约四个月前重新开始使用 Zig，还攒了一篇挺有料的体验报告。有意思的地方在于：她最爱的几个特性和最失望的那件事，来自同一套设计哲学的两面。 先说不爽的。她第一个项目写 snurl（小网络协议库，Gemini、Finger、Gopher 那类），想按 TigerStyle 做测试和",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Patrick Stewart Has Died",
+      "source": "Hacker News",
+      "url": "https://www.nytimes.com/2026/10/29/arts/television/patrick-stewart-dead.html",
+      "date": "2026-10-29",
+      "note": "Article URL: https://www.nytimes.com/2026/10/29/arts/television/patrick-stewart-dead.html Comments URL: https://news.ycombinator.com/item?id=50294770 Points: 47 # Comments: 3",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "The importance of communities around software",
+      "source": "Hacker News",
+      "url": "https://lumi.codeberg.page/blog/software-community.html",
+      "date": "2026-10-29",
+      "note": "Article URL: https://lumi.codeberg.page/blog/software-community.html Comments URL: https://news.ycombinator.com/item?id=50294507 Points: 26 # Comments: 14",
+      "motif": [
+        "threshold"
+      ]
+    },
+    {
+      "level": "confirmed",
+      "dimension": "tech",
+      "title": "Show HN: Auto Dismiss Mac OS \"Allow to find devices on local networks?\"",
+      "source": "Hacker News",
+      "url": "https://github.com/johncassil/dontallow",
+      "date": "2026-10-29",
+      "note": "This popup has been a constant gripe of mine for years. I almost NEVER want to allow this permission and there is no system setting to disable it globally and prevent the popup fro",
+      "motif": [
+        "threshold"
+      ]
+    }
+  ]
+}
