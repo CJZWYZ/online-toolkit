@@ -7,29 +7,24 @@
   <meta name="description" content="天启 Tiaqi 的方法论、更新机制、信源声明与隐私说明。纯静态站点，无数据库、无追踪。" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
   <meta name="color-scheme" content="light" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body class="theme-about">
   <a class="skip" href="#main">跳到正文</a>
+  <div class="bg-plane" aria-hidden="true"></div>
 
   <header class="topbar">
     <a class="brand" href="./">
-      <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
-        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
-        <path d="M12 1.6V6M12 18v4.4M1.6 12H6M18 12h4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-        <path d="M12 12 18.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-      </svg>
-      <span>Tiaqi</span>
-    </a>
-    <nav class="nav" aria-label="主导航">
-      <a href="intel/">情报站</a>
-      <a href="fiction/">小说档案</a>
-      <a href="about.html" aria-current="page">关于</a>
-    </nav>
+      <svg class="mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+        <path d="M12 12 18.4 6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </svg><span class="sr-only">天启 Tiaqi · 回到首页</span></a>
   </header>
 
-  <main id="main" class="page" tabindex="-1">
+  <div class="shell">
+  <details class="sidebar" open>
+    <summary class="sb-sum">分区导航</summary>
     <nav class="sections" aria-label="站点主分区">
       <ul role="list">
         <li><a href="intel/"><span class="s-dot" aria-hidden="true"></span>情报站</a></li>
@@ -39,7 +34,9 @@
         <li><a href="about.html" aria-current="page"><span class="s-dot" aria-hidden="true"></span>关于</a></li>
       </ul>
     </nav>
+  </details>
 
+  <main id="main" class="page" tabindex="-1">
     <article class="prose">
       <p class="eyebrow">ABOUT</p>
       <h1 class="h1">关于天启</h1>
@@ -98,6 +95,7 @@
       </p>
     </article>
   </main>
+  </div>
 
   <footer class="footer">
     <div class="foot-row">
@@ -105,10 +103,37 @@
       <nav class="foot-nav" aria-label="页脚导航">
         <a href="intel/">情报站</a>
         <a href="fiction/">小说档案</a>
-        <a href="feed.xml">RSS</a>
+        <a href="motif/">母题</a>
+        <a href="intel/archive/">归档</a>
+        <a href="about.html">关于</a>
       </nav>
     </div>
     <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
   </footer>
+<script>
+(function(){
+var R=document.documentElement;R.dataset.js='1';
+var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
+var w=R.querySelector('[data-welcome]'),s=R.querySelector('.shell'),main=R.querySelector('#main'),t=0,done=0;
+function dismiss(){
+  if(done||!w)return;done=1;clearTimeout(t);
+  w.classList.add('w-gone');w.setAttribute('aria-hidden','true');w.inert=true;
+  if(s)s.inert=false;
+  if(main)main.focus({preventScroll:true});
+  ls('tq_w',String(Date.now()));
+}
+if(w){
+  var seen=Number(ls('tq_w'));
+  if(seen&&Date.now()-seen<6048e5){dismiss();}
+  else{
+    if(s)s.inert=true;
+    t=setTimeout(dismiss,3500);
+    w.addEventListener('click',dismiss);
+    window.addEventListener('keydown',dismiss);
+    window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
+  }
+}
+})();
+</script>
 </body>
 </html>
