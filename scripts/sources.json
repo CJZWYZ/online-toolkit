@@ -1,0 +1,53 @@
+{
+  "_note": "信源清单模板。enabled=false 即停用；新增源只需照格式追加。dimension 为兜底维度，实际以关键词归类为准。",
+  "sources": [
+    {
+      "name": "开源中国·资讯",
+      "url": "https://www.oschina.net/news/rss",
+      "dimension": "tech",
+      "weight": 1.0,
+      "enabled": true
+    },
+    {
+      "name": "Solidot",
+      "url": "https://www.solidot.org/index.rss",
+      "dimension": "tech",
+      "weight": 1.0,
+      "enabled": true
+    },
+    {
+      "name": "Hacker News",
+      "url": "https://hnrss.org/frontpage",
+      "dimension": "tech",
+      "weight": 0.9,
+      "enabled": true
+    },
+    {
+      "name": "少数派",
+      "url": "https://sspai.com/feed",
+      "dimension": "tech",
+      "weight": 0.8,
+      "enabled": true
+    },
+    {
+      "name": "阮一峰·科技爱好者周刊",
+      "url": "https://www.ruanyifeng.com/blog/atom.xml",
+      "dimension": "tech",
+      "weight": 0.8,
+      "enabled": true
+    }
+  ],
+  "dimensions": {
+    "policy": { "label": "政策", "keywords": ["政策", "法规", "监管", "合规", "条例", "草案", "立法", "政府", "通知", "regulation", "policy", "gdpr", "antitrust", "court", "ban", "lawsuit"] },
+    "security": { "label": "安全", "keywords": ["漏洞", "攻击", "勒索", "安全", "补丁", "泄露", "木马", "cve", "malware", "security", "vulnerability", "breach", "hack", "exploit", "phishing"] },
+    "market": { "label": "市场", "keywords": ["融资", "收购", "并购", "上市", "营收", "估值", "涨价", "裁员", "订单", "funding", "acquisition", "ipo", "revenue", "valuation", "layoff", "merger"] },
+    "tech": { "label": "技术", "keywords": ["发布", "开源", "模型", "芯片", "框架", "算法", "更新", "版本", "ai", "llm", "model", "release", "open source", "framework", "chip", "gpu"] }
+  },
+  "motifByDimension": {
+    "policy": ["boundary"],
+    "security": ["boundary"],
+    "market": ["signal-noise"],
+    "tech": ["threshold"]
+  },
+  "limits": { "maxSignals": 24, "windowDays": 14 }
+}
