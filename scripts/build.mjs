@@ -197,11 +197,17 @@ function loadFiction() {
 }
 
 /* ---------------- 渲染骨架 ---------------- */
-/* 「天启」拆解字背景层：天 → 一 + 大；启 → 户 + 口（系统字体渲染，不导出 path） */
-const DECO = `<div class="deco" aria-hidden="true">
-  <span class="dc dc-tian"><span class="dp dp-1">一</span><span class="dp dp-2">大</span></span>
-  <span class="dc dc-qi"><span class="dp dp-3">户</span><span class="dp dp-4">口</span></span>
-</div>`;
+/* 静态点阵底噪层：零 JS、零动画、零第三方请求 */
+const BG_PLANE = `<div class="bg-plane" aria-hidden="true"></div>`;
+
+/* 顶栏品牌图标：极简几何（圆 + 光束），描边 --c-accent，白底对比 6.6:1 */
+function brandMark() {
+  return `<svg class="mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7" />
+      <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+      <path d="M12 12 18.4 6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+    </svg>`;
+}
 
 /* 欢迎页：无 JS 时是普通可见区块，JS 激活后才成为覆盖层 */
 const WELCOME = `<div class="welcome" data-welcome>
@@ -209,55 +215,31 @@ const WELCOME = `<div class="welcome" data-welcome>
     <span class="w-dot" aria-hidden="true"></span>
     <div class="w-rule" aria-hidden="true"></div>
     <p class="w-hello">Hello, World.</p>
-    <p class="w-title"><span class="sr-only">天启</span><span class="wq" aria-hidden="true">
-      <span class="wc"><span class="wp wp-1">一</span><span class="wp wp-2">大</span></span>
-      <span class="wc"><span class="wp wp-3">户</span><span class="wp wp-4">口</span></span>
-    </span></p>
+    <p class="w-title"><span class="wq">天启</span></p>
     <p class="w-sub">抵达此处，即为第一个信号。</p>
     <p class="w-tag">Tiaqi — insight, opened.</p>
     <button type="button" class="w-enter" data-welcome-enter>进入</button>
   </div>
 </div>`;
 
-/* 全站唯一一段内联脚本：① data-js ② 欢迎页 dismiss ③ 背景层 --p 与开关 */
+/* 全站唯一一段内联脚本：① data-js 标记 ② 欢迎页 dismiss */
 const APP_JS = `<script>
 (function(){
 var R=document.documentElement;R.dataset.js='1';
-var RED=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
-function setP(){
-  var max=(R.scrollHeight-window.innerHeight)*.618;
-  var p=RED?1:(max>0?Math.min(1,Math.max(0,window.scrollY/max)):1);
-  R.style.setProperty('--p',p.toFixed(3));
-}
-var tick=0;
-window.addEventListener('scroll',function(){if(tick)return;tick=1;requestAnimationFrame(function(){tick=0;setP();});},{passive:true});
-window.addEventListener('resize',setP,{passive:true});
-setP();
-var bg=R.querySelector('[data-bg-toggle]'),st=R.querySelector('#bg-status');
-function setBG(off){
-  R.dataset.bg=off?'off':'on';
-  if(bg){bg.setAttribute('aria-pressed',off?'true':'false');bg.textContent=off?'开启背景层':'关闭背景层';}
-  ls('tq_bg',off?'off':'on');
-}
-setBG(ls('tq_bg')==='off');
-if(bg){bg.addEventListener('click',function(){
-  var off=R.dataset.bg!=='off';setBG(off);
-  if(st){st.textContent=off?'背景层已关闭':'背景层已开启';}
-});}
-var w=R.querySelector('[data-welcome]'),main=R.querySelector('#main'),t=0,done=0;
+var w=R.querySelector('[data-welcome]'),s=R.querySelector('.shell'),main=R.querySelector('#main'),t=0,done=0;
 function dismiss(){
   if(done||!w)return;done=1;clearTimeout(t);
   w.classList.add('w-gone');w.setAttribute('aria-hidden','true');w.inert=true;
-  if(main){main.inert=false;main.focus({preventScroll:true});}
+  if(s)s.inert=false;
+  if(main)main.focus({preventScroll:true});
   ls('tq_w',String(Date.now()));
-  try{history.replaceState(history.state,'',location.href);}catch(e){}
 }
 if(w){
   var seen=Number(ls('tq_w'));
   if(seen&&Date.now()-seen<6048e5){dismiss();}
   else{
-    if(main){main.inert=true;}
+    if(s)s.inert=true;
     t=setTimeout(dismiss,3500);
     w.addEventListener('click',dismiss);
     window.addEventListener('keydown',dismiss);
@@ -267,21 +249,37 @@ if(w){
 })();
 </script>`;
 
-/* 5 个分区入口：真实链接跳转（非 tab），pre 前缀跟随页面层级 */
-function sectionNav(pre, active) {
-  const items = [
-    ['intel', `${pre}intel/`, '情报站'],
-    ['fiction', `${pre}fiction/`, '小说档案'],
-    ['motif', `${pre}motif/`, '母题'],
-    ['archive', `${pre}intel/archive/`, '归档'],
-    ['about', `${pre}about.html`, '关于']
-  ];
-  return `<nav class="sections" aria-label="站点主分区"><ul role="list">${items.map(([k, href, label]) =>
-    `<li><a href="${href}"${active === k ? ' aria-current="page"' : ''}><span class="s-dot" aria-hidden="true"></span>${esc(label)}</a></li>`
-  ).join('')}</ul></nav>`;
+/* 5 个分区入口：真实 URL 直出。
+   page = 当前页 key（标 aria-current="page"）
+   section = 所属栏目 key（无精确命中时标 aria-current="true"，同组只标一个） */
+const NAV_ITEMS = [
+  ['intel', 'intel/', '情报站'],
+  ['fiction', 'fiction/', '小说档案'],
+  ['motif', 'motif/', '母题'],
+  ['archive', 'intel/archive/', '归档'],
+  ['about', 'about.html', '关于']
+];
+
+function navList(pre, page = '', section = '') {
+  return NAV_ITEMS.map(([k, href, label]) => {
+    const cur = page === k ? 'page' : (!page && section === k ? 'true' : '');
+    return `<li><a href="${pre}${href}"${cur ? ` aria-current="${cur}"` : ''}><span class="s-dot" aria-hidden="true"></span>${esc(label)}</a></li>`;
+  }).join('');
 }
 
-function layout({ title, desc, theme, body, pre = '', active = '', welcome = false, nav = true }) {
+function sidebar(pre, page = '', section = '') {
+  return `<details class="sidebar" open>
+  <summary class="sb-sum">分区导航</summary>
+  <nav class="sections" aria-label="站点主分区"><ul role="list">${navList(pre, page, section)}</ul></nav>
+</details>`;
+}
+
+function footNav(pre) {
+  return NAV_ITEMS.map(([, href, label]) => `<a href="${pre}${href}">${esc(label)}</a>`).join('')
+    + `<a href="${pre}feed.xml">RSS</a>`;
+}
+
+function layout({ title, desc, theme, body, pre = '', active = '', section = '', welcome = false }) {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -291,40 +289,26 @@ function layout({ title, desc, theme, body, pre = '', active = '', welcome = fal
 <meta name="description" content="${esc(desc)}" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="${pre}style.css?v=3" />
+<link rel="stylesheet" href="${pre}style.css?v=4" />
 </head>
 <body class="theme-${theme}">
 <a class="skip" href="#main">跳到正文</a>
-${DECO}
+${BG_PLANE}
 <header class="topbar">
-  <a class="brand" href="${pre}">
-    <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
-      <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
-      <path d="M12 1.6V6M12 18v4.4M1.6 12H6M18 12h4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-      <path d="M12 12 18.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-    </svg><span>Tiaqi</span>
-  </a>
-  <nav class="nav" aria-label="主导航">
-    <a href="${pre}intel/">情报站</a>
-    <a href="${pre}fiction/">小说档案</a>
-    <a href="${pre}about.html"${active === 'about' ? ' aria-current="page"' : ''}>关于</a>
-  </nav>
+  <a class="brand" href="${pre}"${active === 'home' ? ' aria-current="page"' : ''}>${brandMark()}<span class="sr-only">天启 Tiaqi · 回到首页</span></a>
 </header>
 ${welcome ? WELCOME : ''}
-<main id="main" tabindex="-1">${nav ? sectionNav(pre, active) : ''}${body}</main>
+<div class="shell">
+${sidebar(pre, active, section)}
+<main id="main" tabindex="-1">${body}</main>
+</div>
 <footer class="footer">
   <div class="foot-row">
     <p class="foot-brand">Tiaqi</p>
-    <nav class="foot-nav" aria-label="页脚导航">
-      <a href="${pre}intel/archive/">归档</a>
-      <a href="${pre}feed.xml">RSS</a>
-      <a href="${pre}about.html">关于与更新机制</a>
-    </nav>
+    <nav class="foot-nav" aria-label="页脚导航">${footNav(pre)}</nav>
   </div>
   <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
 </footer>
-<p class="sr-only" role="status" id="bg-status"></p>
 ${APP_JS}
 </body>
 </html>
@@ -376,7 +360,6 @@ function renderHome(issue, chapters) {
 <section class="hero">
   <h1 class="display">抵达此处，即为第一个信号。</h1>
 </section>
-${sectionNav('', 'home')}
 <div class="tracks">
   <section class="track" aria-labelledby="intel-h">
     <h2 class="track-h" id="intel-h">情报站</h2>
@@ -392,14 +375,11 @@ ${sectionNav('', 'home')}
 <section class="motif-band">
   <h2 class="band-h">母题</h2>
   <div class="chips">${chips}</div>
-</section>
-<div class="bgbar">
-  <button type="button" class="btn" aria-pressed="false" data-bg-toggle>关闭背景层</button>
-</div>`;
+</section>`;
   return layout({
     title: 'Tiaqi —— 抵达此处，即为第一个信号',
     desc: '情报站与小说档案的双线站点，纯静态构建。',
-    theme: 'home', body, pre: '', active: 'home', welcome: true, nav: false
+    theme: 'home', body, pre: '', active: 'home', section: '', welcome: true
   });
 }
 
@@ -443,7 +423,12 @@ ${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data
     ${next ? `<a href="${pre}intel/${esc(next.issue)}/">${esc(next.issue)} →</a>` : '<span class="disabled">已是最新 →</span>'}
   </nav>
 </section>`;
-  return layout({ title: entry ? '情报站 —— Tiaqi' : `第 ${issue.issue} 期简报 —— Tiaqi 情报站`, desc: `第 ${issue.issue} 期简报，共 ${issue.signals.length} 条信号。`, theme: 'intel', body, pre, active: 'intel' });
+  return layout({
+    title: entry ? '情报站 —— Tiaqi' : `第 ${issue.issue} 期简报 —— Tiaqi 情报站`,
+    desc: `第 ${issue.issue} 期简报，共 ${issue.signals.length} 条信号。`,
+    theme: 'intel', body, pre,
+    active: entry ? 'intel' : '', section: 'intel'
+  });
 }
 
 function renderIntelLatest(issue, all) {
@@ -463,7 +448,7 @@ function renderArchive(all) {
     <div class="beam wide" aria-hidden="true"></div>
     ${all.length ? `<ul class="timeline">${rows}</ul>` : '<div class="empty"><p class="empty-title">还没有已发布的简报</p><p class="empty-hint">首期简报将在下一次归集后生成。</p></div>'}
   </section>`;
-  return layout({ title: '情报归档 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive' });
+  return layout({ title: '情报归档 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive', section: 'intel' });
 }
 
 function renderFictionIndex(chapters) {
@@ -483,7 +468,7 @@ function renderFictionIndex(chapters) {
     <div class="rule wide" aria-hidden="true"></div>
     ${chapters.length ? vols : '<div class="empty"><p class="empty-title">档案尚未开卷</p><p class="empty-hint">章节以 Markdown 管理，按卷发布。</p></div>'}
   </section>`;
-  return layout({ title: `${book?.bookTitle || '小说档案'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction' });
+  return layout({ title: `${book?.bookTitle || '小说档案'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
 }
 
 function renderChapter(c, chapters, all) {
@@ -505,7 +490,7 @@ function renderChapter(c, chapters, all) {
       <div class="discussion-body"><p class="empty-hint">讨论区将在 giscus 配置完成后启用（托管于 GitHub Discussions，需 GitHub 账号）。</p></div>
     </details>
   </article>`;
-  return layout({ title: `${c.title} · 《${c.bookTitle}》第 ${pad2(c.chapter)} 章 —— Tiaqi`, desc: c.synopsis || `${c.title}`, theme: 'fiction', body, pre: '../../../', active: 'fiction' });
+  return layout({ title: `${c.title} · 《${c.bookTitle}》第 ${pad2(c.chapter)} 章 —— Tiaqi`, desc: c.synopsis || `${c.title}`, theme: 'fiction', body, pre: '../../../', active: '', section: 'fiction' });
 }
 
 function renderMotif(slug, all, chapters) {
@@ -522,7 +507,7 @@ function renderMotif(slug, all, chapters) {
     <h2 class="sec">虚构侧 · ${chs.length} 章</h2>
     ${chs.length ? `<ol class="chapter-list">${chs.map((c) => `<li><a href="../../fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a></li>`).join('')}</ol>` : '<p class="empty-hint">该母题暂无小说映照。</p>'}
   </section>`;
-  return layout({ title: `母题 ${m.name} —— Tiaqi`, desc: m.gloss, theme: 'motif', body, pre: '../../', active: 'motif' });
+  return layout({ title: `母题 ${m.name} —— Tiaqi`, desc: m.gloss, theme: 'motif', body, pre: '../../', active: '', section: 'motif' });
 }
 
 function renderMotifIndex(all, chapters) {
@@ -543,7 +528,7 @@ function renderMotifIndex(all, chapters) {
     ${items ? `<ul class="motif-cards" role="list">${items}</ul>`
       : '<div class="empty"><p class="empty-title">尚未定义母题</p><p class="empty-hint">母题在 content/motifs.json 中维护。</p></div>'}
   </section>`;
-  return layout({ title: '母题 —— Tiaqi', desc: '全部母题索引：现实信号与虚构章节的缝合处。', theme: 'motif', body, pre: '../', active: 'motif' });
+  return layout({ title: '母题 —— Tiaqi', desc: '全部母题索引：现实信号与虚构章节的缝合处。', theme: 'motif', body, pre: '../', active: 'motif', section: 'motif' });
 }
 
 function renderFeed(issue, chapters) {
