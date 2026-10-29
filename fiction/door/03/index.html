@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="no-js">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,24 +7,26 @@
 <meta name="description" content="边界既是保护，也是隔绝。" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="../../../style.css?v=4" />
+<link rel="stylesheet" href="../../../style.css?v=5" />
 </head>
 <body class="theme-fiction">
 <a class="skip" href="#main">跳到正文</a>
 <div class="bg-plane" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="../../../"><svg class="mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-      <circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7" />
-      <circle cx="12" cy="12" r="1.8" fill="currentColor" />
-      <path d="M12 12 18.4 6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-    </svg><span class="sr-only">天启 Tiaqi · 回到首页</span></a>
+  <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
+  <a class="brand" href="../../../">Tiaqi</a>
 </header>
+<div class="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" hidden>
+  <h2 class="sr-only" id="drawer-t">站点导航</h2>
+  <button class="drawer-close" type="button">关闭<span class="sr-only">导航</span></button>
+  <nav class="sections" aria-label="站点导航"><ul role="list"><li><a href="../../../intel/"><span class="s-num mono">01</span><span class="s-txt">情报站</span></a></li><li><a href="../../../fiction/" aria-current="true"><span class="s-num mono">02</span><span class="s-txt">档案室</span></a></li><li><a href="../../../motif/"><span class="s-num mono">03</span><span class="s-txt">母题</span></a></li><li><a href="../../../intel/archive/"><span class="s-num mono">04</span><span class="s-txt">时间线</span></a></li><li><a href="../../../about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
+</aside>
 
 <div class="shell">
-<details class="sidebar" open>
-  <summary class="sb-sum">分区导航</summary>
-  <nav class="sections" aria-label="站点主分区"><ul role="list"><li><a href="../../../intel/"><span class="s-dot" aria-hidden="true"></span>情报站</a></li><li><a href="../../../fiction/" aria-current="true"><span class="s-dot" aria-hidden="true"></span>小说档案</a></li><li><a href="../../../motif/"><span class="s-dot" aria-hidden="true"></span>母题</a></li><li><a href="../../../intel/archive/"><span class="s-dot" aria-hidden="true"></span>归档</a></li><li><a href="../../../about.html"><span class="s-dot" aria-hidden="true"></span>关于</a></li></ul></nav>
-</details>
+<aside class="sidebar">
+  <nav class="sections" aria-label="分区导航"><ul role="list"><li><a href="../../../intel/"><span class="s-num mono">01</span><span class="s-txt">情报站</span></a></li><li><a href="../../../fiction/" aria-current="true"><span class="s-num mono">02</span><span class="s-txt">档案室</span></a></li><li><a href="../../../motif/"><span class="s-num mono">03</span><span class="s-txt">母题</span></a></li><li><a href="../../../intel/archive/"><span class="s-num mono">04</span><span class="s-txt">时间线</span></a></li><li><a href="../../../about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
+</aside>
 <main id="main" tabindex="-1"><article class="chapter">
     <p class="eyebrow"><a href="../../">《门扉》 · 第 1 卷 · 第 03 章</a></p>
     <h1 class="h1 serif">边界</h1>
@@ -63,13 +65,14 @@
 <footer class="footer">
   <div class="foot-row">
     <p class="foot-brand">Tiaqi</p>
-    <nav class="foot-nav" aria-label="页脚导航"><a href="../../../intel/">情报站</a><a href="../../../fiction/">小说档案</a><a href="../../../motif/">母题</a><a href="../../../intel/archive/">归档</a><a href="../../../about.html">关于</a><a href="../../../feed.xml">RSS</a></nav>
+    <nav class="foot-nav" aria-label="页脚导航"><a href="../../../intel/">01 情报站</a><a href="../../../fiction/">02 档案室</a><a href="../../../motif/">03 母题</a><a href="../../../intel/archive/">04 时间线</a><a href="../../../about.html">05 关于</a><a href="../../../feed.xml">RSS</a></nav>
   </div>
   <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
 </footer>
 <script>
 (function(){
-var R=document.documentElement;R.dataset.js='1';
+var R=document.documentElement;
+R.classList.remove('no-js');R.classList.add('js');R.dataset.js='1';
 var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
 var w=R.querySelector('[data-welcome]'),s=R.querySelector('.shell'),main=R.querySelector('#main'),t=0,done=0;
 function dismiss(){
@@ -90,6 +93,42 @@ if(w){
     window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
   }
 }
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim'),cb=R.querySelector('.drawer-close');
+if(!btn||!dr||!sc||!cb)return;
+btn.hidden=false;
+var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
+function shut(){return !dr.classList.contains('is-open');}
+function open(){
+  var bw=window.innerWidth-R.clientWidth;
+  if(bw>0)R.style.setProperty('--sbw',bw+'px');
+  dr.hidden=false;sc.hidden=false;
+  void dr.offsetWidth;
+  dr.classList.add('is-open');sc.classList.add('is-on');
+  btn.setAttribute('aria-expanded','true');
+  R.classList.add('dq-open');
+  cb.focus({preventScroll:true});
+}
+function close(back){
+  dr.classList.remove('is-open');sc.classList.remove('is-on');
+  btn.setAttribute('aria-expanded','false');
+  R.classList.remove('dq-open');R.style.removeProperty('--sbw');
+  if(back)btn.focus({preventScroll:true});
+  setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
+}
+btn.addEventListener('click',function(){shut()?open():close(1);});
+cb.addEventListener('click',function(){close(1);});
+sc.addEventListener('click',function(){close(1);});
+document.addEventListener('keydown',function(e){
+  if(shut())return;
+  if(e.key==='Escape'){close(1);return;}
+  if(e.key!=='Tab')return;
+  var f=fo();if(!f.length)return;
+  var i=f.indexOf(document.activeElement);if(i<0)i=0;
+  e.preventDefault();f[e.shiftKey?(i+f.length-1)%f.length:(i+1)%f.length].focus();
+});
+var mq=window.matchMedia('(min-width:1024px)'),onMq=function(){if(mq.matches&&!shut())close(0);};
+if(mq.addEventListener)mq.addEventListener('change',onMq);else if(mq.addListener)mq.addListener(onMq);
 })();
 </script>
 </body>
