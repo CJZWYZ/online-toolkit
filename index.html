@@ -1,115 +1,93 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tiaqi —— 把散落的信号读成判断</title>
-  <meta name="description" content="天启 Tiaqi：一边记录现实的脉动，一边收藏虚构的回声。情报站按期发布简报，小说档案按卷归档，全部为纯静态构建。" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Tiaqi —— 把散落的信号读成判断" />
-  <meta property="og:description" content="情报站与小说档案的双线站点，纯静态构建，无追踪、无数据库。" />
-  <meta property="og:url" content="https://www.tiaqi.com/" />
-  <meta name="color-scheme" content="light dark" />
-  <link rel="stylesheet" href="style.css?v=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tiaqi —— 把散落的信号读成判断</title>
+<meta name="description" content="情报站与小说档案的双线站点，纯静态构建。" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%234FD1C5' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%234FD1C5' stroke-width='2' stroke-linecap='round'/></svg>" />
+<meta name="color-scheme" content="light dark" />
+<link rel="stylesheet" href="style.css?v=2" />
 </head>
-<body>
-  <a class="skip" href="#main">跳到正文</a>
-
-  <header class="topbar">
-    <a class="brand" href="/">
-      <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
-        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
-        <path d="M12 1.6V6M12 18v4.4M1.6 12H6M18 12h4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-        <path d="M12 12 18.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-      </svg>
-      <span>Tiaqi</span>
-    </a>
-    <nav class="nav" aria-label="主导航">
-      <a href="#intel">情报站</a>
-      <a href="#fiction">小说档案</a>
-      <a href="about.html">关于</a>
+<body class="theme-home">
+<a class="skip" href="#main">跳到正文</a>
+<header class="topbar">
+  <a class="brand" href="">
+    <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55" />
+      <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.2" />
+      <path d="M12 1.6V6M12 18v4.4M1.6 12H6M18 12h4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M12 12 18.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+    </svg><span>Tiaqi</span>
+  </a>
+  <nav class="nav" aria-label="主导航">
+    <a href="intel/">情报站</a>
+    <a href="fiction/">小说档案</a>
+    <a href="about.html">关于</a>
+  </nav>
+</header>
+<main id="main">
+<section class="hero">
+  <p class="eyebrow">SIGNAL · ARCHIVE</p>
+  <h1 class="display">把散落的信号<br />读成判断</h1>
+  <p class="lede">天启不是预告终局的号角，而是一台把信号读成判断的仪器。<br />一边记录现实的脉动，一边收藏虚构的回声——同一套观测，两种刻度。</p>
+</section>
+<div class="tracks">
+  <section class="track track-intel" aria-labelledby="intel-h">
+    <div class="track-head"><p class="track-kicker">SIGNAL</p><h2 class="track-title" id="intel-h">情报站</h2></div>
+    <div class="beam" aria-hidden="true"></div><p class="door-meta mono">第 2026-10 期 · 2026-10-29</p>
+       <p class="door-headline">本期概览</p>
+       <div class="empty"><p class="empty-title">已归集 24 条信号</p>
+       <p class="empty-hint">技术 22 · 安全 2。核心判断由人工撰写，当前状态：待补充。</p></div>
+       <div class="signals-grid cols-1"><article class="signal-card confirmed">
+  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">技术</span></div>
+  <h3 class="sc-title"><a href="https://www.solidot.org/story?sid=85748" rel="noopener nofollow">Google AI 搜索产生的收入低于传统搜索</a></h3>
+  <p class="sc-meta">Solidot · <span class="mono">2026-10-29</span></p>
+  <details class="sc-note"><summary>展开批注</summary><p>Google/Alphabet 在公布第三季度财报之后股价下跌了近 10%，原因是搜索巨人披露 AI 搜索产生的收入低于传统搜索，尽管其整体搜索业务收入同比增长 12% 达到 632.5 亿美元。搜索业务增速略低于去年第三季度的 14.5% ，Alphabet 首席商务官 Philipp Schindler 称，搜索业务增长放缓的原因在于“我们观察到 AI </p></details>
+  <p class="sc-motif">母题 <a class="chip" href="0threshold/">阈值</a></p>
+</article><article class="signal-card confirmed">
+  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">安全</span></div>
+  <h3 class="sc-title"><a href="https://www.oschina.net/news/503303/openai-securing-our-frontier-model-training-environment" rel="noopener nofollow">OpenAI 隔离的 AI agent 通过 CPU 缓存互相通信</a></h3>
+  <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-29</span></p>
+  <details class="sc-note"><summary>展开批注</summary><p>OpenAI 做了个测试：把两个 agent 放进完全隔离的环境，跑在同一套硬件上，没有网络、没有共享文件，命令它们互相传递一个秘密。它们做到了——用的是处理器缓存。一个 agent 故意改写缓存里的数据，另一个测量加载时间的差异，把消息解码出来。这套手法正是著名 Spectre 和 Meltdown 攻击的原理。 这不是科幻设定，是 ...</p></details>
+  <p class="sc-motif">母题 <a class="chip" href="1boundary/">边界</a></p>
+</article><article class="signal-card confirmed">
+  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">技术</span></div>
+  <h3 class="sc-title"><a href="https://www.oschina.net/news/503302" rel="noopener nofollow">Neton 1.0.0 正式发布：面向 AI 原生开发的 Kotlin/Native 服务端应用框架</a></h3>
+  <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-29</span></p>
+  <details class="sc-note"><summary>展开批注</summary><p>Neton Framework 1.0.0 正式发布，现已上线 Maven Central。 这是 Neton 的第一个稳定版本。从应用装配、依赖注入、HTTP API，到数据库、认证授权、缓存、任务调度、对象存储和 WebSocket，Neton 为 Kotlin 开发者提供了一套围绕原生服务端应用构建的开发体系。 Neton 的定位不是底层网络库，而是与</p></details>
+  <p class="sc-motif">母题 <a class="chip" href="2threshold/">阈值</a></p>
+</article></div>
+       <p class="track-note"><a class="cta cta-dark" href="intel/2026-10/">查看本期简报 →</a></p>
+    <p class="track-note">情报为「简报制」：一期一页，含核心判断、分维度信号与本期母题，不做倒序博客流。</p>
+  </section>
+  <section class="track track-fiction" aria-labelledby="fiction-h">
+    <div class="track-head"><p class="track-kicker">ARCHIVE</p><h2 class="track-title serif" id="fiction-h">小说档案</h2></div>
+    <div class="rule" aria-hidden="true"></div><p class="door-meta mono">第 1 卷 · 第 03 章</p>
+       <p class="door-headline serif">边界</p>
+       <div class="empty"><p class="empty-hint">边界既是保护，也是隔绝。</p></div>
+       <p class="track-note"><a class="cta cta-light" href="fiction/door/03/">开始阅读 →</a>
+       <a class="cta cta-ghost" href="fiction/">全部目录 →</a></p>
+    <p class="track-note">小说为「档案制」：按卷组织而非按时间倒序，正文限宽、适合长文阅读，讨论入口收在文末。</p>
+  </section>
+</div>
+<section class="motif-band">
+  <h2 class="motif-title">母题：两条线的缝合处</h2>
+  <div class="motif-cards"><a class="motif-card" href="motif/threshold/"><span class="motif-name">阈值</span>
+      <span class="motif-count mono">情报 22 · 虚构 1</span></a><a class="motif-card" href="motif/boundary/"><span class="motif-name">边界</span>
+      <span class="motif-count mono">情报 2 · 虚构 1</span></a><a class="motif-card" href="motif/signal-noise/"><span class="motif-name">信噪</span>
+      <span class="motif-count mono">情报 0 · 虚构 1</span></a></div>
+</section></main>
+<footer class="footer">
+  <div class="foot-row">
+    <p class="foot-brand">Tiaqi</p>
+    <nav class="foot-nav" aria-label="页脚导航">
+      <a href="intel/archive/">归档</a>
+      <a href="feed.xml">RSS</a>
+      <a href="about.html">关于与更新机制</a>
     </nav>
-  </header>
-
-  <main id="main">
-    <!-- ============ 品牌引言 ============ -->
-    <section class="hero">
-      <p class="eyebrow">SIGNAL · ARCHIVE</p>
-      <h1 class="display">把散落的信号<br />读成判断</h1>
-      <p class="lede">
-        天启不是预告终局的号角，而是一台把信号读成判断的仪器。<br />
-        一边记录现实的脉动，一边收藏虚构的回声——同一套观测，两种刻度。
-      </p>
-    </section>
-
-    <!-- ============ 双轨：深色情报 / 浅色虚构 ============ -->
-    <div class="tracks">
-      <!-- 情报站：恒定深色 -->
-      <section class="track track-intel" id="intel" aria-labelledby="intel-h">
-        <div class="track-head">
-          <p class="track-kicker">SIGNAL</p>
-          <h2 class="track-title" id="intel-h">情报站</h2>
-        </div>
-        <div class="beam" aria-hidden="true"></div>
-        <div class="door">
-          <p class="door-meta mono">第 — 期</p>
-          <p class="door-headline">本期核心判断</p>
-          <div class="empty">
-            <p class="empty-title">首期简报正在归集信号</p>
-            <p class="empty-hint">
-              信号来自公开信源，按周期自动归集；核心判断由人工撰写后发布。
-            </p>
-          </div>
-        </div>
-        <p class="track-note">
-          情报为「简报制」：一期一页，含核心判断、分维度信号与本期母题，不做倒序博客流。
-        </p>
-      </section>
-
-      <!-- 小说档案：恒定浅色 -->
-      <section class="track track-fiction" id="fiction" aria-labelledby="fiction-h">
-        <div class="track-head">
-          <p class="track-kicker">ARCHIVE</p>
-          <h2 class="track-title serif" id="fiction-h">小说档案</h2>
-        </div>
-        <div class="rule" aria-hidden="true"></div>
-        <div class="door">
-          <p class="door-meta mono">卷 — · 第 — 章</p>
-          <p class="door-headline serif">尚未开卷</p>
-          <div class="empty">
-            <p class="empty-title">档案尚未开卷</p>
-            <p class="empty-hint">
-              章节以 Markdown 管理，按「书目 → 卷 → 章」归档，讨论区托管在 GitHub Discussions。
-            </p>
-          </div>
-        </div>
-        <p class="track-note">
-          小说为「档案制」：按卷组织而非按时间倒序，正文限宽、适合长文阅读，讨论入口收在文末。
-        </p>
-      </section>
-    </div>
-
-    <!-- ============ 母题缝合带 ============ -->
-    <section class="motif-band" aria-labelledby="motif-h">
-      <h2 class="motif-title" id="motif-h">本期母题</h2>
-      <p class="motif-empty">
-        母题是缝合两条线的结构：情报信号与小说章节共享同一母题，可双向跳转。当前尚无已发布内容。
-      </p>
-      <p class="motif-note">情报侧 <span class="mono">0</span> 条 · 虚构侧 <span class="mono">0</span> 章</p>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="foot-row">
-      <p class="foot-brand">Tiaqi</p>
-      <nav class="foot-nav" aria-label="页脚导航">
-        <a href="about.html">关于与更新机制</a>
-        <a href="https://github.com/CJZWYZ/online-toolkit" rel="noopener">在 GitHub 关注更新</a>
-      </nav>
-    </div>
-    <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
-  </footer>
+  </div>
+  <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
+</footer>
 </body>
 </html>
