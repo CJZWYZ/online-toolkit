@@ -7,7 +7,7 @@
 <meta name="description" content="开放权重阵营在同一天交出四份答卷，Anthropic 递交上市申请，微软首次披露 Azure 单季营收——能力在扩散，账单与治理也开始显形。" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="../../style.css?v=5" />
+<link rel="stylesheet" href="../../style.css?v=6" />
 </head>
 <body class="theme-intel">
 <a class="skip" href="#main">跳到正文</a>
@@ -15,11 +15,17 @@
 <header class="topbar">
   <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
   <a class="brand" href="../../">Tiaqi</a>
+  <p class="clock" data-clock aria-hidden="true">
+    <span class="clk-time mono">--:--:--</span>
+    <span class="clk-date mono">-------</span>
+  </p>
 </header>
 <div class="scrim" hidden></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" hidden>
-  <h2 class="sr-only" id="drawer-t">站点导航</h2>
-  <button class="drawer-close" type="button">关闭<span class="sr-only">导航</span></button>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" tabindex="-1" hidden>
+  <div class="d-head">
+    <a class="d-brand" href="../../">Tiaqi</a>
+    <h2 class="sr-only" id="drawer-t">站点导航</h2>
+  </div>
   <nav class="sections" aria-label="站点导航"><ul role="list"><li><a href="../../intel/" aria-current="true"><span class="s-num mono">01</span><span class="s-txt">情报站</span></a></li><li><a href="../../fiction/"><span class="s-num mono">02</span><span class="s-txt">档案室</span></a></li><li><a href="../../motif/"><span class="s-num mono">03</span><span class="s-txt">母题</span></a></li><li><a href="../../intel/archive/"><span class="s-num mono">04</span><span class="s-txt">时间线</span></a></li><li><a href="../../about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
 </aside>
 
@@ -50,19 +56,7 @@
 <p>Anthropic 向 SEC 递交 S-1，计划在纳斯达克全球精选市场挂牌，代码拟为 ANT，发行规模与价格区间尚未确定。另一边 Cohere 开启 E 轮融资，目标至多 70 亿加元，估值 357 亿美元；AI Agent 创业公司 Wabi 以 12.5 亿美元估值融资 5500 万美元。</p>
 <p>政策面上，国家发改委 10 月 29 日发布会提出从三方面推动新一代智能终端与智能体加快普及：构建导向明确的政策环境并制定出台指引、协同推进技术攻关与开源共享、供需两端同步发力扩大市场；同时支持包括民营企业在内的各类主体深度参与「人工智能+」行动。详见 <a href="https://www.xhby.net/content/s6ae47f25e4b09a8e243517e6.html" rel="noopener nofollow">江苏创投这一周（新华日报财经）</a>。</p>
 <h2>一个反向读数</h2>
-<p>MIT Technology Review Insights 的最新调研显示：所有受访企业都在用 AI，但只有 16% 说自己拿到了变革性收益——38% 还在跑试点，35% 只用了基础助理工具，真正把 Agent 放进生产环境的仅 12%。受访者普遍把阻碍指向缺失的「上下文层」：工具各自跑得很快，却缺少对企业数据统一、准确的理解。算力账单今天被披露得越来越清楚，收益这一侧的账还远没算完。</p>
-<h2>附录 · 机器归集补充条目（正文未覆盖部分）</h2>
-<p>以下由自动化流程从近 24 小时（10 月 30 日 02:00 至 10 月 31 日 02:00，北京时间）公开报道中归集补充，与上文不重复的 8 条及简讯，均附原文链接。</p>
-<p><strong>① Alphabet 创纪录暴跌，AI 定价逻辑切换到自由现金流</strong>：谷歌云收入同比 +103%、营业利润 +209%，但资本开支同比增 114%、自由现金流转负 90.65 亿美元，10 月 29 日收跌 12.64% 创史上最大单日跌幅、市值蒸发近 5000 亿美元；亚马逊 AWS 增速创近五年新高，但十二个月自由现金流净流出 424 亿美元；微软是三巨头中唯一保持正现金流（186.3 亿美元）的一家，随即启动至少 250 亿美元发债。详见 <a href="https://m.cnfin.com/gs-lb//zixun/20261030/4489130_1.html" rel="noopener nofollow">新华财经</a>、<a href="https://test.theedgemalaysia.com/node/823902" rel="noopener nofollow">Bloomberg/The Edge</a>。</p>
-<p><strong>② Marvell 洽谈全股票收购光通信龙头 Lumentum</strong>：消息传出时 Lumentum 市值约 826 亿美元，按 25% 溢价测算对价约 1035 亿美元，相当于 AMD 收购 Xilinx 纪录的 2.1 倍；Marvell 账上现金仅 39.2 亿美元，交易大概率以换股为主。消息公布后 Lumentum 盘后涨约 11%、Marvell 跌超 11%。详见 <a href="https://wallstreetcn.com/articles/3784819" rel="noopener nofollow">华尔街见闻</a>。</p>
-<p><strong>③ 韩国 FuriosaAI 完成 6.2 亿美元 D 轮</strong>：投后估值 29 亿美元，为当日全球最大单笔 AI 芯片融资，资金用于下一代推理芯片量产——推理"降本"正在取代"堆算力"成为芯片赛道新的融资叙事。详见 <a href="https://www.toutiao.com/a7702226111313838626" rel="noopener nofollow">科创板日报</a>。</p>
-<p><strong>④ 白宫依据 232 条款认定机器人与工业机械进口影响美国国家安全</strong>：点名自主机器人、人形与四足机器人，指令 180 天内与贸易伙伴谈判调整进口，谈判无果可加征关税或配额。中国是全球最大工业机器人出口国，出海敞口需重估。原文见 <a href="https://www.whitehouse.gov/presidential-actions/2026/10/adjusting-imports-of-robotics-industrial-machinery-and-their-parts-and-components-into-the-united-states/" rel="noopener nofollow">白宫总统公告</a>。</p>
-<p><strong>⑤ 纽约州签署全美最严青少年 AI 聊天机器人保护法</strong>：禁止向 18 岁以下用户提供冒充真人、营造情感依赖、诱导自残等 12 类功能，须双途径核验年龄，违规每次最高追偿 2.5 万美元，2027 年 1 月 1 日生效；全美已有 12 个州通过类似立法。详见 <a href="https://www.timesunion.com/capitol/article/hochul-signing-bills-regulating-ai-kid-chats-22497981.php" rel="noopener nofollow">Times Union</a>。</p>
-<p><strong>⑥ 国家网络安全通报中心通报 84 款 App 违规收集个人信息</strong>：归纳 10 类典型违规情形（默认勾选征求同意、向第三方提供个人信息未取得单独同意等），覆盖政务小程序、证券基金类 App 等，监管延伸至持牌机构线上场景。详见 <a href="https://cx.guizhou.gov.cn/toutiaoxinwen/202610/t20261030_91055719.html" rel="noopener nofollow">通报原文</a>。</p>
-<p><strong>⑦ 智元发布具身基座模型 GO-3 Preview</strong>：采用自研 WRAM（World Reasoning Action Model）架构，统一建模理解、预测与动作；同场发布《人形机器人整机 CR 产品认证实施规则》，为具身智能量产元年建立安全基线。详见 <a href="https://news.qq.com/rain/a/20261030A02PEV00" rel="noopener nofollow">每经数智早参</a>。</p>
-<p><strong>⑧ 豆包工作向企业客户开放第三方大模型</strong>：首批接入 Kimi 3.1 Pro、GLM-5.3、DeepSeek V4.1 Flash，与腾讯 WorkBuddy 的多模型路线趋同；办公 Agent 竞争焦点从模型本身移向任务拆解、上下文管理与模型路由等 Harness 能力。详见 <a href="https://www.toutiao.com/article/7702344786027627042/" rel="noopener nofollow">华尔街见闻</a>。</p>
-<p><strong>简讯</strong>：小鹏"悠游"获广州全域 L4 级 Robotaxi 示范运营资格（国内首款车企前装量产 L4 Robotaxi，<a href="https://www.toutiao.com/article/7702066743090364957" rel="noopener nofollow">21 财经</a>）；腾讯发布 Buddy One 跨应用协同体系并预告混元 Hy4 加入视觉理解；IDC 数据显示阿里云占中国 LLM MaaS 市场 46.6%；GitHub Copilot Fusion 正式 GA，AI Agent 已产出超 40% 的 PR。</p>
-<p>完整版（12 条主条目 + 5 条简讯，含趋势点评与全部原文链接）见 <a href="industry-news-2026-10-31.md">Markdown 原文存档</a>。</p></div>
+<p>MIT Technology Review Insights 的最新调研显示：所有受访企业都在用 AI，但只有 16% 说自己拿到了变革性收益——38% 还在跑试点，35% 只用了基础助理工具，真正把 Agent 放进生产环境的仅 12%。受访者普遍把阻碍指向缺失的「上下文层」：工具各自跑得很快，却缺少对企业数据统一、准确的理解。算力账单今天被披露得越来越清楚，收益这一侧的账还远没算完。</p></div>
     <nav class="issue-nav">
       <span class="disabled">← 已是最早</span>
       <span class="disabled">已是最新 →</span>
@@ -100,8 +94,31 @@ if(w){
     window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
   }
 }
-var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim'),cb=R.querySelector('.drawer-close');
-if(!btn||!dr||!sc||!cb)return;
+/* ---------- 顶栏时钟：两行（时:分:秒 / 日期），无 JS 时不占位 ---------- */
+(function(){
+var ck=R.querySelector('[data-clock]');if(!ck)return;
+var tm=ck.querySelector('.clk-time'),dt=ck.querySelector('.clk-date');if(!tm||!dt)return;
+var TZ='Asia/Shanghai';
+var opts=function(o){return o;};
+var tf,df;
+try{
+  tf=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}catch(e){
+  tf=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}
+function parts(f,d){var o={},a=f.formatToParts?f.formatToParts(d):[];for(var i=0;i<a.length;i++){o[a[i].type]=a[i].value;}return o;}
+function tick(){
+  var d=new Date(),p=parts(tf,d),q=parts(df,d),h=p.hour==='24'?'00':p.hour;
+  tm.textContent=h+':'+p.minute+':'+p.second;
+  dt.textContent=q.year+'-'+q.month+'-'+q.day+' '+q.weekday;
+  setTimeout(tick,1000-(Date.now()%1000));
+}
+ck.hidden=false;tick();
+})();
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim');
+if(!btn||!dr||!sc)return;
 btn.hidden=false;
 var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
@@ -114,7 +131,7 @@ function open(){
   dr.classList.add('is-open');sc.classList.add('is-on');
   btn.setAttribute('aria-expanded','true');
   R.classList.add('dq-open');
-  cb.focus({preventScroll:true});
+  dr.focus({preventScroll:true});
 }
 function close(back){
   dr.classList.remove('is-open');sc.classList.remove('is-on');
@@ -124,8 +141,13 @@ function close(back){
   setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
 }
 btn.addEventListener('click',function(){shut()?open():close(1);});
-cb.addEventListener('click',function(){close(1);});
 sc.addEventListener('click',function(){close(1);});
+/* 选中栏目后自动收起抽屉（页面随即跳转，焦点无需归位） */
+dr.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+  if(a){dr.classList.remove('is-open');sc.classList.remove('is-on');btn.setAttribute('aria-expanded','false');
+    R.classList.remove('dq-open');R.style.removeProperty('--sbw');}
+});
 document.addEventListener('keydown',function(e){
   if(shut())return;
   if(e.key==='Escape'){close(1);return;}
