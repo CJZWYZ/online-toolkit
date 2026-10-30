@@ -475,11 +475,12 @@ function renderHome(all, chapters, news) {
   /* ③ 档案室章节列表（弱）：章节少时全量展示并去掉「查看全部」 */
   const CH_MAX = 5;
   const showAll = chapters.length <= CH_MAX;
+  const multiBook = new Set(chapters.map((c) => c.book)).size > 1;
   const ficBlock = chapters.length
     ? `<section class="chapters">
     <h2 class="lst-h">02 档案室 · 章节</h2>
     <ol class="chapter-list">${chapters.slice(0, showAll ? chapters.length : CH_MAX).map((c) => `<li>
-      <a href="fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a>
+      <a href="fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${multiBook ? '《' + esc(c.bookTitle || c.book) + '》' : ''}${esc(c.title)}</span></a>
       <span class="ch-meta mono">${esc(c.date || c.published || '')}</span>
     </li>`).join('')}</ol>
     ${showAll ? '' : '<p class="track-more"><a href="fiction/">查看全部 →</a></p>'}
@@ -614,23 +615,36 @@ function renderArchive(all) {
 }
 
 function renderFictionIndex(chapters) {
-  const book = chapters[0];
-  const byVol = {};
-  chapters.forEach((c) => { (byVol[c.volume] ||= []).push(c); });
-  const vols = Object.entries(byVol).map(([v, list]) => `
-    <h2 class="sec serif">第 ${esc(v)} 卷${list[0].volumeTitle ? ' · ' + esc(String(list[0].volumeTitle).split('·').pop().trim()) : ''}</h2>
-    <ol class="chapter-list">${list.map((c) => `<li>
+  /* 支持多部并行连载：一部作品时沿用「书名即页标题」，多部时按作品分区 */
+  const books = new Map();
+  chapters.forEach((c) => { if (!books.has(c.book)) books.set(c.book, []); books.get(c.book).push(c); });
+  const single = books.size === 1 ? chapters[0] : null;
+
+  const volBlock = (list) => {
+    const byVol = {};
+    list.forEach((c) => { (byVol[c.volume] ||= []).push(c); });
+    return Object.entries(byVol).map(([v, cs]) => `
+    <h3 class="sec serif">第 ${esc(v)} 卷${cs[0].volumeTitle ? ' · ' + esc(String(cs[0].volumeTitle).split('·').pop().trim()) : ''}</h3>
+    <ol class="chapter-list">${cs.map((c) => `<li>
       <a href="${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a>
       <span class="ch-meta mono">${esc(c.date || c.published || '')} · ${esc(c.words || '')} 字</span>
       ${c.demo ? '<span class="badge-demo">示例</span>' : ''}
     </li>`).join('')}</ol>`).join('');
+  };
+
+  const content = single
+    ? volBlock(chapters)
+    : [...books.entries()].map(([, list]) => `
+    <h2 class="sec serif">《${esc(list[0].bookTitle || list[0].book)}》</h2>
+    ${volBlock(list)}`).join('');
+
   const body = `<section class="brief theme-paper">
     <p class="eyebrow">02 · 档案室</p>
-    <h1 class="h1 serif">${esc(book?.bookTitle || '档案室')}</h1>
+    <h1 class="h1 serif">${single ? esc(single.bookTitle || '档案室') : '档案室'}</h1>
     <div class="rule wide" aria-hidden="true"></div>
-    ${chapters.length ? vols : '<div class="empty"><p class="empty-title">档案尚未开卷</p><p class="empty-hint">章节以 Markdown 管理，按卷发布。</p></div>'}
+    ${chapters.length ? content : '<div class="empty"><p class="empty-title">档案尚未开卷</p><p class="empty-hint">章节以 Markdown 管理，按卷发布。</p></div>'}
   </section>`;
-  return layout({ title: `${book?.bookTitle || '档案室'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
+  return layout({ title: `${single?.bookTitle || '档案室'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
 }
 
 function renderChapter(c, chapters, all) {
