@@ -7,7 +7,7 @@
 <meta name="description" content="情报站与档案室的双线站点，纯静态构建。" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="style.css?v=5" />
+<link rel="stylesheet" href="style.css?v=6" />
 </head>
 <body class="theme-home">
 <a class="skip" href="#main">跳到正文</a>
@@ -15,11 +15,17 @@
 <header class="topbar">
   <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
   <a class="brand" href="./" aria-current="page">Tiaqi</a>
+  <p class="clock" data-clock aria-hidden="true">
+    <span class="clk-time mono">--:--:--</span>
+    <span class="clk-date mono">-------</span>
+  </p>
 </header>
 <div class="scrim" hidden></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" hidden>
-  <h2 class="sr-only" id="drawer-t">站点导航</h2>
-  <button class="drawer-close" type="button">关闭<span class="sr-only">导航</span></button>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" tabindex="-1" hidden>
+  <div class="d-head">
+    <a class="d-brand" href="./">Tiaqi</a>
+    <h2 class="sr-only" id="drawer-t">站点导航</h2>
+  </div>
   <nav class="sections" aria-label="站点导航"><ul role="list"><li><a href="intel/"><span class="s-num mono">01</span><span class="s-txt">情报站</span></a></li><li><a href="fiction/"><span class="s-num mono">02</span><span class="s-txt">档案室</span></a></li><li><a href="motif/"><span class="s-num mono">03</span><span class="s-txt">母题</span></a></li><li><a href="intel/archive/"><span class="s-num mono">04</span><span class="s-txt">时间线</span></a></li><li><a href="about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
 </aside>
 <div class="welcome" data-welcome>
@@ -40,14 +46,14 @@
 <main id="main" tabindex="-1"><div class="focus focus-2"><section class="f-cell">
     <p class="f-kicker mono">01 情报站 · 2026-10</p>
     <h1 class="f-title"><a href="intel/2026-10/">第 2026-10 期简报</a></h1>
-    <p class="f-sum">本期已归集 24 条信号，覆盖技术、安全、市场。核心判断由人工撰写后发布。</p>
-    <span class="kws"><a class="kw" href="motif/threshold/">阈值</a><a class="kw" href="motif/boundary/">边界</a><a class="kw" href="motif/signal-noise/">信噪</a></span>
+    <p class="f-sum">本期已归集 24 条信号，覆盖技术、安全。核心判断由人工撰写后发布。</p>
+    <span class="kws"><a class="kw" href="motif/threshold/">阈值</a><a class="kw" href="motif/boundary/">边界</a></span>
     <p class="f-go"><a href="intel/2026-10/">阅读全文 →</a></p>
   </section><section class="f-cell">
-    <p class="f-kicker mono">02 档案室 · 第 04 章</p>
-    <h2 class="f-title f-title-sm"><a href="fiction/door/04/">副本</a></h2>
-    <p class="f-sum f-sum-2">他一直读的，是被人先读过一遍的那一份。</p>
-    <p class="f-go"><a href="fiction/door/04/">阅读章节 →</a></p>
+    <p class="f-kicker mono">02 档案室 · 第 03 章</p>
+    <h2 class="f-title f-title-sm"><a href="fiction/door/03/">边界</a></h2>
+    <p class="f-sum f-sum-2">边界既是保护，也是隔绝。</p>
+    <p class="f-go"><a href="fiction/door/03/">阅读章节 →</a></p>
   </section></div><section class="latest">
     <h2 class="lst-h">资讯 · 最新</h2>
     <ul class="lst" role="list"><li>
@@ -65,9 +71,6 @@
     </li><li>
       <a href="fiction/door/03/"><span class="ch-no mono">03</span><span class="ch-title">边界</span></a>
       <span class="ch-meta mono">2026-10-28</span>
-    </li><li>
-      <a href="fiction/door/04/"><span class="ch-no mono">04</span><span class="ch-title">副本</span></a>
-      <span class="ch-meta mono">2026-10-31</span>
     </li></ol>
     
   </section><section class="about-line">
@@ -105,8 +108,31 @@ if(w){
     window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
   }
 }
-var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim'),cb=R.querySelector('.drawer-close');
-if(!btn||!dr||!sc||!cb)return;
+/* ---------- 顶栏时钟：两行（时:分:秒 / 日期），无 JS 时不占位 ---------- */
+(function(){
+var ck=R.querySelector('[data-clock]');if(!ck)return;
+var tm=ck.querySelector('.clk-time'),dt=ck.querySelector('.clk-date');if(!tm||!dt)return;
+var TZ='Asia/Shanghai';
+var opts=function(o){return o;};
+var tf,df;
+try{
+  tf=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}catch(e){
+  tf=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}
+function parts(f,d){var o={},a=f.formatToParts?f.formatToParts(d):[];for(var i=0;i<a.length;i++){o[a[i].type]=a[i].value;}return o;}
+function tick(){
+  var d=new Date(),p=parts(tf,d),q=parts(df,d),h=p.hour==='24'?'00':p.hour;
+  tm.textContent=h+':'+p.minute+':'+p.second;
+  dt.textContent=q.year+'-'+q.month+'-'+q.day+' '+q.weekday;
+  setTimeout(tick,1000-(Date.now()%1000));
+}
+ck.hidden=false;tick();
+})();
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim');
+if(!btn||!dr||!sc)return;
 btn.hidden=false;
 var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
@@ -119,7 +145,7 @@ function open(){
   dr.classList.add('is-open');sc.classList.add('is-on');
   btn.setAttribute('aria-expanded','true');
   R.classList.add('dq-open');
-  cb.focus({preventScroll:true});
+  dr.focus({preventScroll:true});
 }
 function close(back){
   dr.classList.remove('is-open');sc.classList.remove('is-on');
@@ -129,8 +155,13 @@ function close(back){
   setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
 }
 btn.addEventListener('click',function(){shut()?open():close(1);});
-cb.addEventListener('click',function(){close(1);});
 sc.addEventListener('click',function(){close(1);});
+/* 选中栏目后自动收起抽屉（页面随即跳转，焦点无需归位） */
+dr.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+  if(a){dr.classList.remove('is-open');sc.classList.remove('is-on');btn.setAttribute('aria-expanded','false');
+    R.classList.remove('dq-open');R.style.removeProperty('--sbw');}
+});
 document.addEventListener('keydown',function(e){
   if(shut())return;
   if(e.key==='Escape'){close(1);return;}

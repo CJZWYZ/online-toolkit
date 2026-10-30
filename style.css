@@ -163,6 +163,27 @@ main:focus { outline: none; }
 }
 .brand[aria-current="page"] { color: var(--c-text-2); }
 
+/* ---------- 顶栏时钟：第一行时间（精确到秒）· 第二行日期 ----------
+   无 JS 时完全不占位（内容为静态占位符，无需朗读，故 aria-hidden） */
+.clock { display: none; }
+html.js .clock {
+  display: flex; flex-direction: column; align-items: flex-end;
+  margin-left: auto; padding: 0 var(--s-2); line-height: 1.2;
+}
+.no-js .clock { display: none; }
+.clk-time {
+  font-size: var(--fs-16); font-variant-numeric: tabular-nums;
+  color: var(--c-text); letter-spacing: .02em;
+}
+.clk-date {
+  font-size: var(--fs-13); font-variant-numeric: tabular-nums;
+  color: var(--c-text-3); letter-spacing: .04em;
+}
+@media (max-width: 389.98px) {
+  /* 窄屏不与汉堡、品牌抢空间 */
+  html.js .clock { display: none; }
+}
+
 /* 汉堡按钮：仅 <1024 显示；默认 hidden + .no-js 双保险，JS 激活后才可用 */
 .menu-btn {
   display: none;
@@ -218,15 +239,18 @@ main:focus { outline: none; }
   transition: transform var(--t-233) var(--ease);
 }
 .drawer[hidden], .scrim[hidden] { display: none; }
-.drawer-close {
-  display: block; margin: 0 0 var(--s-2) auto;
-  min-height: 44px; padding: 0 var(--s-2);
-  font: inherit; font-size: var(--fs-13); cursor: pointer;
-  color: var(--c-text-2); background: transparent;
-  border: 1px solid var(--c-line); border-radius: var(--radius);
-  transition: color var(--t-144) var(--ease), border-color var(--t-144) var(--ease);
+/* 抽屉顶部：品牌字样（替代原关闭按钮）。关闭方式：遮罩 / Esc / 选中栏目 / ≥1024 自动退出 */
+.d-head {
+  display: flex; align-items: center; min-height: 50px;
+  margin-bottom: var(--s-2);
+  border-bottom: 1px solid var(--c-line);
 }
-.drawer-close:hover { color: var(--c-accent); border-color: var(--c-accent); }
+.d-brand {
+  padding: var(--s-1) var(--s-1) var(--s-1) 0;
+  font-size: var(--fs-21); line-height: 34px; font-weight: 600; letter-spacing: .01em;
+  color: var(--c-text); text-decoration: none;
+}
+.d-brand:hover { color: var(--c-accent); }
 /* 滚动锁：overflow 而非 position:fixed（不丢滚动位置）+ 滚动条宽度补偿 */
 html.dq-open body { overflow: hidden; padding-right: var(--sbw, 0px); }
 @media (min-width: 1024px) {

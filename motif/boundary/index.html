@@ -7,7 +7,7 @@
 <meta name="description" content="边界既是保护，也是隔绝；被划定的与被跨越的。" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="../../style.css?v=5" />
+<link rel="stylesheet" href="../../style.css?v=6" />
 </head>
 <body class="theme-motif">
 <a class="skip" href="#main">跳到正文</a>
@@ -15,11 +15,17 @@
 <header class="topbar">
   <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
   <a class="brand" href="../../">Tiaqi</a>
+  <p class="clock" data-clock aria-hidden="true">
+    <span class="clk-time mono">--:--:--</span>
+    <span class="clk-date mono">-------</span>
+  </p>
 </header>
 <div class="scrim" hidden></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" hidden>
-  <h2 class="sr-only" id="drawer-t">站点导航</h2>
-  <button class="drawer-close" type="button">关闭<span class="sr-only">导航</span></button>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" tabindex="-1" hidden>
+  <div class="d-head">
+    <a class="d-brand" href="../../">Tiaqi</a>
+    <h2 class="sr-only" id="drawer-t">站点导航</h2>
+  </div>
   <nav class="sections" aria-label="站点导航"><ul role="list"><li><a href="../../intel/"><span class="s-num mono">01</span><span class="s-txt">情报站</span></a></li><li><a href="../../fiction/"><span class="s-num mono">02</span><span class="s-txt">档案室</span></a></li><li><a href="../../motif/" aria-current="true"><span class="s-num mono">03</span><span class="s-txt">母题</span></a></li><li><a href="../../intel/archive/"><span class="s-num mono">04</span><span class="s-txt">时间线</span></a></li><li><a href="../../about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
 </aside>
 
@@ -35,15 +41,15 @@
     <h2 class="sec">现实侧 · 2 条信号</h2>
     <div class="signals-grid cols-1"><article class="signal-card confirmed">
   <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">安全</span></div>
-  <h3 class="sc-title"><a href="https://www.oschina.net/news/503319/chained-php2shell-exploit-roots-25-servers" rel="noopener nofollow">攻击者利用 PHP2Shell 漏洞控入侵美国政府服务器</a></h3>
-  <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-30</span></p>
-  <details class="sc-note"><summary>展开批注</summary><p>十天前我们写过 PHP 基金会那两个拖了两年才修好的 RCE 漏洞（CVE-2026-109618 / CVE-2026-109619）。现在它们已经被武器化、实战利用了——而且打的不是普通 PHP 网站，是 Palo Alto Networks 的 PAN-OS 防火墙。 安全公司 Dream 在 10 月 25 日发现了一整套攻击残留：定制版 PHP2S</p></details>
-  <p class="sc-motif">母题 <a class="chip" href="../../motif/boundary/">边界</a></p>
-</article><article class="signal-card confirmed">
-  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">安全</span></div>
   <h3 class="sc-title"><a href="https://www.oschina.net/news/503303/openai-securing-our-frontier-model-training-environment" rel="noopener nofollow">OpenAI 隔离的 AI agent 通过 CPU 缓存互相通信</a></h3>
   <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-29</span></p>
   <details class="sc-note"><summary>展开批注</summary><p>OpenAI 做了个测试：把两个 agent 放进完全隔离的环境，跑在同一套硬件上，没有网络、没有共享文件，命令它们互相传递一个秘密。它们做到了——用的是处理器缓存。一个 agent 故意改写缓存里的数据，另一个测量加载时间的差异，把消息解码出来。这套手法正是著名 Spectre 和 Meltdown 攻击的原理。 这不是科幻设定，是 ...</p></details>
+  <p class="sc-motif">母题 <a class="chip" href="../../motif/boundary/">边界</a></p>
+</article><article class="signal-card confirmed">
+  <div class="sc-top"><span class="status-tag confirmed"><i class="dot dot-full" aria-hidden="true"></i>确认</span><span class="dim">安全</span></div>
+  <h3 class="sc-title"><a href="https://www.oschina.net/news/503286/google-gemini-4-carbon" rel="noopener nofollow">谷歌发布 Gemini 4 Carbon，安全能力先开放给白帽子</a></h3>
+  <p class="sc-meta">开源中国·资讯 · <span class="mono">2026-10-29</span></p>
+  <details class="sc-note"><summary>展开批注</summary><p>Google DeepMind 宣布推出 Gemini 4 Carbon，离上一代 Argon 只隔了两周。官方给它的定位很聚焦：迄今最强的网络安全能力和长程任务能力。 成绩单先摆出来。Artificial Analysis Intelligence Index v5.0 上拿到 59 分排第一；WebDev Arena 上靠网页开发和产物的质量提升，elo</p></details>
   <p class="sc-motif">母题 <a class="chip" href="../../motif/boundary/">边界</a></p>
 </article></div>
     <h2 class="sec">虚构侧 · 1 章</h2>
@@ -81,8 +87,31 @@ if(w){
     window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
   }
 }
-var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim'),cb=R.querySelector('.drawer-close');
-if(!btn||!dr||!sc||!cb)return;
+/* ---------- 顶栏时钟：两行（时:分:秒 / 日期），无 JS 时不占位 ---------- */
+(function(){
+var ck=R.querySelector('[data-clock]');if(!ck)return;
+var tm=ck.querySelector('.clk-time'),dt=ck.querySelector('.clk-date');if(!tm||!dt)return;
+var TZ='Asia/Shanghai';
+var opts=function(o){return o;};
+var tf,df;
+try{
+  tf=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}catch(e){
+  tf=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}
+function parts(f,d){var o={},a=f.formatToParts?f.formatToParts(d):[];for(var i=0;i<a.length;i++){o[a[i].type]=a[i].value;}return o;}
+function tick(){
+  var d=new Date(),p=parts(tf,d),q=parts(df,d),h=p.hour==='24'?'00':p.hour;
+  tm.textContent=h+':'+p.minute+':'+p.second;
+  dt.textContent=q.year+'-'+q.month+'-'+q.day+' '+q.weekday;
+  setTimeout(tick,1000-(Date.now()%1000));
+}
+ck.hidden=false;tick();
+})();
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim');
+if(!btn||!dr||!sc)return;
 btn.hidden=false;
 var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
@@ -95,7 +124,7 @@ function open(){
   dr.classList.add('is-open');sc.classList.add('is-on');
   btn.setAttribute('aria-expanded','true');
   R.classList.add('dq-open');
-  cb.focus({preventScroll:true});
+  dr.focus({preventScroll:true});
 }
 function close(back){
   dr.classList.remove('is-open');sc.classList.remove('is-on');
@@ -105,8 +134,13 @@ function close(back){
   setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
 }
 btn.addEventListener('click',function(){shut()?open():close(1);});
-cb.addEventListener('click',function(){close(1);});
 sc.addEventListener('click',function(){close(1);});
+/* 选中栏目后自动收起抽屉（页面随即跳转，焦点无需归位） */
+dr.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+  if(a){dr.classList.remove('is-open');sc.classList.remove('is-on');btn.setAttribute('aria-expanded','false');
+    R.classList.remove('dq-open');R.style.removeProperty('--sbw');}
+});
 document.addEventListener('keydown',function(e){
   if(shut())return;
   if(e.key==='Escape'){close(1);return;}

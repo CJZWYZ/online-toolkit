@@ -7,7 +7,7 @@
   <meta name="description" content="天启 Tiaqi 的方法论、更新机制、信源声明与隐私说明。纯静态站点，无数据库、无追踪。" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
   <meta name="color-scheme" content="light" />
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
 </head>
 <body class="theme-about">
   <a class="skip" href="#main">跳到正文</a>
@@ -16,12 +16,18 @@
   <header class="topbar">
     <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
     <a class="brand" href="./">Tiaqi</a>
+    <p class="clock" data-clock aria-hidden="true">
+      <span class="clk-time mono">--:--:--</span>
+      <span class="clk-date mono">-------</span>
+    </p>
   </header>
 
   <div class="scrim" hidden></div>
-  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" hidden>
-    <h2 class="sr-only" id="drawer-t">站点导航</h2>
-    <button class="drawer-close" type="button">关闭<span class="sr-only">导航</span></button>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" tabindex="-1" hidden>
+    <div class="d-head">
+      <a class="d-brand" href="./">Tiaqi</a>
+      <h2 class="sr-only" id="drawer-t">站点导航</h2>
+    </div>
     <nav class="sections" aria-label="站点导航">
       <ul role="list">
         <li><a href="intel/"><span class="s-num mono">01</span><span class="s-txt">情报站</span></a></li>
@@ -145,8 +151,30 @@ if(w){
     window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
   }
 }
-var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim'),cb=R.querySelector('.drawer-close');
-if(!btn||!dr||!sc||!cb)return;
+/* ---------- 顶栏时钟：两行（时:分:秒 / 日期），无 JS 时不占位 ---------- */
+(function(){
+var ck=R.querySelector('[data-clock]');if(!ck)return;
+var tm=ck.querySelector('.clk-time'),dt=ck.querySelector('.clk-date');if(!tm||!dt)return;
+var TZ='Asia/Shanghai';
+var tf,df;
+try{
+  tf=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}catch(e){
+  tf=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}
+function parts(f,d){var o={},a=f.formatToParts?f.formatToParts(d):[];for(var i=0;i<a.length;i++){o[a[i].type]=a[i].value;}return o;}
+function tick(){
+  var d=new Date(),p=parts(tf,d),q=parts(df,d),h=p.hour==='24'?'00':p.hour;
+  tm.textContent=h+':'+p.minute+':'+p.second;
+  dt.textContent=q.year+'-'+q.month+'-'+q.day+' '+q.weekday;
+  setTimeout(tick,1000-(Date.now()%1000));
+}
+ck.hidden=false;tick();
+})();
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim');
+if(!btn||!dr||!sc)return;
 btn.hidden=false;
 var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
@@ -159,7 +187,7 @@ function open(){
   dr.classList.add('is-open');sc.classList.add('is-on');
   btn.setAttribute('aria-expanded','true');
   R.classList.add('dq-open');
-  cb.focus({preventScroll:true});
+  dr.focus({preventScroll:true});
 }
 function close(back){
   dr.classList.remove('is-open');sc.classList.remove('is-on');
@@ -169,8 +197,13 @@ function close(back){
   setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
 }
 btn.addEventListener('click',function(){shut()?open():close(1);});
-cb.addEventListener('click',function(){close(1);});
 sc.addEventListener('click',function(){close(1);});
+/* 选中栏目后自动收起抽屉（页面随即跳转，焦点无需归位） */
+dr.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+  if(a){dr.classList.remove('is-open');sc.classList.remove('is-on');btn.setAttribute('aria-expanded','false');
+    R.classList.remove('dq-open');R.style.removeProperty('--sbw');}
+});
 document.addEventListener('keydown',function(e){
   if(shut())return;
   if(e.key==='Escape'){close(1);return;}
