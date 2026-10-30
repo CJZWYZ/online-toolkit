@@ -186,7 +186,8 @@ function loadFiction() {
   for (const book of fs.readdirSync(base)) {
     const dir = path.join(base, book);
     if (!fs.statSync(dir).isDirectory()) continue;
-    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.md'))) {
+    /* about.md 是作品简介，不是章节 */
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.md') && x !== 'about.md')) {
       const { data, body } = parseFrontmatter(fs.readFileSync(path.join(dir, f), 'utf8'));
       if (data.status === 'draft') continue;
       chapters.push({
@@ -204,7 +205,7 @@ function loadFiction() {
 }
 
 /* ---------------- 每日资讯（content/news/*.md）----------------
-   与「情报站」同源：机器归集的是信号，这里放人工撰写的行业资讯。
+   与「每日情报」同源：机器归集的是信号，这里放人工撰写的行业资讯。
    front matter：title / date / summary / tags */
 function loadNews() {
   if (loadNews.cache) return loadNews.cache;
@@ -343,10 +344,10 @@ if(mq.addEventListener)mq.addEventListener('change',onMq);else if(mq.addListener
    page = 当前页 key（标 aria-current="page"）
    section = 所属栏目 key（无精确命中时标 aria-current="true"，同组只标一个） */
 const NAV_ITEMS = [
-  ['intel', 'intel/', '情报站'],
-  ['fiction', 'fiction/', '档案室'],
-  ['motif', 'motif/', '母题'],
-  ['archive', 'intel/archive/', '时间线'],
+  ['intel', 'intel/', '每日情报'],
+  ['fiction', 'fiction/', '小说'],
+  ['motif', 'motif/', '关键词'],
+  ['archive', 'intel/archive/', '往期'],
   ['about', 'about.html', '关于']
 ];
 
@@ -392,7 +393,7 @@ function layout({ title, desc, theme, body, pre = '', active = '', section = '',
 <meta name="description" content="${esc(desc)}" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
 <meta name="color-scheme" content="light" />
-<link rel="stylesheet" href="${pre}style.css?v=6" />
+<link rel="stylesheet" href="${pre}style.css?v=7" />
 </head>
 <body class="theme-${theme}">
 <a class="skip" href="#main">跳到正文</a>
@@ -439,16 +440,16 @@ function signalCard(s, motifPre = 'motif/') {
   <h3 class="sc-title"><a href="${esc(s.url)}" rel="noopener nofollow">${esc(s.title)}</a></h3>
   <p class="sc-meta">${esc(s.source)} · <span class="mono">${esc(s.date)}</span></p>
   ${s.note ? `<details class="sc-note"><summary>展开批注</summary><p>${esc(s.note)}</p></details>` : ''}
-  ${motifs ? `<p class="sc-motif">母题 ${motifs}</p>` : ''}
+  ${motifs ? `<p class="sc-motif">关键词 ${motifs}</p>` : ''}
 </article>`;
 }
 
 /* ---------------- 页面 ---------------- */
 /* 首页：一个焦点区原则。① 焦点区（最新简报 | 最新章节）② 情报最新 3 条
-   ③ 档案室章节列表 ④ 关于·订阅一行。空集合不渲染容器。 */
+   ③ 小说章节列表 ④ 关于·订阅一行。空集合不渲染容器。 */
 function renderHome(all, chapters, news) {
   const issue = all[0];
-  const latest = chapters[chapters.length - 1];
+  const latest = [...chapters].sort(byDateDesc)[0];
   const sig = (issue?.signals || []).slice(0, 3);
   let h1used = false;
   const h = () => { const t = h1used ? 'h2' : 'h1'; h1used = true; return t; };
@@ -462,11 +463,11 @@ function renderHome(all, chapters, news) {
     const dims = [...new Set(issue.signals.map((s) => cfg.dimensions[s.dimension]?.label || s.dimension))];
     const ht = h();
     cells.push(`<section class="f-cell">
-    <p class="f-kicker mono">01 情报站 · ${esc(issue.issue)}</p>
+    <p class="f-kicker mono">01 每日情报 · ${esc(issue.issue)}</p>
     <${ht} class="f-title"><a href="intel/${esc(issue.issue)}/">${esc(issue.headline || `第 ${issue.issue} 期简报`)}</a></${ht}>
     <p class="f-sum">${esc((issue.judgments || []).length
       ? issue.judgments.slice(0, 3).join(' ')
-      : `本期已归集 ${issue.signals.length} 条信号，覆盖${dims.join('、') || '多个维度'}。核心判断由人工撰写后发布。`)}</p>
+      : `本期已归集 ${issue.signals.length} 条信号，覆盖${dims.join('、') || '多个维度'}。要点由人工撰写后发布。`)}</p>
     ${kw([...new Set(issue.signals.flatMap((s) => s.motif || []))])}
     <p class="f-go"><a href="intel/${esc(issue.issue)}/">阅读全文 →</a></p>
   </section>`);
@@ -475,7 +476,7 @@ function renderHome(all, chapters, news) {
     const firstP = (latest.html.match(/<p>([\s\S]*?)<\/p>/) || [, ''])[1].replace(/<[^>]+>/g, '');
     const ht = h();
     cells.push(`<section class="f-cell">
-    <p class="f-kicker mono">02 档案室 · 第 ${pad2(latest.chapter)} 章</p>
+    <p class="f-kicker mono">02 小说 · 第 ${pad2(latest.chapter)} 章</p>
     <${ht} class="f-title f-title-sm"><a href="fiction/${esc(latest.slug)}/">${esc(latest.title)}</a></${ht}>
     <p class="f-sum f-sum-2">${esc(latest.synopsis || firstP || '')}</p>
     <p class="f-go"><a href="fiction/${esc(latest.slug)}/">阅读章节 →</a></p>
@@ -484,12 +485,12 @@ function renderHome(all, chapters, news) {
   const focus = cells.length
     ? `<div class="focus focus-${cells.length}">${cells.join('')}</div>`
     : `<div class="focus focus-1"><section class="f-cell"><h1 class="f-title">抵达此处，即为第一个信号。</h1>
-    <p class="f-sum">情报站与档案室的双线站点，内容正在归集。</p></section></div>`;
+    <p class="f-sum">每日情报与小说的双线站点，内容正在归集。</p></section></div>`;
 
-  /* ② 情报站最新 3 条：仅 1 期时整块不渲染（焦点区已承载该期） */
+  /* ② 每日情报最新 3 条：仅 1 期时整块不渲染（焦点区已承载该期） */
   const latestBlock = (all.length > 1 && sig.length)
     ? `<section class="latest">
-    <h2 class="lst-h">情报站 · 最新 3 条</h2>
+    <h2 class="lst-h">每日情报 · 最新 3 条</h2>
     <ul class="lst" role="list">${sig.map((s) => `<li>
       <span class="m-date mono">${esc(s.date)}</span>
       <a class="lst-a" href="intel/${esc(issue.issue)}/">${esc(s.title)}</a>${kw(s.motif)}</li>`).join('')}</ul>
@@ -503,24 +504,27 @@ function renderHome(all, chapters, news) {
     <ul class="lst" role="list">${news.slice(0, 3).map((n) => `<li>
       <span class="m-date mono">${esc(n.date)}</span>
       <a class="lst-a" href="news/${esc(n.slug)}/">${esc(n.title)}</a></li>`).join('')}</ul>
-    <p class="track-more"><a href="news/">查看全部 →</a></p>
+    <p class="track-more"><a href="news/">看全部 →</a></p>
   </section>`
     : '';
 
-  /* ③ 档案室章节列表（弱）：章节少时全量展示并去掉「查看全部」 */
-  const CH_MAX = 5;
-  const showAll = chapters.length <= CH_MAX;
-  const multiBook = new Set(chapters.map((c) => c.book)).size > 1;
-  const ficBlock = chapters.length
-    ? `<section class="chapters">
-    <h2 class="lst-h">02 档案室 · 章节</h2>
-    <ol class="chapter-list">${chapters.slice(0, showAll ? chapters.length : CH_MAX).map((c) => `<li>
-      <a href="fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${multiBook ? '《' + esc(c.bookTitle || c.book) + '》' : ''}${esc(c.title)}</span></a>
-      <span class="ch-meta mono">${esc(c.date || c.published || '')}</span>
+  /* ③ 小说：按作品分组，每部作品一个区块（不同作品的章节不再混排） */
+  const HOME_MAX = 3;
+  const groups = new Map();
+  chapters.forEach((c) => { if (!groups.has(c.book)) groups.set(c.book, []); groups.get(c.book).push(c); });
+  const ficBlock = [...groups.entries()]
+    .map(([slug, list]) => {
+      const recent = [...list].sort(byDateDesc);
+      const title = recent[0]?.bookTitle || slug;
+      return `<section class="chapters">
+    <h2 class="lst-h">02 小说 · <a href="fiction/${esc(slug)}/">《${esc(title)}》</a></h2>
+    <ol class="chapter-list">${recent.slice(0, HOME_MAX).map((c) => `<li>
+      <a href="fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a>
+      <span class="ch-meta mono">${esc(c.published || c.date || '')}</span>
     </li>`).join('')}</ol>
-    ${showAll ? '' : '<p class="track-more"><a href="fiction/">查看全部 →</a></p>'}
-  </section>`
-    : '';
+    ${recent.length > HOME_MAX ? `<p class="track-more"><a href="fiction/${esc(slug)}/">看全部 ${recent.length} 章 →</a></p>` : ''}
+  </section>`;
+    }).join('');
 
   /* ④ 关于·订阅一行（弱，13px，上 hairline） */
   const aboutLine = `<section class="about-line">
@@ -530,7 +534,7 @@ function renderHome(all, chapters, news) {
   const body = `${focus}${latestBlock}${newsBlock}${ficBlock}${aboutLine}`;
   return layout({
     title: 'Tiaqi —— 抵达此处，即为第一个信号',
-    desc: '情报站与档案室的双线站点，纯静态构建。',
+    desc: '每日情报与小说的双线站点，纯静态构建。',
     theme: 'home', body, pre: '', active: 'home', section: '', welcome: true
   });
 }
@@ -552,24 +556,24 @@ function renderBriefing(issue, all, pre = '../../', entry = false) {
 ${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data-dim="${esc(d)}"]){display:none;}`}`).join('\n');
   const body = `
 <section class="brief">
-  <p class="eyebrow"><a href="${pre}intel/archive/">← 时间线</a></p>
+  <p class="eyebrow"><a href="${pre}intel/archive/">← 往期</a></p>
   <p class="issue-no mono">第 ${esc(issue.issue)} 期</p>
-  <h1 class="h1">本期核心判断</h1>
+  <h1 class="h1">今日要点</h1>
   <div class="beam wide" aria-hidden="true"></div>
   ${issue.headline
       ? `<p class="headline">${esc(issue.headline)}</p><ol class="judgments">${(issue.judgments || []).map((j) => `<li>${esc(j)}</li>`).join('')}</ol>`
-      : `<div class="empty pending"><p class="empty-title">本期判断待补充</p>
-         <p class="empty-hint">信号已由机器归集完成（${issue.signals.length} 条），核心判断由人工撰写后发布。下方信号可先行查阅。</p></div>`}
-  <h2 class="sec">分维度信号</h2>
+      : `<div class="empty pending"><p class="empty-title">今日要点待补充</p>
+         <p class="empty-hint">情报已由机器归集完成（${issue.signals.length} 条），要点由人工撰写后发布。下方信号可先行查阅。</p></div>`}
+  <h2 class="sec">今日情报</h2>
   <fieldset class="filterbar">
-    <legend class="sr-only">按维度筛选</legend>
+    <legend class="sr-only">按类别筛选</legend>
     ${radios}
     <div class="filters">${labels}</div>
-    <div class="signals-grid" id="signals">${cards || '<p class="empty-hint">本期暂无信号。</p>'}</div>
+    <div class="signals-grid" id="signals">${cards || '<p class="empty-hint">这次还没有收集到情报。</p>'}</div>
   </fieldset>
   <style>${dimCss}</style>
-  <h2 class="sec">本期母题</h2>
-  <p class="motif-line"><span class="chips">${[...new Set(issue.signals.flatMap((s) => s.motif || []))].map((m) => `<a class="chip" href="${pre}motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('') || '<span class="empty-hint">本期信号未命中母题。</span>'}</span></p>
+  <h2 class="sec">本期关键词</h2>
+  <p class="motif-line"><span class="chips">${[...new Set(issue.signals.flatMap((s) => s.motif || []))].map((m) => `<a class="chip" href="${pre}motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('') || '<span class="empty-hint">这批情报还没命中关键词。</span>'}</span></p>
   ${NEWS_ENTRY(pre)}
   <nav class="issue-nav">
     ${prev ? `<a href="${pre}intel/${esc(prev.issue)}/">← ${esc(prev.issue)}</a>` : '<span class="disabled">← 已是最早</span>'}
@@ -577,7 +581,7 @@ ${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data
   </nav>
 </section>`;
   return layout({
-    title: entry ? '情报站 —— Tiaqi' : `第 ${issue.issue} 期简报 —— Tiaqi 情报站`,
+    title: entry ? '每日情报 —— Tiaqi' : `第 ${issue.issue} 期简报 —— Tiaqi 每日情报`,
     desc: `第 ${issue.issue} 期简报，共 ${issue.signals.length} 条信号。`,
     theme: 'intel', body, pre,
     active: entry ? 'intel' : '', section: 'intel'
@@ -590,7 +594,7 @@ function renderIntelLatest(issue, all) {
 }
 
 /* ---------------- 每日资讯页 ---------------- */
-/* 情报站子栏目：自动化任务撰写的人工资讯，与机器归集的「信号」分开呈现 */
+/* 每日情报子栏目：自动化任务撰写的人工资讯，与机器归集的「信号」分开呈现 */
 function NEWS_ENTRY(pre = '../') {
   const n = loadNews();
   return n.length ? `<p class="track-more"><a href="${pre}news/">每日资讯 · 共 ${n.length} 篇 →</a></p>` : '';
@@ -604,14 +608,14 @@ function renderNewsIndex(news) {
     <span class="tl-meta mono">${n.summary ? esc(n.summary) : `${n.words} 字`}</span></span>
   </li>`).join('');
   const body = `<section class="brief">
-    <p class="eyebrow"><a href="../intel/">01 · 情报站 · 每日资讯</a></p>
+    <p class="eyebrow"><a href="../intel/">01 · 每日情报 · 每日资讯</a></p>
     <h1 class="h1">每日资讯</h1>
     <div class="beam wide" aria-hidden="true"></div>
     <p class="standfirst">机器负责归集信号，这里收录人工撰写的行业观察。</p>
     ${news.length ? `<ul class="timeline">${rows}</ul>`
       : '<div class="empty"><p class="empty-title">还没有资讯</p><p class="empty-hint">每日资讯由自动化任务撰写后发布。</p></div>'}
   </section>`;
-  return layout({ title: '每日资讯 —— Tiaqi 情报站', desc: '人工撰写的每日行业资讯归档。', theme: 'intel', body, pre: '../', active: '', section: 'intel' });
+  return layout({ title: '每日资讯 —— Tiaqi 每日情报', desc: '人工撰写的每日行业资讯归档。', theme: 'intel', body, pre: '../', active: '', section: 'intel' });
 }
 
 function renderNewsPost(n, news) {
@@ -638,55 +642,81 @@ function renderArchive(all) {
   const rows = all.map((i) => `<li class="tl-item">
     <span class="tl-node" aria-hidden="true"></span>
     <a class="tl-issue mono" href="../${esc(i.issue)}/">${esc(i.issue)}</a>
-    <span class="tl-body">${i.headline ? esc(i.headline) : '<span class="empty-hint">判断待补充</span>'}
+    <span class="tl-body">${i.headline ? esc(i.headline) : '<span class="empty-hint">要点待补充</span>'}
     <span class="tl-meta mono">${i.signals.length} 信号 / ${new Set(i.signals.map((s) => s.dimension)).size} 维度</span></span>
   </li>`).join('');
   const body = `<section class="brief">
-    <p class="eyebrow">04 · 时间线</p><h1 class="h1">时间线</h1>
+    <p class="eyebrow">04 · 往期</p><h1 class="h1">往期</h1>
     <div class="beam wide" aria-hidden="true"></div>
     ${all.length ? `<ul class="timeline">${rows}</ul>` : '<div class="empty"><p class="empty-title">还没有已发布的简报</p><p class="empty-hint">首期简报将在下一次归集后生成。</p></div>'}
   </section>`;
-  return layout({ title: '时间线 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive', section: 'intel' });
+  return layout({ title: '往期 —— Tiaqi', desc: '全部情报简报按期归档。', theme: 'intel', body, pre: '../../', active: 'archive', section: 'intel' });
 }
 
-function renderFictionIndex(chapters) {
-  /* 支持多部并行连载：一部作品时沿用「书名即页标题」，多部时按作品分区 */
-  const books = new Map();
-  chapters.forEach((c) => { if (!books.has(c.book)) books.set(c.book, []); books.get(c.book).push(c); });
-  const single = books.size === 1 ? chapters[0] : null;
+/* 单部作品页：/fiction/<book>/ —— 每本书一个入口，章节不再与其他作品混排 */
+function loadBookAbout(book) {
+  const f = p('content/fiction', book, 'about.md');
+  if (!fs.existsSync(f)) return '';
+  const { body } = parseFrontmatter(fs.readFileSync(f, 'utf8'));
+  return renderMarkdown(body);
+}
 
-  const volBlock = (list) => {
-    const byVol = {};
-    list.forEach((c) => { (byVol[c.volume] ||= []).push(c); });
-    return Object.entries(byVol).map(([v, cs]) => `
+const byDateDesc = (a, b) => String(b.published || b.date || '').localeCompare(String(a.published || a.date || ''));
+
+function renderBook(list) {
+  const b = list[0];
+  const about = loadBookAbout(b.book);
+  const latest = [...list].sort(byDateDesc)[0];
+  const byVol = {};
+  list.forEach((c) => { (byVol[c.volume] ||= []).push(c); });
+  const content = Object.entries(byVol).map(([v, cs]) => `
     <h3 class="sec serif">第 ${esc(v)} 卷${cs[0].volumeTitle ? ' · ' + esc(String(cs[0].volumeTitle).split('·').pop().trim()) : ''}</h3>
     <ol class="chapter-list">${cs.map((c) => `<li>
       <a href="${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a>
-      <span class="ch-meta mono">${esc(c.date || c.published || '')} · ${esc(c.words || '')} 字</span>
+      <span class="ch-meta mono">${esc(c.published || c.date || '')} · ${esc(c.words || '')} 字</span>
       ${c.demo ? '<span class="badge-demo">示例</span>' : ''}
     </li>`).join('')}</ol>`).join('');
-  };
-
-  const content = single
-    ? volBlock(chapters)
-    : [...books.entries()].map(([, list]) => `
-    <h2 class="sec serif">《${esc(list[0].bookTitle || list[0].book)}》</h2>
-    ${volBlock(list)}`).join('');
-
   const body = `<section class="brief theme-paper">
-    <p class="eyebrow">02 · 档案室</p>
-    <h1 class="h1 serif">${single ? esc(single.bookTitle || '档案室') : '档案室'}</h1>
+    <p class="eyebrow"><a href="../">02 · 小说</a></p>
+    <h1 class="h1 serif">《${esc(b.bookTitle || b.book)}》</h1>
     <div class="rule wide" aria-hidden="true"></div>
-    ${chapters.length ? content : '<div class="empty"><p class="empty-title">档案尚未开卷</p><p class="empty-hint">章节以 Markdown 管理，按卷发布。</p></div>'}
+    <p class="standfirst">共 ${list.length} 章${latest ? ` · 最近更新 ${esc(latest.published || latest.date || '')}` : ''}</p>
+    ${about ? `<div class="book-about">${about}</div>` : ''}
+    ${content}
   </section>`;
-  return layout({ title: `${single?.bookTitle || '档案室'} —— Tiaqi`, desc: '按卷归档的章节目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
+  return layout({ title: `《${b.bookTitle || b.book}》 —— Tiaqi 小说`, desc: `《${b.bookTitle || b.book}》章节目录，共 ${list.length} 章。`, theme: 'fiction', body, pre: '../../', active: 'fiction', section: 'fiction' });
+}
+
+function renderFictionIndex(chapters) {
+  /* 作品总览：每部作品一张卡片，点击进入各自的章节目录 */
+  const books = new Map();
+  chapters.forEach((c) => { if (!books.has(c.book)) books.set(c.book, []); books.get(c.book).push(c); });
+  const items = [...books.entries()]
+    .sort((a, b) => byDateDesc([...a[1]].sort(byDateDesc)[0] || {}, [...b[1]].sort(byDateDesc)[0] || {}))
+    .map(([slug, list]) => {
+      const latest = [...list].sort(byDateDesc)[0];
+      return `<li class="book-item"><a class="book-card" href="${esc(slug)}/">
+      <span class="book-name serif">《${esc(list[0].bookTitle || slug)}》</span>
+      <span class="book-gloss">${esc(latest?.synopsis || '')}</span>
+      <span class="book-count mono">${list.length} 章 · 更新于 ${esc(latest?.published || latest?.date || '')}</span>
+    </a></li>`;
+    }).join('');
+  const body = `<section class="brief theme-paper">
+    <p class="eyebrow">02 · 小说</p>
+    <h1 class="h1 serif">小说</h1>
+    <div class="rule wide" aria-hidden="true"></div>
+    <p class="standfirst">每部作品单独成册，点进去看它的全部章节。</p>
+    ${items ? `<ul class="book-cards" role="list">${items}</ul>`
+      : '<div class="empty"><p class="empty-title">还没有发布的故事</p><p class="empty-hint">章节用 Markdown 写作，按卷发布。</p></div>'}
+  </section>`;
+  return layout({ title: '小说 —— Tiaqi', desc: '站内全部小说的目录。', theme: 'fiction', body, pre: '../', active: 'fiction', section: 'fiction' });
 }
 
 function renderChapter(c, chapters, all) {
   const i = chapters.findIndex((x) => x.slug === c.slug);
   const prev = chapters[i - 1], next = chapters[i + 1];
   const body = `<article class="chapter">
-    <p class="eyebrow"><a href="../../">《${esc(c.bookTitle)}》 · 第 ${esc(c.volume)} 卷 · 第 ${pad2(c.chapter)} 章</a></p>
+    <p class="eyebrow"><a href="../">《${esc(c.bookTitle)}》 · 第 ${pad2(c.chapter)} 章</a></p>
     <h1 class="h1 serif">${esc(c.title)}</h1>
     <p class="ch-info">${esc(c.published || '')} · ${esc(c.words || '')} 字 ${c.demo ? '<span class="badge-demo">示例章节</span>' : ''}</p>
     ${(c.motif || []).length ? `<p class="motif-line"><span class="chips">${c.motif.map((m) => `<a class="chip" href="../../../motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('')}</span></p>` : ''}
@@ -694,7 +724,7 @@ function renderChapter(c, chapters, all) {
     <div class="prose-body">${c.html}</div>
     <nav class="chapter-nav">
       ${prev ? `<a href="../../${esc(prev.slug)}/">← ${esc(prev.title)}</a>` : '<span class="disabled">← 已是第一章</span>'}
-      <a href="../../">目录</a>
+      <a href="../">《${esc(c.bookTitle)}》目录</a>
       ${next ? `<a href="../../${esc(next.slug)}/">${esc(next.title)} →</a>` : '<span class="disabled">已是最新一章 →</span>'}
     </nav>
     <details class="discussion"><summary>展开讨论</summary>
@@ -709,16 +739,16 @@ function renderMotif(slug, all, chapters) {
   const sig = all.flatMap((i) => i.signals.filter((s) => (s.motif || []).includes(slug)).map((s) => ({ ...s, issue: i.issue })));
   const chs = chapters.filter((c) => (c.motif || []).includes(slug));
   const body = `<section class="brief">
-    <p class="eyebrow"><a href="../">← 全部母题</a></p>
+    <p class="eyebrow"><a href="../">← 全部关键词</a></p>
     <h1 class="h1 serif">${esc(m.name)}</h1>
     <div class="rule wide" aria-hidden="true"></div>
     <p class="standfirst">${esc(m.gloss)}</p>
     <h2 class="sec">现实侧 · ${sig.length} 条信号</h2>
-    ${sig.length ? `<div class="signals-grid cols-1">${sig.slice(0, 12).map((s) => signalCard(s, '../../motif/')).join('')}</div>` : '<p class="empty-hint">该母题暂无情报信号。</p>'}
+    ${sig.length ? `<div class="signals-grid cols-1">${sig.slice(0, 12).map((s) => signalCard(s, '../../motif/')).join('')}</div>` : '<p class="empty-hint">该关键词暂无情报信号。</p>'}
     <h2 class="sec">虚构侧 · ${chs.length} 章</h2>
-    ${chs.length ? `<ol class="chapter-list">${chs.map((c) => `<li><a href="../../fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a></li>`).join('')}</ol>` : '<p class="empty-hint">该母题暂无小说映照。</p>'}
+    ${chs.length ? `<ol class="chapter-list">${chs.map((c) => `<li><a href="../../fiction/${esc(c.slug)}/"><span class="ch-no mono">${pad2(c.chapter)}</span><span class="ch-title">${esc(c.title)}</span></a></li>`).join('')}</ol>` : '<p class="empty-hint">这个关键词还没有对应的章节。</p>'}
   </section>`;
-  return layout({ title: `母题 ${m.name} —— Tiaqi`, desc: m.gloss, theme: 'motif', body, pre: '../../', active: '', section: 'motif' });
+  return layout({ title: `关键词 ${m.name} —— Tiaqi`, desc: m.gloss, theme: 'motif', body, pre: '../../', active: '', section: 'motif' });
 }
 
 function renderMotifIndex(all, chapters) {
@@ -732,14 +762,14 @@ function renderMotifIndex(all, chapters) {
     </a></li>`;
   }).join('');
   const body = `<section class="brief">
-    <p class="eyebrow">03 · 母题</p>
-    <h1 class="h1">母题</h1>
+    <p class="eyebrow">03 · 关键词</p>
+    <h1 class="h1">关键词</h1>
     <div class="rule wide" aria-hidden="true"></div>
-    <p class="standfirst">母题是两条线的缝合处：同一命题下的现实信号与虚构章节，可双向跳转。</p>
+    <p class="standfirst">关键词是两条线的缝合处：同一命题下的现实情报与小说章节，可双向跳转。</p>
     ${items ? `<ul class="motif-cards" role="list">${items}</ul>`
-      : '<div class="empty"><p class="empty-title">尚未定义母题</p><p class="empty-hint">母题在 content/motifs.json 中维护。</p></div>'}
+      : '<div class="empty"><p class="empty-title">尚未定义关键词</p><p class="empty-hint">关键词在 content/motifs.json 中维护。</p></div>'}
   </section>`;
-  return layout({ title: '母题 —— Tiaqi', desc: '全部母题索引：现实信号与虚构章节的缝合处。', theme: 'motif', body, pre: '../', active: 'motif', section: 'motif' });
+  return layout({ title: '关键词 —— Tiaqi', desc: '全部关键词索引：现实情报与小说章节的缝合处。', theme: 'motif', body, pre: '../', active: 'motif', section: 'motif' });
 }
 
 function renderFeed(issue, chapters, news = []) {
@@ -750,7 +780,7 @@ function renderFeed(issue, chapters, news = []) {
   ].join('');
   return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>
 <title>Tiaqi · 天启</title><link>https://www.tiaqi.com/</link>
-<description>情报站与档案室的双线站点</description><language>zh-CN</language>
+<description>每日情报与小说的双线站点</description><language>zh-CN</language>
 ${items}</channel></rss>`;
 }
 
@@ -798,6 +828,8 @@ const allIssues = fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
   .sort((a, b) => b.issue.localeCompare(a.issue));
 
 const news = loadNews();
+const bookGroups = new Map();
+chapters.forEach((c) => { if (!bookGroups.has(c.book)) bookGroups.set(c.book, []); bookGroups.get(c.book).push(c); });
 
 console.log('生成页面…');
 write('index.html', renderHome(allIssues, chapters, news));
@@ -808,6 +840,7 @@ write('intel/archive/index.html', renderArchive(allIssues));
 write('news/index.html', renderNewsIndex(news));
 for (const n of news) write(`news/${n.slug}/index.html`, renderNewsPost(n, news));
 write('fiction/index.html', renderFictionIndex(chapters));
+for (const [, list] of bookGroups) write(`fiction/${list[0].book}/index.html`, renderBook(list));
 for (const c of chapters) write(`fiction/${c.slug}/index.html`, renderChapter(c, chapters, allIssues));
 write('motif/index.html', renderMotifIndex(allIssues, chapters));
 for (const m of MOTIFS.values()) write(`motif/${m.slug}/index.html`, renderMotif(m.slug, allIssues, chapters));

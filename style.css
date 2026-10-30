@@ -45,12 +45,15 @@
 
   /* 版心 */
   --maxw: 987px;
-  --col: 610px;
+  --col: 720px;
   --gold-l: 61.8%;
   --gold-r: 38.2%;
   --gap-col: 34px;
   --pad: 21px;
-  --radius: 2px;
+  --radius: 4px;
+  /* 卡片尺度：比版式节奏更紧，用于卡片内边距与网格间距 */
+  --card-p: 16px;
+  --grid-g: 20px;
 
   /* 侧栏：1024–1279 → 144px；≥1280 → 233px；间距恒定 34px */
   --sb: 144px;
@@ -570,14 +573,14 @@ main { position: relative; z-index: 1; }
 .tg:hover { color: var(--c-text); border-color: var(--c-line-strong); }
 
 /* ---------- 信号卡 ---------- */
-.signals-grid { display: grid; gap: var(--s-2); grid-template-columns: 1fr; }
+.signals-grid { display: grid; gap: 16px var(--grid-g); grid-template-columns: 1fr; }
 @media (min-width: 720px) { .signals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .signals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .signals-grid.cols-1 { grid-template-columns: 1fr; }
 
 .signal-card {
   position: relative; min-width: 0;
-  padding: var(--s-2);
+  padding: var(--card-p);
   background: var(--c-bg); border: 1px solid var(--c-line);
   border-left-width: 2px; border-radius: var(--radius);
   transition: border-color var(--t-233) var(--ease), background var(--t-233) var(--ease);
@@ -663,20 +666,27 @@ main { position: relative; z-index: 1; }
 .ch-title { font-family: var(--font-serif); font-size: var(--fs-16); }
 .ch-meta { font-size: var(--fs-13); color: var(--c-text-3); }
 
-/* ---------- 母题卡 ---------- */
-.motif-cards { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; }
-.motif-item { flex: 1 1 260px; min-width: 0; }
-.motif-card {
+/* ---------- 作品卡 / 关键词卡（同一套轻量卡片） ---------- */
+.motif-cards, .book-cards { display: grid; gap: 16px var(--grid-g); grid-template-columns: 1fr; list-style: none; }
+@media (min-width: 640px) { .motif-cards, .book-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.motif-item, .book-item { min-width: 0; }
+.motif-card, .book-card {
   display: flex; flex-direction: column; gap: 4px;
-  height: 100%; padding: var(--s-2);
+  height: 100%; padding: var(--card-p);
   background: var(--c-bg); border: 1px solid var(--c-line);
   border-radius: var(--radius); text-decoration: none;
   transition: border-color var(--t-233) var(--ease), background var(--t-233) var(--ease);
 }
-.motif-card:hover { border-color: var(--c-accent); background: var(--c-bg-2); }
-.motif-name { font-size: var(--fs-16); font-weight: 600; color: var(--c-text); }
-.motif-gloss { font-size: var(--fs-13); color: var(--c-text-2); }
-.motif-count { font-size: var(--fs-13); color: var(--c-text-3); }
+.motif-card:hover, .book-card:hover { border-color: var(--c-accent); background: var(--c-bg-2); }
+.motif-name, .book-name { font-size: var(--fs-16); font-weight: 600; color: var(--c-text); }
+.motif-gloss, .book-gloss { font-size: var(--fs-13); color: var(--c-text-2); }
+.motif-count, .book-count { font-size: var(--fs-13); color: var(--c-text-3); }
+.book-about {
+  max-width: var(--col); margin: var(--s-2) 0 0;
+  font-size: var(--fs-16); line-height: 1.75; color: var(--c-text-2);
+}
+.lst-h a { color: var(--c-text-2); text-decoration: none; }
+.lst-h a:hover { color: var(--c-accent); }
 
 /* ---------- 正文页 / 关于 ---------- */
 .page { max-width: var(--maxw); margin: 0 auto; padding: var(--s-4) var(--pad) var(--s-5); }
