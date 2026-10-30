@@ -19,7 +19,14 @@ const esc = (s) => String(s ?? '')
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 function inlineMd(s) {
-  return esc(s)
+  /* 顺序：先转义 → 再解析 [文字](链接)（仅放行 http/https 与站内相对路径） */
+  let t = esc(s)
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, txt, raw) => {
+      const href = raw.replace(/^&quot;|&quot;$/g, '');
+      if (!/^(https?:\/\/|\/|#)/i.test(href)) return txt;
+      return `<a href="${href}" rel="noopener nofollow">${txt}</a>`;
+    });
+  return t
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
 }
@@ -194,6 +201,33 @@ function loadFiction() {
     }
   }
   return chapters.sort((a, b) => a.volume - b.volume || a.chapter - b.chapter);
+}
+
+/* ---------------- 每日资讯（content/news/*.md）----------------
+   与「情报站」同源：机器归集的是信号，这里放人工撰写的行业资讯。
+   front matter：title / date / summary / tags */
+function loadNews() {
+  if (loadNews.cache) return loadNews.cache;
+  const base = p('content/news');
+  if (!fs.existsSync(base)) return [];
+  loadNews.cache = fs.readdirSync(base)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const { data, body } = parseFrontmatter(fs.readFileSync(path.join(base, f), 'utf8'));
+      const slug = f.replace(/\.md$/, '');
+      const tags = Array.isArray(data.tags) ? data.tags : (data.tags ? [data.tags] : []);
+      return {
+        slug,
+        title: data.title || slug,
+        date: data.date || slug.slice(0, 10),
+        summary: data.summary || '',
+        tags,
+        words: Number(data.words) || (body.match(/[\u4e00-\u9fa5]/g) || []).length,
+        html: renderMarkdown(body)
+      };
+    })
+    .sort((a, b) => b.date.localeCompare(a.date) || b.slug.localeCompare(a.slug));
+  return loadNews.cache;
 }
 
 /* ---------------- 渲染骨架 ---------------- */
@@ -377,7 +411,7 @@ function signalCard(s, motifPre = 'motif/') {
 /* ---------------- 页面 ---------------- */
 /* 首页：一个焦点区原则。① 焦点区（最新简报 | 最新章节）② 情报最新 3 条
    ③ 档案室章节列表 ④ 关于·订阅一行。空集合不渲染容器。 */
-function renderHome(all, chapters) {
+function renderHome(all, chapters, news) {
   const issue = all[0];
   const latest = chapters[chapters.length - 1];
   const sig = (issue?.signals || []).slice(0, 3);
@@ -427,6 +461,17 @@ function renderHome(all, chapters) {
   </section>`
     : '';
 
+  /* ②b 每日资讯：人工撰写。无资讯时整块不渲染 */
+  const newsBlock = news.length
+    ? `<section class="latest">
+    <h2 class="lst-h">资讯 · 最新</h2>
+    <ul class="lst" role="list">${news.slice(0, 3).map((n) => `<li>
+      <span class="m-date mono">${esc(n.date)}</span>
+      <a class="lst-a" href="news/${esc(n.slug)}/">${esc(n.title)}</a></li>`).join('')}</ul>
+    <p class="track-more"><a href="news/">查看全部 →</a></p>
+  </section>`
+    : '';
+
   /* ③ 档案室章节列表（弱）：章节少时全量展示并去掉「查看全部」 */
   const CH_MAX = 5;
   const showAll = chapters.length <= CH_MAX;
@@ -446,7 +491,7 @@ function renderHome(all, chapters) {
     <p><a href="about.html">05 关于</a> · <a href="feed.xml">订阅 RSS</a> · 无追踪、无统计脚本</p>
   </section>`;
 
-  const body = `${focus}${latestBlock}${ficBlock}${aboutLine}`;
+  const body = `${focus}${latestBlock}${newsBlock}${ficBlock}${aboutLine}`;
   return layout({
     title: 'Tiaqi —— 抵达此处，即为第一个信号',
     desc: '情报站与档案室的双线站点，纯静态构建。',
@@ -489,6 +534,7 @@ ${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data
   <style>${dimCss}</style>
   <h2 class="sec">本期母题</h2>
   <p class="motif-line"><span class="chips">${[...new Set(issue.signals.flatMap((s) => s.motif || []))].map((m) => `<a class="chip" href="${pre}motif/${esc(m)}/">${esc(MOTIFS.get(m)?.name || m)}</a>`).join('') || '<span class="empty-hint">本期信号未命中母题。</span>'}</span></p>
+  ${NEWS_ENTRY(pre)}
   <nav class="issue-nav">
     ${prev ? `<a href="${pre}intel/${esc(prev.issue)}/">← ${esc(prev.issue)}</a>` : '<span class="disabled">← 已是最早</span>'}
     ${next ? `<a href="${pre}intel/${esc(next.issue)}/">${esc(next.issue)} →</a>` : '<span class="disabled">已是最新 →</span>'}
@@ -505,6 +551,51 @@ ${d === 'all' ? '' : `#dim-${esc(d)}:checked ~ .signals-grid .sig-wrap:not([data
 function renderIntelLatest(issue, all) {
   /* 分区入口页：直接渲染最新一期简报正文（真内容，无 meta-refresh 跳转） */
   return renderBriefing(issue, all, '../', true);
+}
+
+/* ---------------- 每日资讯页 ---------------- */
+/* 情报站子栏目：自动化任务撰写的人工资讯，与机器归集的「信号」分开呈现 */
+function NEWS_ENTRY(pre = '../') {
+  const n = loadNews();
+  return n.length ? `<p class="track-more"><a href="${pre}news/">每日资讯 · 共 ${n.length} 篇 →</a></p>` : '';
+}
+
+function renderNewsIndex(news) {
+  const rows = news.map((n) => `<li class="tl-item">
+    <span class="tl-node" aria-hidden="true"></span>
+    <a class="tl-issue mono" href="${esc(n.slug)}/">${esc(n.date)}</a>
+    <span class="tl-body"><a href="${esc(n.slug)}/">${esc(n.title)}</a>
+    <span class="tl-meta mono">${n.summary ? esc(n.summary) : `${n.words} 字`}</span></span>
+  </li>`).join('');
+  const body = `<section class="brief">
+    <p class="eyebrow"><a href="../intel/">01 · 情报站 · 每日资讯</a></p>
+    <h1 class="h1">每日资讯</h1>
+    <div class="beam wide" aria-hidden="true"></div>
+    <p class="standfirst">机器负责归集信号，这里收录人工撰写的行业观察。</p>
+    ${news.length ? `<ul class="timeline">${rows}</ul>`
+      : '<div class="empty"><p class="empty-title">还没有资讯</p><p class="empty-hint">每日资讯由自动化任务撰写后发布。</p></div>'}
+  </section>`;
+  return layout({ title: '每日资讯 —— Tiaqi 情报站', desc: '人工撰写的每日行业资讯归档。', theme: 'intel', body, pre: '../', active: '', section: 'intel' });
+}
+
+function renderNewsPost(n, news) {
+  const i = news.findIndex((x) => x.slug === n.slug);
+  const prev = news[i + 1], next = news[i - 1];
+  const tags = n.tags.length ? `<p class="chips">${n.tags.map((t) => `<span class="chip">${esc(t)}</span>`).join('')}</p>` : '';
+  const body = `<article class="brief">
+    <p class="eyebrow"><a href="../../news/">← 每日资讯</a></p>
+    <p class="issue-no mono">${esc(n.date)}</p>
+    <h1 class="h1">${esc(n.title)}</h1>
+    <div class="beam wide" aria-hidden="true"></div>
+    ${n.summary ? `<p class="headline">${esc(n.summary)}</p>` : ''}
+    ${tags}
+    <div class="prose-body">${n.html}</div>
+    <nav class="issue-nav">
+      ${prev ? `<a href="../../news/${esc(prev.slug)}/">← ${esc(prev.date)}</a>` : '<span class="disabled">← 已是最早</span>'}
+      ${next ? `<a href="../../news/${esc(next.slug)}/">${esc(next.date)} →</a>` : '<span class="disabled">已是最新 →</span>'}
+    </nav>
+  </article>`;
+  return layout({ title: `${n.title} —— Tiaqi 每日资讯`, desc: n.summary || n.title, theme: 'intel', body, pre: '../../', active: '', section: 'intel' });
 }
 
 function renderArchive(all) {
@@ -602,10 +693,11 @@ function renderMotifIndex(all, chapters) {
   return layout({ title: '母题 —— Tiaqi', desc: '全部母题索引：现实信号与虚构章节的缝合处。', theme: 'motif', body, pre: '../', active: 'motif', section: 'motif' });
 }
 
-function renderFeed(issue, chapters) {
+function renderFeed(issue, chapters, news = []) {
   const items = [
     ...(issue?.signals || []).map((s) => `<item><title>${esc(s.title)}</title><link>${esc(s.url)}</link><pubDate>${new Date(s.date).toUTCString()}</pubDate><description>${esc(s.source)} · ${esc(cfg.dimensions[s.dimension]?.label || s.dimension)}</description></item>`),
-    ...chapters.map((c) => `<item><title>《${esc(c.bookTitle)}》第 ${pad2(c.chapter)} 章 · ${esc(c.title)}</title><link>https://www.tiaqi.com/fiction/${esc(c.slug)}/</link><pubDate>${new Date(c.published || Date.now()).toUTCString()}</pubDate><description>${esc(c.synopsis || '')}</description></item>`)
+    ...chapters.map((c) => `<item><title>《${esc(c.bookTitle)}》第 ${pad2(c.chapter)} 章 · ${esc(c.title)}</title><link>https://www.tiaqi.com/fiction/${esc(c.slug)}/</link><pubDate>${new Date(c.published || Date.now()).toUTCString()}</pubDate><description>${esc(c.synopsis || '')}</description></item>`),
+    ...news.map((n) => `<item><title>资讯 · ${esc(n.title)}</title><link>https://www.tiaqi.com/news/${esc(n.slug)}/</link><pubDate>${new Date(n.date).toUTCString()}</pubDate><description>${esc(n.summary || '')}</description></item>`)
   ].join('');
   return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>
 <title>Tiaqi · 天启</title><link>https://www.tiaqi.com/</link>
@@ -656,12 +748,16 @@ const allIssues = fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
   .map((f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')))
   .sort((a, b) => b.issue.localeCompare(a.issue));
 
+const news = loadNews();
+
 console.log('生成页面…');
-write('index.html', renderHome(allIssues, chapters));
-write('feed.xml', renderFeed(allIssues[0], chapters));
+write('index.html', renderHome(allIssues, chapters, news));
+write('feed.xml', renderFeed(allIssues[0], chapters, news));
 for (const i of allIssues) write(`intel/${i.issue}/index.html`, renderBriefing(i, allIssues));
 write('intel/index.html', renderIntelLatest(allIssues[0], allIssues));
 write('intel/archive/index.html', renderArchive(allIssues));
+write('news/index.html', renderNewsIndex(news));
+for (const n of news) write(`news/${n.slug}/index.html`, renderNewsPost(n, news));
 write('fiction/index.html', renderFictionIndex(chapters));
 for (const c of chapters) write(`fiction/${c.slug}/index.html`, renderChapter(c, chapters, allIssues));
 write('motif/index.html', renderMotifIndex(allIssues, chapters));
