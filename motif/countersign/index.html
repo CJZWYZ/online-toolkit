@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>关键词 会签 —— Tiaqi</title>
+<meta name="description" content="一条线要两个人看：画线的人看不见它，旁观的人才看得见。" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='9' fill='none' stroke='%231F4FD8' stroke-width='1.6'/><path d='M12 12 18.5 7.5' stroke='%231F4FD8' stroke-width='2' stroke-linecap='round'/></svg>" />
+<meta name="color-scheme" content="light" />
+<link rel="stylesheet" href="../../style.css?v=7" />
+</head>
+<body class="theme-motif">
+<a class="skip" href="#main">跳到正文</a>
+<div class="bg-plane" aria-hidden="true"></div>
+<header class="topbar">
+  <button class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false" hidden><span class="mb-bars" aria-hidden="true"></span><span class="sr-only">站点导航</span></button>
+  <a class="brand" href="../../">Tiaqi</a>
+  <p class="clock" data-clock aria-hidden="true">
+    <span class="clk-time mono">--:--:--</span>
+    <span class="clk-date mono">-------</span>
+  </p>
+</header>
+<div class="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-t" tabindex="-1" hidden>
+  <div class="d-head">
+    <a class="d-brand" href="../../">Tiaqi</a>
+    <h2 class="sr-only" id="drawer-t">站点导航</h2>
+  </div>
+  <nav class="sections" aria-label="站点导航"><ul role="list"><li><a href="../../intel/"><span class="s-num mono">01</span><span class="s-txt">每日情报</span></a></li><li><a href="../../fiction/"><span class="s-num mono">02</span><span class="s-txt">小说</span></a></li><li><a href="../../motif/" aria-current="true"><span class="s-num mono">03</span><span class="s-txt">关键词</span></a></li><li><a href="../../intel/archive/"><span class="s-num mono">04</span><span class="s-txt">往期</span></a></li><li><a href="../../about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
+</aside>
+
+<div class="shell">
+<aside class="sidebar">
+  <nav class="sections" aria-label="分区导航"><ul role="list"><li><a href="../../intel/"><span class="s-num mono">01</span><span class="s-txt">每日情报</span></a></li><li><a href="../../fiction/"><span class="s-num mono">02</span><span class="s-txt">小说</span></a></li><li><a href="../../motif/" aria-current="true"><span class="s-num mono">03</span><span class="s-txt">关键词</span></a></li><li><a href="../../intel/archive/"><span class="s-num mono">04</span><span class="s-txt">往期</span></a></li><li><a href="../../about.html"><span class="s-num mono">05</span><span class="s-txt">关于</span></a></li></ul></nav>
+</aside>
+<main id="main" tabindex="-1"><section class="brief">
+    <p class="eyebrow"><a href="../">← 全部关键词</a></p>
+    <h1 class="h1 serif">会签</h1>
+    <div class="rule wide" aria-hidden="true"></div>
+    <p class="standfirst">一条线要两个人看：画线的人看不见它，旁观的人才看得见。</p>
+    <h2 class="sec">现实侧 · 0 条信号</h2>
+    <p class="empty-hint">该关键词暂无情报信号。</p>
+    <h2 class="sec">虚构侧 · 1 章</h2>
+    <ol class="chapter-list"><li><a href="../../fiction/trace/03/"><span class="ch-no mono">03</span><span class="ch-title">单签</span></a></li></ol>
+  </section></main>
+</div>
+<footer class="footer">
+  <div class="foot-row">
+    <p class="foot-brand">Tiaqi</p>
+    <nav class="foot-nav" aria-label="页脚导航"><a href="../../intel/">01 每日情报</a><a href="../../fiction/">02 小说</a><a href="../../motif/">03 关键词</a><a href="../../intel/archive/">04 往期</a><a href="../../about.html">05 关于</a><a href="../../feed.xml">RSS</a></nav>
+  </div>
+  <p class="foot-note">纯静态构建 · 无追踪、无统计脚本 · 评论托管于 GitHub Discussions</p>
+</footer>
+<script>
+(function(){
+var R=document.documentElement;
+R.classList.remove('no-js');R.classList.add('js');R.dataset.js='1';
+var ls=function(k,v){try{return arguments.length>1?localStorage.setItem(k,v):localStorage.getItem(k);}catch(e){return null;}};
+var w=R.querySelector('[data-welcome]'),s=R.querySelector('.shell'),main=R.querySelector('#main'),t=0,done=0;
+function dismiss(){
+  if(done||!w)return;done=1;clearTimeout(t);
+  w.classList.add('w-gone');w.setAttribute('aria-hidden','true');w.inert=true;
+  if(s)s.inert=false;
+  if(main)main.focus({preventScroll:true});
+  ls('tq_w',String(Date.now()));
+}
+if(w){
+  var seen=Number(ls('tq_w'));
+  if(seen&&Date.now()-seen<6048e5){dismiss();}
+  else{
+    if(s)s.inert=true;
+    t=setTimeout(dismiss,3500);
+    w.addEventListener('click',dismiss);
+    window.addEventListener('keydown',dismiss);
+    window.addEventListener('scroll',function(){if(window.scrollY>=40){dismiss();}},{passive:true});
+  }
+}
+/* ---------- 顶栏时钟：两行（时:分:秒 / 日期），无 JS 时不占位 ---------- */
+(function(){
+var ck=R.querySelector('[data-clock]');if(!ck)return;
+var tm=ck.querySelector('.clk-time'),dt=ck.querySelector('.clk-date');if(!tm||!dt)return;
+var TZ='Asia/Shanghai';
+var opts=function(o){return o;};
+var tf,df;
+try{
+  tf=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}catch(e){
+  tf=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  df=new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+}
+function parts(f,d){var o={},a=f.formatToParts?f.formatToParts(d):[];for(var i=0;i<a.length;i++){o[a[i].type]=a[i].value;}return o;}
+function tick(){
+  var d=new Date(),p=parts(tf,d),q=parts(df,d),h=p.hour==='24'?'00':p.hour;
+  tm.textContent=h+':'+p.minute+':'+p.second;
+  dt.textContent=q.year+'-'+q.month+'-'+q.day+' '+q.weekday;
+  setTimeout(tick,1000-(Date.now()%1000));
+}
+ck.hidden=false;tick();
+})();
+var btn=R.querySelector('.menu-btn'),dr=document.getElementById('drawer'),sc=R.querySelector('.scrim');
+if(!btn||!dr||!sc)return;
+btn.hidden=false;
+var SEL='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function fo(){return [].slice.call(dr.querySelectorAll(SEL)).filter(function(e){return e.getClientRects().length;});}
+function shut(){return !dr.classList.contains('is-open');}
+function open(){
+  var bw=window.innerWidth-R.clientWidth;
+  if(bw>0)R.style.setProperty('--sbw',bw+'px');
+  dr.hidden=false;sc.hidden=false;
+  void dr.offsetWidth;
+  dr.classList.add('is-open');sc.classList.add('is-on');
+  btn.setAttribute('aria-expanded','true');
+  R.classList.add('dq-open');
+  dr.focus({preventScroll:true});
+}
+function close(back){
+  dr.classList.remove('is-open');sc.classList.remove('is-on');
+  btn.setAttribute('aria-expanded','false');
+  R.classList.remove('dq-open');R.style.removeProperty('--sbw');
+  if(back)btn.focus({preventScroll:true});
+  setTimeout(function(){if(shut()){dr.hidden=true;sc.hidden=true;}},160);
+}
+btn.addEventListener('click',function(){shut()?open():close(1);});
+sc.addEventListener('click',function(){close(1);});
+/* 选中栏目后自动收起抽屉（页面随即跳转，焦点无需归位） */
+dr.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+  if(a){dr.classList.remove('is-open');sc.classList.remove('is-on');btn.setAttribute('aria-expanded','false');
+    R.classList.remove('dq-open');R.style.removeProperty('--sbw');}
+});
+document.addEventListener('keydown',function(e){
+  if(shut())return;
+  if(e.key==='Escape'){close(1);return;}
+  if(e.key!=='Tab')return;
+  var f=fo();if(!f.length)return;
+  var i=f.indexOf(document.activeElement);if(i<0)i=0;
+  e.preventDefault();f[e.shiftKey?(i+f.length-1)%f.length:(i+1)%f.length].focus();
+});
+var mq=window.matchMedia('(min-width:1024px)'),onMq=function(){if(mq.matches&&!shut())close(0);};
+if(mq.addEventListener)mq.addEventListener('change',onMq);else if(mq.addListener)mq.addListener(onMq);
+})();
+</script>
+</body>
+</html>
