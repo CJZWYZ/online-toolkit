@@ -47,7 +47,7 @@ echo "[OK] build 完成"
 mapfile -t FILES < <(
   {
     for f in index.html about.html style.css feed.xml .nojekyll; do [ -f "$f" ] && echo "$f"; done
-    find assets intel fiction motif data content scripts -type f 2>/dev/null
+    find assets intel fiction motif data content news scripts -type f 2>/dev/null
   } | grep -v -E '(^|/)(\.git|\.secrets)/' | grep -v -E '\.(png|jpe?g|gif|zip|pdf)$' \
     | grep -v -E '^scripts/publish\.(deletions|log)$' | sort -u
 )
